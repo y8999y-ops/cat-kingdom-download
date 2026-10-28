@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>疊疊看 QR Code</title>
+<style>
+  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; color: #4e342e; background: #fff; text-align: center; }
+  .sheet { padding: 40px 20px; }
+  h1 { font-size: 44px; margin: 10px 0; }
+  p { font-size: 22px; margin: 8px 0; }
+  img { width: min(70vw, 420px); image-rendering: pixelated; margin: 16px 0; }
+  .url { font-size: 18px; color: #8d6e63; word-break: break-all; }
+  @media print { @page { size: A4; margin: 15mm; } .noprint { display: none; } }
+  button { font-size: 18px; padding: 10px 24px; border-radius: 999px; border: none; background: #ff8f00; color: #fff; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>🐱 疊疊看！三角形分類</h1>
+  <p>用平板的相機掃描，就可以開始玩</p>
+  <img src="qrcode.png" alt="遊戲網址 QR Code">
+  <p class="url">https://y8999y-ops.github.io/cat-kingdom-download/triangle/</p>
+  <p class="noprint"><button onclick="print()">列印這一頁</button></p>
+</div>
+</body>
+</html>

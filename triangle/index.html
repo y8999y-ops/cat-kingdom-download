@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff4e0">
+<title>疊疊看・三角形分類</title>
+<link rel="icon" href="../icon.png">
+<style>
+  :root {
+    --bg: #fff4e0;
+    --ink: #4e342e;
+    --soft: #8d6e63;
+    --card: #ffffff;
+    --accent: #ff8f00;
+    --good: #2e7d32;
+    --bad: #c62828;
+    --line: #e0c9a6;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    overscroll-behavior: none;
+  }
+  button { font: inherit; touch-action: manipulation; cursor: pointer; }
+  #app {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ---------- 上方：小貓和對話 ---------- */
+  #top { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+  #cat { font-size: 42px; line-height: 1; flex: none; transition: transform .2s; }
+  #cat.bounce { animation: bounce .5s; }
+  #say {
+    flex: 1; background: var(--card); border: 3px solid var(--line); border-radius: 18px;
+    padding: 6px 14px; font-size: clamp(15px, 2.2vw, 21px); line-height: 1.35; height: 84px;
+    display: flex; align-items: center; position: relative; overflow: hidden;
+  }
+  @media (max-width: 600px) {
+    #say { font-size: 13px; height: 92px; padding: 4px 10px; }
+    #cat { font-size: 32px; }
+  }
+  #say::before {
+    content: ""; position: absolute; left: -12px; top: 50%; margin-top: -9px;
+    border: 9px solid transparent; border-right-color: var(--line); border-left: 0;
+  }
+  #say.good { border-color: #81c784; background: #f1f8e9; }
+  #say.bad { border-color: #ef9a9a; background: #fff3f3; }
+  .topbtns { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+  #pageLabel { font-size: 14px; color: var(--soft); white-space: nowrap; }
+  .topbtns div { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--line); background: var(--card);
+    font-size: 22px; display: grid; place-items: center; padding: 0;
+  }
+
+  /* ---------- 中間：三角形桌面 ---------- */
+  #board { flex: 1; position: relative; z-index: 2; min-height: 0; }
+  #svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; display: block; }
+  .piece polygon.body { stroke: #5d4037; stroke-width: 3; stroke-linejoin: round; fill-opacity: .93; transition: fill-opacity .15s; }
+  .piece.sel polygon.body { stroke: var(--accent); stroke-width: 5; }
+  .piece.dragging polygon.body { fill-opacity: .5; }
+  .piece.pair polygon.body { fill-opacity: .32; }
+  .piece.pair polygon.outline { fill: none; stroke: #fff; stroke-width: 7; stroke-linejoin: round; }
+  .piece.pair polygon.outline2 { fill: none; stroke: #2e7d32; stroke-width: 3; stroke-linejoin: round; stroke-dasharray: 10 6; }
+  .piece.pulse { animation: pulse .7s ease-in-out 4; }
+  .piece.pop { animation: pop .6s ease-out; }
+  .piece.shake { animation: shake .4s; }
+  .marks path, .marks line { pointer-events: none; }
+  @keyframes pulse { 50% { filter: drop-shadow(0 0 10px #ffab00) brightness(1.15); } }
+  @keyframes pop { 0% { filter: drop-shadow(0 0 0 #fff); } 40% { filter: drop-shadow(0 0 18px #fff59d) brightness(1.2); } 100% { filter: none; } }
+  @keyframes shake { 25% { opacity: .6; } 50% { opacity: 1; } 75% { opacity: .6; } }
+  @keyframes bounce { 30% { transform: translateY(-10px) rotate(-8deg); } 60% { transform: translateY(0) rotate(6deg); } }
+
+  /* 右側工具列 */
+  #tools {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 3;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #tools button {
+    width: 62px; height: 62px; border-radius: 18px; border: 3px solid var(--line); background: var(--card);
+    font-size: 28px; display: grid; place-items: center; padding: 0; color: var(--ink);
+    box-shadow: 0 3px 0 var(--line);
+  }
+  #tools button span { font-size: 12px; display: block; margin-top: -4px; }
+  #tools button:disabled { opacity: .35; }
+  #tools button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+
+  /* ---------- 下方：分類籃 ---------- */
+  #bins { display: grid; gap: 8px; padding: 8px 12px 12px; position: relative; z-index: 1; }
+  #bins:empty { display: none; }
+  .bin {
+    background: var(--card); border: 3px dashed var(--line); border-radius: 16px; min-height: 92px;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px;
+    transition: transform .15s, background .15s, border-color .15s;
+  }
+  .bin b { font-size: clamp(15px, 2.2vw, 20px); }
+  .bin small { font-size: 12px; color: var(--soft); }
+  .bin.over { background: #fff8e1; border-color: var(--accent); border-style: solid; transform: scale(1.04); }
+  .bin.ok { animation: binok .6s; }
+  .bin.no { animation: binno .4s; }
+  .minis { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 4px; }
+  .minis svg { width: 34px; height: 34px; }
+  @keyframes binok { 40% { background: #c8e6c9; transform: scale(1.06); } }
+  @keyframes binno { 20%, 60% { transform: translateX(-6px); background: #ffcdd2; } 40%, 80% { transform: translateX(6px); } }
+  .grid-head { font-size: clamp(14px, 2vw, 18px); font-weight: bold; text-align: center; align-self: end; color: var(--soft); }
+  .grid-head.row { align-self: center; writing-mode: vertical-rl; letter-spacing: 2px; }
+  #bins.both .bin { min-height: 66px; }
+  #bins.both .bin b { font-size: clamp(13px, 1.8vw, 17px); }
+
+  /* ---------- 覆蓋畫面 ---------- */
+  #overlay {
+    position: fixed; inset: 0; background: rgba(78, 52, 46, .45); z-index: 10;
+    display: none; place-items: center; padding: 16px; touch-action: auto;
+  }
+  #overlay.show { display: grid; }
+  .panel {
+    background: var(--bg); border-radius: 28px; padding: 24px 28px; max-width: 560px; width: 100%;
+    text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.25); border: 4px solid #fff;
+    max-height: 100%; overflow: auto;
+  }
+  .panel h1 { margin: 4px 0 10px; font-size: clamp(26px, 5vw, 38px); }
+  .panel h2 { margin: 4px 0 8px; font-size: clamp(22px, 4vw, 30px); }
+  .panel p { font-size: clamp(16px, 2.6vw, 20px); line-height: 1.6; margin: 8px 0; }
+  .big-cat { font-size: 72px; line-height: 1; }
+  .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+  .off { filter: grayscale(1); opacity: .3; }
+  .btn {
+    display: inline-block; margin: 10px 6px 0; padding: 14px 34px; font-size: 22px; font-weight: bold;
+    border-radius: 999px; border: none; background: var(--accent); color: #fff; box-shadow: 0 4px 0 #c56000;
+  }
+  .btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 4px 0 var(--line); }
+  .btn:active { transform: translateY(3px); box-shadow: none; }
+  .howto { text-align: left; display: inline-block; font-size: clamp(16px, 2.5vw, 19px); line-height: 1.9; margin: 6px 0 10px; }
+  .seat { font-size: 18px; margin: 8px 0; }
+  .seat input {
+    width: 90px; font-size: 22px; padding: 6px 10px; border-radius: 12px; border: 3px solid var(--line);
+    text-align: center; touch-action: auto; user-select: text; -webkit-user-select: text;
+  }
+  table.result { margin: 10px auto; border-collapse: collapse; font-size: 18px; }
+  table.result td, table.result th { padding: 6px 12px; border-bottom: 2px solid var(--line); }
+  .note { font-size: 14px !important; color: var(--soft); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div id="cat">🐱</div>
+    <div id="say">一起來疊疊看！</div>
+    <div class="topbtns">
+      <div id="pageLabel"></div>
+      <div>
+        <button class="icon-btn" id="hintBtn" aria-label="提示">💡</button>
+        <button class="icon-btn" id="soundBtn" aria-label="音效">🔊</button>
+      </div>
+    </div>
+  </div>
+  <div id="board">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g></svg>
+    <div id="tools">
+      <button id="rotL" aria-label="向左轉" disabled>↺<span>轉</span></button>
+      <button id="rotR" aria-label="向右轉" disabled>↻<span>轉</span></button>
+      <button id="flip" aria-label="翻面" disabled>⇋<span>翻面</span></button>
+    </div>
+  </div>
+  <div id="bins"></div>
+</div>
+<div id="overlay"><div class="panel" id="panel"></div></div>
+<noscript>請開啟 JavaScript 才能玩這個遊戲。</noscript>
+
+<script>
+"use strict";
+
+// ================= 題庫：三個角的度數 =================
+const LIB = {
+  "equi-acute": [[60, 60, 60]],
+  "iso-acute":  [[40, 70, 70], [50, 65, 65], [80, 50, 50], [30, 75, 75]],
+  "iso-right":  [[90, 45, 45]],
+  "iso-obtuse": [[110, 35, 35], [120, 30, 30], [130, 25, 25]],
+  "sca-acute":  [[50, 60, 70], [45, 65, 70], [40, 65, 75], [55, 48, 77]],
+  "sca-right":  [[90, 30, 60], [90, 35, 55], [90, 25, 65]],
+  "sca-obtuse": [[110, 40, 30], [120, 35, 25], [105, 45, 30], [130, 30, 20], [115, 25, 40]],
+};
+const ALL_KEYS = Object.keys(LIB);
+const NAME_ANGLE = { acute: "銳角三角形", right: "直角三角形", obtuse: "鈍角三角形" };
+const NAME_SIDE = { equi: "正三角形", iso: "等腰三角形", sca: "不等邊三角形" };
+const WHY_ANGLE = {
+  acute: "三個角都比直角小",
+  right: "有一個角是直角",
+  obtuse: "有一個角比直角大",
+};
+const WHY_SIDE = {
+  equi: "三條邊都一樣長",
+  iso: "有兩條邊一樣長",
+  sca: "三條邊都不一樣長",
+};
+const COLORS = ["#ff8a80", "#ffb74d", "#ffd54f", "#aed581", "#4fc3f7", "#9575cd",
+                "#f06292", "#4db6ac", "#bcaaa4", "#90caf9", "#ce93d8", "#dce775"];
+
+const PAGES = [
+  { mode: "tutorial", title: "練習：疊疊看" },
+  { mode: "angle", title: "第 1 關：用「角」分類" },
+  { mode: "side", title: "第 2 關：用「邊」分類" },
+  { mode: "both", title: "第 3 關：角和邊一起看" },
+];
+
+// ================= 小工具 =================
+const $ = (s) => document.querySelector(s);
+const rand = (n) => Math.floor(Math.random() * n);
+const pick = (a) => a[rand(a.length)];
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+const sortNum = (a) => [...a].sort((x, y) => x - y);
+const sameAngles = (a, b) => { const x = sortNum(a), y = sortNum(b); return x.every((v, i) => Math.abs(v - y[i]) < 0.5); };
+const PERMS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
+
+// 用三個角和最長邊長度做出三角形（頂點以重心為原點）
+function makeTri(angles, size) {
+  let a = [...angles];
+  const k = rand(3);
+  a = [...a.slice(k), ...a.slice(0, k)];
+  if (Math.random() < 0.5) a.reverse();
+  const [A, B, C] = a.map((d) => d * Math.PI / 180);
+  const b = Math.sin(B) / Math.sin(C);
+  let v = [[0, 0], [1, 0], [b * Math.cos(A), -b * Math.sin(A)]];
+  const sides = [dist(v[1], v[2]), dist(v[0], v[2]), dist(v[0], v[1])];
+  const f = size / Math.max(...sides);
+  v = v.map((p) => [p[0] * f, p[1] * f]);
+  const cx = (v[0][0] + v[1][0] + v[2][0]) / 3, cy = (v[0][1] + v[1][1] + v[2][1]) / 3;
+  v = v.map((p) => [p[0] - cx, p[1] - cy]);
+  return { v, ang: a, sides: sides.map((s) => s * f), size };
+}
+
+function categorize(ang) {
+  const m = Math.max(...ang);
+  const angle = Math.abs(m - 90) < 0.5 ? "right" : m > 90 ? "obtuse" : "acute";
+  const eq = (i, j) => Math.abs(ang[i] - ang[j]) < 0.5;
+  const n = (eq(0, 1) ? 1 : 0) + (eq(1, 2) ? 1 : 0) + (eq(0, 2) ? 1 : 0);
+  const side = n === 3 ? "equi" : n === 1 ? "iso" : "sca";
+  return { angle, side };
+}
+
+// ================= 出題 =================
+function pickAngles(key, used) {
+  const fresh = LIB[key].filter((a) => !used.some((u) => sameAngles(u, a)));
+  return pick(fresh.length ? fresh : LIB[key]);
+}
+
+function genSpecs(mode) {
+  if (mode === "tutorial") return [{ angles: [90, 45, 45], size: 1.15, role: "pair", key: "iso-right" }];
+  for (let tries = 0; tries < 50; tries++) {
+    let keys;
+    if (mode === "angle") {
+      keys = [pick(["equi-acute", "iso-acute", "sca-acute", "iso-acute", "sca-acute"]),
+              pick(["iso-right", "sca-right"]), pick(["iso-obtuse", "sca-obtuse"]), pick(ALL_KEYS)];
+    } else if (mode === "side") {
+      keys = ["equi-acute", pick(["iso-acute", "iso-right", "iso-obtuse"]),
+              pick(["sca-acute", "sca-right", "sca-obtuse"]), pick(ALL_KEYS)];
+    } else {
+      keys = shuffle(["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"]).slice(0, 5);
+    }
+    const sizes = shuffle([0.8, 0.9, 1.0, 1.1, 1.2]);
+    const used = [];
+    const specs = keys.map((key, i) => {
+      const angles = pickAngles(key, used);
+      used.push(angles);
+      return { angles, size: sizes[i], role: "pair", key };
+    });
+    // 干擾題：看起來很像，但不全等
+    const base = pick(specs);
+    const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)));
+    let d;
+    if (Math.random() < 0.5 || !alt.length) {
+      const bigger = base.size <= 1.0;
+      d = { angles: base.angles, size: bigger ? base.size * 1.25 : base.size * 0.72, role: "distractor", key: base.key,
+            reason: `它和另一組的形狀一樣，可是${bigger ? "比較大" : "比較小"}，所以沒有全等的朋友。` };
+    } else {
+      d = { angles: pick(alt), size: base.size, role: "distractor", key: base.key,
+            reason: "它和另一組的大小差不多，可是角度不一樣，所以沒有全等的朋友。" };
+    }
+    const clash = specs.some((s) => sameAngles(s.angles, d.angles) && Math.abs(s.size - d.size) < 0.05);
+    if (!clash) return [...specs, d];
+  }
+  return [];
+}
+
+// ================= 遊戲狀態 =================
+let pageIdx = 0, pieces = [], mode = "tutorial", grid = { cols: 1, rows: 1 };
+let mistakes = 0, pageStart = 0, gameStart = 0, results = [], seatNo = "";
+let selected = null, playing = false, lastAct = 0, pageDone = false;
+let W = 0, H = 0, S = 60;
+const TOOL_W = 84;
+const svg = $("#svg"), layer = $("#layer"), board = $("#board"), binsEl = $("#bins");
+
+function startPage(i) {
+  pageIdx = i;
+  mode = PAGES[i].mode;
+  mistakes = 0;
+  pageDone = false;
+  selected = null;
+  pageStart = Date.now();
+  lastAct = Date.now();
+  $("#pageLabel").textContent = PAGES[i].title;
+  buildBins();
+  measure();
+
+  const specs = genSpecs(mode);
+  const colors = shuffle([...COLORS]);
+  pieces = [];
+  let id = 0;
+  for (const sp of specs) {
+    const tri = makeTri(sp.angles, sp.size);
+    const count = sp.role === "pair" ? 2 : 1;
+    for (let c = 0; c < count; c++) {
+      pieces.push({
+        id: "p" + id++, v: tri.v.map((p) => [...p]), ang: tri.ang, sides: tri.sides, size: tri.size,
+        cat: categorize(tri.ang), distractor: sp.role === "distractor", reason: sp.reason || "",
+        state: "free", partner: null, nx: 0, ny: 0, r: 0, s: 1, marks: null,
+      });
+    }
+  }
+  // 方向：每個都轉一個角度、有的翻面；同一組的兩個不能一開始就對齊
+  if (mode === "tutorial") {
+    pieces[0].r = 0; pieces[1].r = 90;
+  } else {
+    for (const p of pieces) { p.r = 30 * rand(12); p.s = Math.random() < 0.5 ? 1 : -1; }
+    for (let k = 0; k + 1 < pieces.length; k++) {
+      const a = pieces[k], b = pieces[k + 1];
+      if (!a.distractor && !b.distractor && congruent(a, b) && a.s === b.s && (a.r - b.r) % 360 === 0) b.r += 90;
+    }
+  }
+  shuffle(pieces);
+  pieces.forEach((p, k) => { p.color = colors[k % colors.length]; });
+
+  // 擺放：格子加一點亂數
+  const n = pieces.length;
+  const availW = Math.max(100, W - TOOL_W);
+  const cols = Math.max(1, Math.ceil(Math.sqrt(n * availW / Math.max(H, 1))));
+  const rows = Math.ceil(n / cols);
+  grid = { cols, rows };
+  measure();
+  const slots = shuffle([...Array(cols * rows).keys()]).slice(0, n);
+  pieces.forEach((p, k) => {
+    const col = slots[k] % cols, row = Math.floor(slots[k] / cols);
+    p.nx = ((col + 0.5 + (Math.random() - 0.5) * 0.25) * availW / cols) / W;
+    p.ny = ((row + 0.5 + (Math.random() - 0.5) * 0.25) * H / rows) / H;
+  });
+
+  renderAll();
+  updateTools();
+  if (mode === "tutorial") {
+    say("先練習！把一個三角形<b>拖到</b>另一個上面。方向不一樣的話，按右邊的 <b>↻</b> 轉一轉，對齊就會疊合變透明！");
+  } else if (mode === "angle") {
+    say("把<b>全等</b>的兩個三角形疊在一起，再拖到下面：看<b>角</b>來分類！");
+  } else if (mode === "side") {
+    say("這一關看<b>邊</b>：疊好全等的一組後，看看有幾條邊一樣長。");
+  } else {
+    say("最後一關！<b>角</b>和<b>邊</b>要一起看，放進正確的格子。");
+  }
+  playing = true;
+}
+
+// ================= 版面與畫圖 =================
+function measure() {
+  W = board.clientWidth; H = board.clientHeight;
+  const availW = Math.max(100, W - TOOL_W);
+  S = 0.6 * Math.min(availW / grid.cols, H / grid.rows);
+  S = Math.max(40, Math.min(S, 160));
+}
+
+const byId = (id) => pieces.find((p) => p.id === id);
+const lenPx = (p) => p.size * S;
+
+function worldVerts(p) {
+  const rad = p.r * Math.PI / 180, c = Math.cos(rad), s = Math.sin(rad);
+  const x0 = p.nx * W, y0 = p.ny * H;
+  return p.v.map(([x, y]) => {
+    const xs = x * p.s * S, ys = y * S;
+    return [x0 + xs * c - ys * s, y0 + xs * s + ys * c];
+  });
+}
+
+function pointsAttr(p) { return p.v.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(" "); }
+
+function marksSvg(p, kind) {
+  const v = p.v.map(([x, y]) => [x * S, y * S]);
+  const L = lenPx(p);
+  let out = "";
+  if (kind === "angle" || kind === "both") {
+    const cat = p.cat.angle;
+    for (let i = 0; i < 3; i++) {
+      const P = v[i], Q = v[(i + 1) % 3], R = v[(i + 2) % 3];
+      const u = norm([Q[0] - P[0], Q[1] - P[1]]), w = norm([R[0] - P[0], R[1] - P[1]]);
+      const a = p.ang[i];
+      const k = Math.max(14, L * 0.16);
+      if (Math.abs(a - 90) < 0.5) {
+        const A = [P[0] + u[0] * k, P[1] + u[1] * k], B = [A[0] + w[0] * k, A[1] + w[1] * k], C = [P[0] + w[0] * k, P[1] + w[1] * k];
+        out += `<path d="M${A} L${B} L${C}" fill="none" stroke="#1565c0" stroke-width="4"/>`;
+      } else if (a > 90 || cat === "acute") {
+        const col = a > 90 ? "#d32f2f" : "#2e7d32";
+        const cross = u[0] * w[1] - u[1] * w[0];
+        const A = [P[0] + u[0] * k, P[1] + u[1] * k], C = [P[0] + w[0] * k, P[1] + w[1] * k];
+        out += `<path d="M${P} L${A} A${k},${k} 0 0 ${cross > 0 ? 1 : 0} ${C} Z" fill="${col}" fill-opacity=".35" stroke="${col}" stroke-width="3"/>`;
+      }
+    }
+  }
+  if (kind === "side" || kind === "both") {
+    const sides = [[1, 2], [0, 2], [0, 1]];
+    for (let i = 0; i < 3; i++) {
+      const same = [0, 1, 2].filter((j) => j !== i && Math.abs(p.sides[i] - p.sides[j]) < p.size * 0.01).length;
+      if (!same) continue;
+      const [a, b] = sides[i];
+      const M = [(v[a][0] + v[b][0]) / 2, (v[a][1] + v[b][1]) / 2];
+      const d = norm([v[b][0] - v[a][0], v[b][1] - v[a][1]]), nrm = [-d[1], d[0]];
+      const t = 10;
+      out += `<line x1="${M[0] - nrm[0] * t}" y1="${M[1] - nrm[1] * t}" x2="${M[0] + nrm[0] * t}" y2="${M[1] + nrm[1] * t}" stroke="#6a1b9a" stroke-width="5" stroke-linecap="round"/>`;
+    }
+  }
+  return `<g class="marks">${out}</g>`;
+}
+function norm(d) { const l = Math.hypot(d[0], d[1]) || 1; return [d[0] / l, d[1] / l]; }
+
+function pieceMarkup(p) {
+  const pts = pointsAttr(p);
+  let inner;
+  if (p.state === "pair") {
+    inner = `<polygon class="outline" points="${pts}"/>` +
+            `<polygon class="body" points="${pts}" fill="${p.color}"/>` +
+            `<polygon class="body" points="${pts}" fill="${p.partner.color}"/>` +
+            `<polygon class="outline2" points="${pts}"/>`;
+  } else {
+    inner = `<polygon class="body" points="${pts}" fill="${p.color}"/>`;
+  }
+  if (p.marks) inner += marksSvg(p, p.marks);
+  return inner;
+}
+
+function renderAll() {
+  layer.innerHTML = "";
+  for (const p of pieces) {
+    if (p.state !== "free" && p.state !== "pair") continue;
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "piece" + (p.state === "pair" ? " pair" : "") + (selected === p ? " sel" : ""));
+    g.dataset.id = p.id;
+    g.innerHTML = pieceMarkup(p);
+    p.el = g;
+    updT(p);
+    layer.appendChild(g);
+  }
+}
+function redraw(p) { if (p.el) p.el.innerHTML = pieceMarkup(p); }
+function updT(p) {
+  if (p.el) p.el.setAttribute("transform", `translate(${(p.nx * W).toFixed(1)},${(p.ny * H).toFixed(1)}) rotate(${p.r.toFixed(2)}) scale(${p.s.toFixed(3)},1)`);
+}
+function flash(p, cls, ms = 700) {
+  if (!p.el) return;
+  p.el.classList.remove(cls); void p.el.getBBox(); p.el.classList.add(cls);
+  setTimeout(() => p.el && p.el.classList.remove(cls), ms);
+}
+
+function clampIn(p) {
+  const r = lenPx(p) * 0.45;
+  p.nx = Math.min(Math.max(p.nx * W, r), Math.max(r, W - r)) / W;
+  p.ny = Math.min(Math.max(p.ny * H, r), Math.max(r, H - r)) / H;
+}
+
+function tween(p, to, ms = 200, done) {
+  const from = {}; for (const k in to) from[k] = p[k];
+  const t0 = performance.now();
+  const step = (t) => {
+    const k = Math.min(1, (t - t0) / ms), e = 1 - (1 - k) ** 3;
+    for (const key in to) p[key] = from[key] + (to[key] - from[key]) * e;
+    updT(p);
+    if (k < 1) requestAnimationFrame(step); else { for (const key in to) p[key] = to[key]; updT(p); done && done(); }
+  };
+  requestAnimationFrame(step);
+}
+
+// ================= 分類籃 =================
+function binsFor(m) {
+  if (m === "angle") return ["acute", "right", "obtuse"].map((k) => ({ key: k, label: NAME_ANGLE[k], sub: WHY_ANGLE[k] }));
+  if (m === "side") return ["equi", "iso", "sca"].map((k) => ({ key: k, label: NAME_SIDE[k], sub: WHY_SIDE[k] }));
+  return [];
+}
+function buildBins() {
+  binsEl.innerHTML = "";
+  binsEl.className = "";
+  if (mode === "tutorial") return;
+  if (mode === "both") {
+    binsEl.className = "both";
+    binsEl.style.gridTemplateColumns = "auto repeat(3, 1fr)";
+    let html = `<div></div>` + ["acute", "right", "obtuse"].map((a) => `<div class="grid-head">${NAME_ANGLE[a].replace("三角形", "")}</div>`).join("");
+    for (const s of ["iso", "sca"]) {
+      html += `<div class="grid-head row">${s === "iso" ? "等腰" : "不等邊"}</div>`;
+      for (const a of ["acute", "right", "obtuse"]) {
+        html += `<div class="bin" data-key="${s}-${a}"><b>${comboName(s, a)}</b><div class="minis"></div></div>`;
+      }
+    }
+    binsEl.innerHTML = html;
+  } else {
+    binsEl.style.gridTemplateColumns = "repeat(3, 1fr)";
+    binsEl.innerHTML = binsFor(mode).map((b) => `<div class="bin" data-key="${b.key}"><b>${b.label}</b><small>${b.sub}</small><div class="minis"></div></div>`).join("");
+  }
+}
+function comboName(s, a) {
+  return (s === "iso" ? "等腰" : "不等邊") + NAME_ANGLE[a];
+}
+function keyOf(p) {
+  if (mode === "angle") return p.cat.angle;
+  if (mode === "side") return p.cat.side;
+  return p.cat.side + "-" + p.cat.angle;
+}
+function binAt(cx, cy) {
+  for (const b of binsEl.querySelectorAll(".bin")) {
+    const r = b.getBoundingClientRect();
+    if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) return b;
+  }
+  return null;
+}
+function explain(p) {
+  if (mode === "angle") return `${WHY_ANGLE[p.cat.angle]}，是<b>${NAME_ANGLE[p.cat.angle]}</b>`;
+  if (mode === "side") return `${WHY_SIDE[p.cat.side]}，是<b>${NAME_SIDE[p.cat.side]}</b>`;
+  return `${WHY_SIDE[p.cat.side]}，而且${WHY_ANGLE[p.cat.angle]}，是<b>${comboName(p.cat.side, p.cat.angle)}</b>`;
+}
+function addMini(bin, p) {
+  const vs = p.v;
+  const xs = vs.map((q) => q[0] * p.s), ys = vs.map((q) => q[1]);
+  const pad = 0.08;
+  const minx = Math.min(...xs) - pad, maxx = Math.max(...xs) + pad, miny = Math.min(...ys) - pad, maxy = Math.max(...ys) + pad;
+  const pts = vs.map((q) => `${(q[0] * p.s).toFixed(3)},${q[1].toFixed(3)}`).join(" ");
+  const box = bin.querySelector(".minis");
+  box.insertAdjacentHTML("beforeend",
+    `<svg viewBox="${minx} ${miny} ${maxx - minx} ${maxy - miny}"><polygon points="${pts}" fill="${p.color}" stroke="#5d4037" stroke-width="0.05" stroke-linejoin="round"/></svg>`);
+}
+
+// ================= 判斷 =================
+function congruent(a, b) {
+  const x = sortNum(a.sides), y = sortNum(b.sides);
+  return x.every((v, i) => Math.abs(v - y[i]) < 0.02 * Math.max(x[2], y[2]));
+}
+function alignError(a, b) {
+  const wa = worldVerts(a), wb = worldVerts(b);
+  let best = Infinity;
+  for (const pm of PERMS) best = Math.min(best, Math.max(...pm.map((j, i) => dist(wa[i], wb[j]))));
+  return best;
+}
+function nearestFree(p) {
+  let best = null, bd = Infinity;
+  for (const q of pieces) {
+    if (q === p || q.state !== "free") continue;
+    const d = Math.hypot((q.nx - p.nx) * W, (q.ny - p.ny) * H);
+    if (d < 0.6 * Math.max(lenPx(p), lenPx(q)) && d < bd) { bd = d; best = q; }
+  }
+  return best;
+}
+
+function checkDrop(p, quiet) {
+  const t = nearestFree(p);
+  if (!t) return;
+  if (congruent(p, t)) {
+    if (alignError(p, t) < 0.22 * lenPx(t)) return doMatch(p, t);
+    if (!quiet) say("大小、形狀都一樣！再<b>轉一轉 ↻</b> 或<b>翻一翻 ⇋</b>，對齊就能疊合。");
+    return;
+  }
+  if (quiet) return;
+  mistakes++;
+  sfx.bad();
+  const msg = sameAngles(p.ang, t.ang)
+    ? "形狀一樣，可是<b>大小不一樣</b>，不能完全疊合，不是全等喔！"
+    : "<b>形狀不一樣</b>，怎麼轉都疊不起來，不是全等喔！";
+  say(msg, "bad");
+  flash(p, "shake", 400);
+  // 輕輕推開
+  let dx = (p.nx - t.nx) * W, dy = (p.ny - t.ny) * H;
+  if (Math.hypot(dx, dy) < 1) { dx = 1; dy = 0; }
+  const d = norm([dx, dy]), push = 0.75 * Math.max(lenPx(p), lenPx(t));
+  const target = { nx: p.nx + d[0] * push / W, ny: p.ny + d[1] * push / H };
+  const tmp = { ...p, ...target }; clampIn(tmp);
+  tween(p, { nx: tmp.nx, ny: tmp.ny }, 260);
+}
+
+function doMatch(p, t) {
+  // 對齊：移到下面那個的位置，兩個疊在一起變透明
+  t.state = "pair";
+  t.partner = p;
+  p.state = "merged";
+  if (selected === p) selected = t;
+  sfx.match();
+  catBounce();
+  renderAll();
+  flash(t, "pop", 700);
+  updateTools();
+  lastAct = Date.now();
+  if (mode === "tutorial") {
+    say("完全疊合，變透明了！✨ 形狀和大小都一樣，可以完全疊在一起，就是<b>全等</b>。", "good");
+    setTimeout(finishPage, 1800);
+  } else {
+    say("完全疊合！✨ 它們是全等三角形。把這一組<b>拖到下面</b>正確的籃子裡。", "good");
+  }
+}
+
+function classify(p, bin) {
+  const key = bin.dataset.key;
+  if (key === keyOf(p)) {
+    p.state = "done";
+    if (selected === p) selected = null;
+    sfx.ok();
+    bin.classList.remove("ok"); void bin.offsetWidth; bin.classList.add("ok");
+    addMini(bin, p);
+    say("答對了！" + explain(p) + "。", "good");
+    catBounce();
+    renderAll();
+    updateTools();
+    lastAct = Date.now();
+    if (!pieces.some((q) => q.state === "pair" || (q.state === "free" && !q.distractor))) finishPage();
+    return true;
+  }
+  if (mode === "side" && key === "iso" && p.cat.side === "equi") {
+    say("正三角形也算是很特別的等腰三角形！不過這一關，三條邊都一樣長的請放到「<b>正三角形</b>」。");
+    showMarks(p, "side");
+    return false;
+  }
+  mistakes++;
+  sfx.bad();
+  bin.classList.remove("no"); void bin.offsetWidth; bin.classList.add("no");
+  showMarks(p, mode);
+  say("再看看記號：" + markLegend(mode) + "<br>這一組" + explain(p) + "。", "bad");
+  return false;
+}
+function markLegend(m) {
+  const a = "<span style='color:#1565c0'>藍色方框</span>是直角、<span style='color:#d32f2f'>紅色</span>是鈍角、<span style='color:#2e7d32'>綠色</span>是銳角";
+  const s = "<span style='color:#6a1b9a'>紫色短線</span>表示一樣長的邊";
+  return m === "angle" ? a + "。" : m === "side" ? s + "。" : a + "；" + s + "。";
+}
+function showMarks(p, kind, ms = 4500) {
+  p.marks = kind;
+  redraw(p);
+  clearTimeout(p.markTimer);
+  p.markTimer = setTimeout(() => { p.marks = null; redraw(p); }, ms);
+}
+
+// ================= 操作：拖曳、雙指旋轉 =================
+const pointers = new Map();
+let drag = null, gesture = null;
+
+function localPt(e) {
+  const r = board.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+function twoAngle() {
+  const [a, b] = [...pointers.values()];
+  return Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+}
+function select(p) {
+  selected = p;
+  for (const q of pieces) if (q.el) q.el.classList.toggle("sel", q === p);
+  updateTools();
+}
+function updateTools() {
+  const ok = !!selected && (selected.state === "free" || selected.state === "pair");
+  for (const id of ["rotL", "rotR", "flip"]) $("#" + id).disabled = !ok;
+}
+
+svg.addEventListener("pointerdown", (e) => {
+  if (!playing) return;
+  ensureAudio();
+  lastAct = Date.now();
+  try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  const pt = localPt(e);
+  pointers.set(e.pointerId, pt);
+  if (pointers.size === 1) {
+    const g = e.target.closest && e.target.closest("[data-id]");
+    const p = g && byId(g.dataset.id);
+    if (p) {
+      select(p);
+      layer.appendChild(p.el);
+      p.el.classList.add("dragging");
+      drag = { p, pid: e.pointerId, dx: p.nx * W - pt.x, dy: p.ny * H - pt.y, x0: pt.x, y0: pt.y, moved: false };
+      if (mode === "tutorial" && p.state === "free") say("拖到另一個上面疊疊看。也可以用<b>兩根手指</b>轉，或按右邊的 <b>↻</b>。");
+    } else {
+      select(null);
+    }
+  } else if (pointers.size === 2 && selected) {
+    if (drag) { drag.p.el && drag.p.el.classList.add("dragging"); }
+    gesture = { p: selected, last: twoAngle() };
+    drag = null;
+  }
+});
+
+svg.addEventListener("pointermove", (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  const pt = localPt(e);
+  pointers.set(e.pointerId, pt);
+  if (gesture && pointers.size >= 2) {
+    const a = twoAngle();
+    let d = a - gesture.last;
+    if (d > 180) d -= 360; if (d < -180) d += 360;
+    gesture.last = a;
+    gesture.p.r += d;
+    updT(gesture.p);
+    return;
+  }
+  if (drag && e.pointerId === drag.pid) {
+    const p = drag.p;
+    p.nx = (pt.x + drag.dx) / W;
+    p.ny = (pt.y + drag.dy) / H;
+    if (Math.hypot(pt.x - drag.x0, pt.y - drag.y0) > 8) drag.moved = true;
+    if (p.state === "free") clampIn(p);
+    updT(p);
+    const over = binAt(e.clientX, e.clientY);
+    for (const b of binsEl.querySelectorAll(".bin")) b.classList.toggle("over", b === over);
+  }
+});
+
+function endPointer(e) {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  if (gesture) {
+    if (pointers.size < 2) {
+      const p = gesture.p;
+      gesture = null;
+      p.el && p.el.classList.remove("dragging");
+      tween(p, { r: Math.round(p.r / 15) * 15 }, 120, () => { if (p.state === "free") checkDrop(p, true); });
+      drag = null;
+    }
+    return;
+  }
+  if (!drag || e.pointerId !== drag.pid) return;
+  const p = drag.p, dragMoved = drag.moved;
+  drag = null;
+  p.el && p.el.classList.remove("dragging");
+  for (const b of binsEl.querySelectorAll(".bin")) b.classList.remove("over");
+  const bin = binAt(e.clientX, e.clientY);
+  if (p.state === "pair") {
+    if (bin && classify(p, bin)) return;
+    const tmp = { ...p }; clampIn(tmp);
+    tween(p, { nx: tmp.nx, ny: tmp.ny }, 220);
+    return;
+  }
+  if (!dragMoved) return;
+  if (bin) say("先找到<b>全等</b>的朋友疊在一起，才能放進籃子喔！");
+  checkDrop(p, false);
+}
+svg.addEventListener("pointerup", endPointer);
+svg.addEventListener("pointercancel", endPointer);
+
+function turn(deg) {
+  const p = selected;
+  if (!p) return;
+  ensureAudio(); lastAct = Date.now(); sfx.tick();
+  tween(p, { r: Math.round(p.r / 15) * 15 + deg }, 180, () => { if (p.state === "free") checkDrop(p, true); });
+}
+$("#rotL").addEventListener("click", () => turn(-30));
+$("#rotR").addEventListener("click", () => turn(30));
+$("#flip").addEventListener("click", () => {
+  const p = selected;
+  if (!p) return;
+  ensureAudio(); lastAct = Date.now(); sfx.tick();
+  tween(p, { s: -Math.sign(p.s || 1) }, 260, () => { if (p.state === "free") checkDrop(p, true); });
+});
+
+// ================= 提示 =================
+function giveHint() {
+  if (!playing || pageDone) return;
+  lastAct = Date.now();
+  const free = pieces.filter((p) => p.state === "free" && !p.distractor);
+  for (let i = 0; i < free.length; i++) for (let j = i + 1; j < free.length; j++) {
+    if (congruent(free[i], free[j])) {
+      flash(free[i], "pulse", 2900); flash(free[j], "pulse", 2900);
+      say("看看這兩個閃閃的，是不是一樣大？拖過去<b>疊疊看</b>！");
+      return;
+    }
+  }
+  const pair = pieces.find((p) => p.state === "pair");
+  if (pair) {
+    showMarks(pair, mode === "tutorial" ? "both" : mode);
+    say(markLegend(mode === "tutorial" ? "both" : mode));
+  }
+}
+$("#hintBtn").addEventListener("click", () => { ensureAudio(); giveHint(); });
+setInterval(() => { if (playing && !pageDone && Date.now() - lastAct > 30000) giveHint(); }, 1000);
+
+// ================= 對話與音效 =================
+function say(html, tone) {
+  const el = $("#say");
+  el.innerHTML = `<span>${html}</span>`;
+  el.className = tone || "";
+}
+function catBounce() { const c = $("#cat"); c.classList.remove("bounce"); void c.offsetWidth; c.classList.add("bounce"); }
+
+let ac = null, soundOn = true;
+function ensureAudio() {
+  if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { ac = null; } }
+  if (ac && ac.state === "suspended") ac.resume();
+}
+function tone(f, dur, type = "sine", when = 0, vol = 0.15) {
+  if (!soundOn || !ac) return;
+  const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + when;
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const sfx = {
+  match: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, "triangle", i * 0.08)),
+  ok: () => { tone(784, 0.15, "triangle"); tone(1175, 0.3, "triangle", 0.1); },
+  bad: () => { tone(220, 0.22, "square", 0, 0.07); tone(180, 0.3, "square", 0.12, 0.07); },
+  tick: () => tone(900, 0.05, "sine", 0, 0.06),
+  win: () => [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, "triangle", i * 0.11)),
+};
+$("#soundBtn").addEventListener("click", () => {
+  soundOn = !soundOn;
+  $("#soundBtn").textContent = soundOn ? "🔊" : "🔇";
+  if (soundOn) { ensureAudio(); sfx.tick(); }
+});
+
+// ================= 關卡結束與畫面 =================
+function starsFor(m) { return m === 0 ? 3 : m <= 2 ? 2 : 1; }
+function starHtml(n) { return [0, 1, 2].map((i) => `<span class="${i < n ? "" : "off"}">⭐</span>`).join(""); }
+function fmtTime(ms) { const s = Math.round(ms / 1000); return `${Math.floor(s / 60)} 分 ${s % 60} 秒`; }
+
+function finishPage() {
+  if (pageDone) return;
+  pageDone = true;
+  const time = Date.now() - pageStart;
+  const stars = starsFor(mistakes);
+  if (mode !== "tutorial") results.push({ title: PAGES[pageIdx].title, stars, mistakes, time });
+  sfx.win();
+  catBounce();
+  const d = pieces.find((p) => p.distractor && p.state === "free");
+  let extra = "";
+  if (d) {
+    showMarks(d, mode, 6000);
+    flash(d, "pulse", 2900);
+    say("全部分類完成！剩下閃閃的這一個呢？" + d.reason, "good");
+    extra = `<p>剩下的那個三角形：${d.reason}</p>`;
+  }
+  const last = pageIdx === PAGES.length - 1;
+  setTimeout(() => {
+    if (mode === "tutorial") {
+      showPanel(`<div class="big-cat">😺</div><h2>練習完成！</h2>
+        <p>兩個三角形經過<b>滑動、旋轉、翻面</b>以後，可以<b>完全疊合</b>，它們就是<b>全等</b>。</p>
+        <p>接下來，疊好的全等三角形還要<b>分類</b>喔！</p>
+        <button class="btn" id="nextBtn">開始第 1 關</button>`);
+    } else {
+      showPanel(`<div class="big-cat">😸</div><h2>${PAGES[pageIdx].title.split("：")[0]} 完成！</h2>
+        <div class="stars">${starHtml(stars)}</div>
+        <p>錯誤 ${mistakes} 次・用了 ${fmtTime(time)}</p>${extra}
+        <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>`);
+    }
+    $("#nextBtn").addEventListener("click", () => {
+      hidePanel();
+      if (last) showFinal(); else startPage(pageIdx + 1);
+    });
+  }, d ? 3200 : 1400);
+}
+
+function showPanel(html) { playing = false; $("#panel").innerHTML = html; $("#overlay").classList.add("show"); }
+function hidePanel() { $("#overlay").classList.remove("show"); }
+
+function showFinal() {
+  const total = Date.now() - gameStart;
+  const allStars = results.reduce((s, r) => s + r.stars, 0);
+  const rows = results.map((r) => `<tr><td>${r.title.split("：")[0]}</td><td>${starHtml(r.stars)}</td><td>錯 ${r.mistakes} 次</td></tr>`).join("");
+  const msg = allStars >= 8 ? "太厲害了！你是三角形大師！" : allStars >= 6 ? "很棒！全等和分類都學會了！" : "完成了！再玩一次會更熟練喔！";
+  showPanel(`<div class="big-cat">🏆</div><h1>全部完成！</h1>
+    ${seatNo ? `<p><b>座號 ${escapeHtml(seatNo)}</b></p>` : ""}
+    <table class="result">${rows}</table>
+    <p>總共 ${allStars} 顆星・${fmtTime(total)}</p>
+    <p>${msg}</p>
+    <button class="btn" id="againBtn">再玩一次</button>
+    <button class="btn ghost" id="homeBtn">回首頁</button>
+    <p class="note">每次的題目都不一樣，可以多挑戰幾次！</p>`);
+  $("#againBtn").addEventListener("click", () => { hidePanel(); results = []; gameStart = Date.now(); startPage(1); });
+  $("#homeBtn").addEventListener("click", showHome);
+}
+function escapeHtml(s) { return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+function showHome() {
+  layer.innerHTML = ""; binsEl.innerHTML = ""; pieces = [];
+  $("#pageLabel").textContent = "";
+  say("一起來疊疊看！");
+  showPanel(`<div class="big-cat">🐱📐</div>
+    <h1>疊疊看！三角形分類</h1>
+    <div class="howto">
+      👆 <b>拖曳</b>：移動三角形<br>
+      ↻ <b>旋轉</b>：按按鈕或用兩根手指轉<br>
+      ⇋ <b>翻面</b>：把三角形翻過來<br>
+      ✨ 疊上去<b>完全一樣</b>就會變透明：是全等！<br>
+      🧺 再把全等的一組拖進正確的<b>分類籃</b>
+    </div>
+    <div class="seat">座號（可不填）：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
+    <button class="btn" id="startBtn">開始</button>
+    <p class="note">約 10 分鐘・練習 + 3 關</p>`);
+  $("#startBtn").addEventListener("click", () => {
+    ensureAudio();
+    seatNo = $("#seatInput").value.trim();
+    hidePanel();
+    results = [];
+    gameStart = Date.now();
+    startPage(0);
+  });
+}
+
+// ================= 其他 =================
+new ResizeObserver(() => onResize()).observe(board);
+function onResize() {
+  if (!pieces.length || (W === board.clientWidth && H === board.clientHeight)) return;
+  measure();
+  for (const p of pieces) if (p.state === "free" || p.state === "pair") clampIn(p);
+  renderAll();
+}
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("dblclick", (e) => e.preventDefault());
+
+showHome();
+</script>
+</body>
+</html>
