@@ -92,8 +92,13 @@ repo 根目錄的 `README.md` 和其他檔案，是另一個專案「貓咪王�
 ## 更新和部署流程
 
 1. 在開發分支修改 `triangle/` 下的檔案，用上面的方式測試。
-2. 推上 GitHub，開 Pull Request 到 `main`，老師同意後合併。
-3. 等 1～2 分鐘，GitHub Pages 會自動更新。學生的平板如果還是舊版，重新整理網頁就好。
+2. 推上 GitHub，開 Pull Request 到 `main`。
+   老師已經授權（2026-10-28）：**測試通過後直接合併**，不用再問老師（`gh pr merge --merge --delete-branch`）。
+3. 等 1～2 分鐘，GitHub Pages 會自動更新，確認線上版本已經是新版。學生的平板如果還是舊版，重新整理網頁就好。
+
+老師的電腦：
+- repo 複製在 `C:\Users\user\cat-kingdom-download`。工作資料夾路徑太長的話，Git 會出現 Filename too long，所以放在這裡。
+- 已安裝 Git 和 GitHub CLI（`gh`），`gh` 已經用 y8999y-ops 登入。
 
 ## 可能的後續想法（還沒做）
 
