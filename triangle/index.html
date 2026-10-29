@@ -29,7 +29,7 @@
   button { font: inherit; touch-action: manipulation; cursor: pointer; }
   #app {
     position: fixed; inset: 0; display: flex; flex-direction: column;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 18px);   /* 畫面四周留白，看起來不會太靠邊 */
   }
 
   /* ---------- 上方：小貓和對話 ---------- */
@@ -42,7 +42,7 @@
     display: flex; align-items: center; position: relative; overflow: hidden;
   }
   @media (max-width: 600px) {
-    #say { font-size: 16px; height: 150px; padding: 4px 10px; line-height: 1.28; }
+    #say { font-size: 16px; height: 158px; padding: 4px 10px; line-height: 1.28; }
     #cat { font-size: 36px; }
   }
   #say::before {
@@ -87,6 +87,7 @@
   .lbl text { font-size: 25px; font-weight: bold; fill: #4e342e; pointer-events: none; }
   .ask { animation: ask 1s ease-in-out infinite; }
   .ang-guide { fill: #fff; fill-opacity: .45; stroke: #5d4037; stroke-width: 2.5; stroke-dasharray: 6 4; }
+  .side-guide { stroke: #fff; stroke-width: 7; stroke-dasharray: 8 7; stroke-linecap: round; pointer-events: none; }
   /* 看不見的粗外框：細長的三角形也容易抓 */
   .piece polygon.hit { fill: transparent; stroke: transparent; stroke-width: 28; stroke-linejoin: round; }
   /* 挑戰關「找全等」的題目三角形 */
@@ -134,10 +135,10 @@
   #tools button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
 
   /* ---------- 下方：分類籃 ---------- */
-  #bins { display: grid; gap: 8px; padding: 8px 12px 12px; position: relative; z-index: 1; }
+  #bins { display: grid; gap: 10px; padding: 10px 0 0; position: relative; z-index: 1; }
   #bins:empty { display: none; }
   .bin {
-    background: var(--card); border: 3px dashed var(--line); border-radius: 16px; min-height: 92px;
+    background: var(--card); border: 3px dashed var(--line); border-radius: 16px; min-height: 116px;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px;
     transition: transform .15s, background .15s, border-color .15s;
   }
@@ -152,7 +153,7 @@
   @keyframes binno { 20%, 60% { transform: translateX(-6px); background: #ffcdd2; } 40%, 80% { transform: translateX(6px); } }
   .grid-head { font-size: clamp(18px, 2.8vw, 25px); font-weight: bold; text-align: center; align-self: end; color: var(--soft); }
   .grid-head.row { align-self: center; writing-mode: vertical-rl; letter-spacing: 2px; }
-  #bins.both .bin { min-height: 70px; }
+  #bins.both .bin { min-height: 84px; }
   #bins.both .bin b { font-size: clamp(16px, 2.6vw, 24px); }
 
   /* ---------- 覆蓋畫面 ---------- */
@@ -230,6 +231,7 @@
     .lvl b { font-size: 19px; }
     .lvl span { font-size: 14px; }
     /* 手機上選單和提示按鈕縮小，留空間給小貓的對話 */
+    #app { padding: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 6px); }
     .icon-btn { width: 40px; height: 40px; font-size: 20px; }
     .topbtns div { gap: 4px; }
     #hearts { font-size: 17px; }
@@ -278,10 +280,10 @@ const LIB = {
   "equi-acute": [[60, 60, 60]],
   "iso-acute":  [[40, 70, 70], [50, 65, 65], [80, 50, 50], [30, 75, 75]],
   "iso-right":  [[90, 45, 45]],
-  "iso-obtuse": [[110, 35, 35], [120, 30, 30], [130, 25, 25]],
+  "iso-obtuse": [[110, 35, 35], [120, 30, 30], [116, 32, 32]],   // 不放 130° 那種很扁的，手指才不會整個蓋住
   "sca-acute":  [[50, 60, 70], [45, 65, 70], [40, 65, 75], [55, 48, 77]],
   "sca-right":  [[90, 30, 60], [90, 35, 55], [90, 25, 65]],
-  "sca-obtuse": [[110, 40, 30], [120, 35, 25], [105, 45, 30], [130, 30, 20], [115, 25, 40]],
+  "sca-obtuse": [[110, 40, 30], [120, 35, 25], [105, 45, 30], [115, 35, 30], [112, 43, 25]],
 };
 const ALL_KEYS = Object.keys(LIB);
 const NAME_ANGLE = { acute: "銳角三角形", right: "直角三角形", obtuse: "鈍角三角形" };
@@ -387,7 +389,7 @@ function genSpecs(mode, direct) {
         ? [...two(["equi-acute", "iso-acute", "sca-acute"]), "iso-right", "sca-right", "iso-obtuse", "sca-obtuse"]
         // 角和邊一起看：2×3 格子每格一個（沒有正三角形）
         : ["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"];
-    const sizes = shuffle([0.85, 0.9, 0.95, 1.0, 1.1, 1.2]);
+    const sizes = shuffle([0.9, 0.95, 1.0, 1.05, 1.1, 1.2]);
     const used = [];
     return keys.map((key, i) => {
       const angles = pickAngles(key, used);
@@ -396,8 +398,8 @@ function genSpecs(mode, direct) {
     });
   }
   for (let tries = 0; tries < 50; tries++) {
-    const keys = shuffle(["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"]).slice(0, 5);
-    const sizes = shuffle([0.8, 0.9, 1.0, 1.1, 1.2]);
+    const keys = shuffle(["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"]).slice(0, 4);   // 4 組全等 + 1 個干擾題，三角形才夠大
+    const sizes = shuffle([0.95, 1.05, 1.15, 1.25]);
     const used = [];
     const specs = keys.map((key, i) => {
       const angles = pickAngles(key, used);
@@ -409,8 +411,8 @@ function genSpecs(mode, direct) {
     const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)));
     let d;
     if (Math.random() < 0.5 || !alt.length) {
-      const bigger = base.size <= 1.0;
-      d = { angles: base.angles, size: bigger ? base.size * 1.25 : base.size * 0.72, role: "distractor", key: base.key,
+      const bigger = base.size <= 1.05;   // 大的放大、小的縮小，干擾題才不會太大或太小
+      d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.8, role: "distractor", key: base.key,
             reason: `它和其中一組形狀一樣，但是${bigger ? "比較大" : "比較小"}，所以沒有和它全等的三角形。` };
     } else {
       d = { angles: pick(alt), size: base.size, role: "distractor", key: base.key,
@@ -492,13 +494,17 @@ function startPage(i) {
   const rows = Math.ceil(n / cols);
   grid = { cols, rows };
   measure();
-  const slots = shuffle([...Array(cols * rows).keys()]).slice(0, n);
-  pieces.forEach((p, k) => {
-    const col = slots[k] % cols, row = Math.floor(slots[k] / cols);
-    p.nx = ((col + 0.5 + (Math.random() - 0.5) * 0.15) * availW / cols) / W;
-    p.ny = ((row + 0.5 + (Math.random() - 0.5) * 0.15) * H / rows) / H;
-    fitIn(p, 6);
-  });
+  // 三角形很大，偶爾會碰到隔壁的：碰到就換位置重新排，最多試 30 次
+  for (let tries = 0; tries < 30; tries++) {
+    const slots = shuffle([...Array(cols * rows).keys()]).slice(0, n);
+    pieces.forEach((p, k) => {
+      const col = slots[k] % cols, row = Math.floor(slots[k] / cols);
+      p.nx = ((col + 0.5 + (Math.random() - 0.5) * 0.1) * availW / cols) / W;
+      p.ny = ((row + 0.5 + (Math.random() - 0.5) * 0.1) * H / rows) / H;
+      fitIn(p, 10);
+    });
+    if (!anyOverlap()) break;
+  }
 
   renderAll();
   updateTools();
@@ -535,7 +541,7 @@ function startTutorial(step) {
     nx: (wide ? (k + 0.5) * availW / 2 : availW / 2) / W, ny: wide ? 0.5 : (k + 0.5) / 2,
     r: step === 0 ? k * 90 : 0, s: step === 1 && k === 1 ? -1 : 1, color: colors[k],
   }));
-  for (const p of pieces) fitIn(p, 6);
+  for (const p of pieces) fitIn(p, 10);
   selected = null;
   renderAll();
   updateTools();
@@ -546,8 +552,8 @@ function startTutorial(step) {
 function measure() {
   W = board.clientWidth; H = board.clientHeight;
   const availW = Math.max(100, W - TOOL_W);
-  // 三角形盡量放大：最長邊約是格子的 70%（找對應那關只有兩個，可以更大）
-  const f = mode === "corr" ? 0.62 : 0.7;
+  // 三角形盡量放大：最長邊約是格子的 75%（找對應那關只有兩個，可以更大）
+  const f = mode === "corr" ? 0.62 : 0.75;
   S = f * Math.min(availW / grid.cols, H / grid.rows);
   S = Math.max(50, Math.min(S, mode === "corr" ? 300 : 230));
 }
@@ -652,10 +658,17 @@ function corrSvg(p) {
       out += `<path class="${m.cls}" d="${arcD(v, m.i, k)}" fill="${m.col}" fill-opacity=".5" stroke="${m.col}" stroke-width="4" pointer-events="none"/>`;
     }
   }
-  // 點邊用：看不見的粗線
+  // 問邊的時候：另一個三角形的三條邊畫成虛線，提醒要點邊
+  if (p.sideTap) {
+    for (let s = 0; s < 3; s++) {
+      const A = v[(s + 1) % 3], B = v[(s + 2) % 3];
+      out += `<line class="side-guide" x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}"/>`;
+    }
+  }
+  // 點邊用：看不見的粗線（不要太粗，學生點三角形中間選取時才不會被當成作答）
   for (let s = 0; s < 3; s++) {
     const A = v[(s + 1) % 3], B = v[(s + 2) % 3];
-    out += `<line data-side="${s}" x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="#000" stroke-opacity="0" stroke-width="36" stroke-linecap="round"/>`;
+    out += `<line data-side="${s}" x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="#000" stroke-opacity="0" stroke-width="26" stroke-linecap="round"/>`;
   }
   // 問角的時候：另一個三角形的三個角畫成虛線扇形，點扇形作答（不是點頂點的字母，避免和「點」搞混）
   if (p.angleTap) {
@@ -708,6 +721,21 @@ function flash(p, cls, ms = 700) {
   el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls);
   clearTimeout(p["t_" + cls]);
   p["t_" + cls] = setTimeout(() => el.classList.remove(cls), ms);
+}
+
+// 兩個三角形有沒有重疊（分離軸判斷，多留 6px 間隔）
+function trisOverlap(A, B) {
+  for (const P of [A, B]) for (let i = 0; i < 3; i++) {
+    const p = P[i], q = P[(i + 1) % 3], n = norm([q[1] - p[1], p[0] - q[0]]);
+    const pa = A.map((v) => v[0] * n[0] + v[1] * n[1]), pb = B.map((v) => v[0] * n[0] + v[1] * n[1]);
+    if (Math.max(...pa) + 6 < Math.min(...pb) || Math.max(...pb) + 6 < Math.min(...pa)) return false;
+  }
+  return true;
+}
+function anyOverlap() {
+  const ws = pieces.map(worldVerts);
+  for (let i = 0; i < ws.length; i++) for (let j = i + 1; j < ws.length; j++) if (trisOverlap(ws[i], ws[j])) return true;
+  return false;
 }
 
 // 出題擺放後用：把整個三角形（含頂點字母）推回桌面內，右邊留給工具列
@@ -841,7 +869,8 @@ function nearestFree(p) {
 }
 
 function checkDrop(p, quiet) {
-  if (direct || mode === "corr" || mode === "pick") return;   // 這些關卡不用疊合
+  if (mode === "pick") return pickDrop(p, quiet);   // 挑戰關的找全等
+  if (direct || mode === "corr") return;   // 這些關卡不用疊合
   const t = nearestFree(p);
   if (!t) return;
   if (congruent(p, t)) {
@@ -858,7 +887,11 @@ function checkDrop(p, quiet) {
     : "<b>形狀不一樣</b>，怎麼轉、怎麼翻都疊不起來，所以不是全等。";
   say(msg, "bad");
   flash(p, "shake", 400);
-  // 輕輕推開
+  pushAway(p, t);
+}
+
+// 疊錯了：把 p 從 t 上面輕輕推開
+function pushAway(p, t) {
   let dx = (p.nx - t.nx) * W, dy = (p.ny - t.ny) * H;
   if (Math.hypot(dx, dy) < 1) { dx = 1; dy = 0; }
   const d = norm([dx, dy]), push = 0.75 * Math.max(lenPx(p), lenPx(t));
@@ -884,11 +917,11 @@ function doMatch(p, t) {
       say("完全疊合了！轉一轉就對齊了。<br>接下來練習<b>翻面</b>。", "good");
       setTimeout(() => { if (tok === pageToken) startTutorial(1); }, 1500);
     } else {
-      say("完全疊合了！有時候要<b>翻面</b>才能疊合。<br>能完全疊在一起的兩個三角形，叫做<b>全等</b>。", "good");
+      say("完全疊合了！有時候要<b>翻面</b>才能疊合。<br>能完全疊在一起的兩個三角形，叫做<b>全等三角形</b>。", "good");
       setTimeout(() => { if (tok === pageToken) finishPage(); }, 1500);
     }
   } else {
-    say("完全疊合了！這兩個三角形<b>全等</b>。<br>把這一組拖到下面的格子裡。", "good");
+    say("完全疊合了！這兩個三角形是<b>全等三角形</b>。<br>把這一組拖到下面的格子裡。", "good");
   }
 }
 
@@ -946,16 +979,17 @@ function startCorrRound() {
   grid = wide ? { cols: 2, rows: 1 } : { cols: 1, rows: 2 };
   measure();
   const colors = shuffle([...COLORS]);
-  pieces = [0, 1].map((k) => {
-    const t = makeTri(angles, 1.0);
-    return {
-      id: "c" + k, v: t.v, ang: t.ang, sides: t.sides, size: 1.0, cat: categorize(t.ang),
-      distractor: false, reason: "", state: "free", partner: null, marks: null,
-      nx: (wide ? (k + 0.5) * availW / 2 : availW / 2) / W, ny: wide ? 0.5 : (k + 0.5) / 2,
-      r: 30 * rand(12), s: k === 1 && Math.random() < 0.5 ? -1 : 1,
-      color: colors[k], labels: CORR_LETTERS[k], ans: [], ask: null, hint: null,
-    };
-  });
+  // 兩個用同一份形狀（只差旋轉 30° 的倍數和翻面），學生才轉得到一樣的方向；
+  // 以前各自 makeTri，底邊不同，相差的角度不是 15° 的倍數，怎麼轉都對不齊。
+  // D E F 隨機放在頂點上，對應關係才不會每次都是 A↔D、B↔E、C↔F。
+  const t = makeTri(angles, 1.0);
+  pieces = [0, 1].map((k) => ({
+    id: "c" + k, v: t.v.map((q) => [...q]), ang: t.ang, sides: t.sides, size: 1.0, cat: categorize(t.ang),
+    distractor: false, reason: "", state: "free", partner: null, marks: null,
+    nx: (wide ? (k + 0.5) * availW / 2 : availW / 2) / W, ny: wide ? 0.5 : (k + 0.5) / 2,
+    r: 30 * rand(12), s: k === 1 && Math.random() < 0.5 ? -1 : 1,
+    color: colors[k], labels: k === 0 ? CORR_LETTERS[0] : shuffle([...CORR_LETTERS[1]]), ans: [], ask: null, hint: null,
+  }));
   const [a, b] = pieces;
   if (a.s === b.s && a.r === b.r) b.r += 90;
   for (const p of pieces) fitIn(p, 52, 96);   // 頂點字母在三角形外面約 50px；上面再留給進度點或挑戰關的時間條
@@ -996,7 +1030,8 @@ function renderProgress() {
   el.innerHTML = html;
 }
 
-const CORR_HOW = { point: "點一下另一個三角形上的<b>點</b>。", side: "點一下另一個三角形上的<b>邊</b>。", angle: "點一下另一個三角形裡的<b>角</b>。" };const CORR_WRONG_KIND = {
+const CORR_HOW = { point: "點一下另一個三角形上的<b>點</b>。", side: "點一下另一個三角形上的<b>邊</b>。", angle: "點一下另一個三角形裡的<b>角</b>。" };
+const CORR_WRONG_KIND = {
   point: "這一題要找<b>點</b>：點一下頂點旁邊的字母。",
   side: "這一題要找<b>邊</b>：點一下三角形的一條邊。",
   angle: "這一題要找<b>角</b>：點一下三角形裡面虛線圍起來的角。",
@@ -1008,10 +1043,11 @@ function askCorr() {
   a.ans = []; b.ans = []; b.hint = null;
   a.ask = q;
   b.angleTap = q.kind === "angle";
+  b.sideTap = q.kind === "side";
   redraw(a); redraw(b);
   renderProgress();
   // 每組第一題先說明這兩個三角形全等
-  const intro = corr.q === 0 ? "這兩個三角形<b>全等</b>（可以完全疊合）。<br>" : "";
+  const intro = corr.q === 0 ? "這兩個三角形是<b>全等三角形</b>。<br>" : "";
   say(`${intro}找出 <b>${corrName(a, q.kind, q.i)}</b> 的<b>${CORR_WORD[q.kind]}</b>，${CORR_HOW[q.kind]}`);
 }
 
@@ -1030,6 +1066,7 @@ function answerCorr(p, tap) {
     b.ans.push({ kind: q.kind, i: want });
     b.hint = null;
     b.angleTap = false;
+    b.sideTap = false;
     redraw(a); redraw(b);
     if (challenge) { corr.busy = true; chalRight(`對了！${A} 和 ${B} 是${CORR_WORD[q.kind]}。`); return; }
     catBounce();
@@ -1128,7 +1165,9 @@ svg.addEventListener("pointerdown", (e) => {
     const hit = e.target.closest && e.target.closest("[data-vtx],[data-side],[data-ang]");
     const tap = hit && (hit.dataset.vtx != null ? { kind: "vtx", i: +hit.dataset.vtx }
       : hit.dataset.ang != null ? { kind: "ang", i: +hit.dataset.ang } : { kind: "side", i: +hit.dataset.side });
-    drag = { p, pid: e.pointerId, dx: p.nx * W - pt.x, dy: p.ny * H - pt.y, x0: pt.x, y0: pt.y, moved: false, tap };
+    // lift：用手指拖時，三角形浮到手指上方一點，才不會被手指整個蓋住（滑鼠不用）
+    const lift = e.pointerType === "touch" ? Math.min(70, lenPx(p) * 0.4 + 20) : 0;
+    drag = { p, pid: e.pointerId, dx: p.nx * W - pt.x, dy: p.ny * H - pt.y, x0: pt.x, y0: pt.y, moved: false, tap, lift, tm: 0 };
     if (mode === "tutorial" && p.state === "free") say(TUT_TEXT[tutStep]);
   } else {
     select(null);
@@ -1163,9 +1202,11 @@ svg.addEventListener("pointermove", (e) => {
   }
   if (drag && e.pointerId === drag.pid) {
     const p = drag.p;
+    if (!drag.moved && Math.hypot(pt.x - drag.x0, pt.y - drag.y0) > 8) { drag.moved = true; drag.tm = performance.now(); }
+    // 開始拖了才浮起來，0.15 秒內慢慢升上去；只點一下不會動
+    const up = drag.moved ? drag.lift * Math.min(1, (performance.now() - drag.tm) / 150) : 0;
     p.nx = (pt.x + drag.dx) / W;
-    p.ny = (pt.y + drag.dy) / H;
-    if (Math.hypot(pt.x - drag.x0, pt.y - drag.y0) > 8) drag.moved = true;
+    p.ny = (pt.y + drag.dy - up) / H;
     if (p.state === "free" && !direct) clampIn(p);   // 第 1～3 關可以直接拖到下面的格子，不要被桌面邊緣擋住
     updT(p);
     const over = dropBin(e, p);
@@ -1211,7 +1252,7 @@ function endPointer(e) {
     return;
   }
   if (mode === "pick") {
-    if (!dragMoved) answerPick(p);
+    if (dragMoved) pickDrop(p, false);   // 點一下只是選取，疊上去才判斷
     return;
   }
   const bin = dropBin(e, p);
@@ -1332,7 +1373,7 @@ function finishPage() {
     if (tok !== pageToken) return;
     if (mode === "tutorial") {
       showPanel(`<div class="big-cat">${ico("cat")}</div><h2>練習完成！</h2>
-        <p>一個三角形經過<b>移動、旋轉、翻面</b>，如果能和另一個<b>完全疊合</b>，這兩個三角形就<b>全等</b>。</p>
+        <p>一個三角形經過<b>移動、旋轉、翻面</b>，如果能和另一個<b>完全疊合</b>，這兩個三角形就是<b>全等三角形</b>。</p>
         <p>下一關：先疊合，再分類。</p>
         <button class="btn" id="nextBtn">開始${PAGES[pageIdx + 1].title.split("：")[0]}</button>`);
     } else {
@@ -1399,12 +1440,13 @@ function showHome() {
     : best.challenge != null ? `最佳成績 ${best.challenge} 分` : "可以挑戰了！";
   const chalBtn = `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 90 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
-  showPanel(`<h1>${ico("cat")} 疊疊看！三角形分類</h1>
+  showPanel(`<h1 id="homeTitle">${ico("cat")} 疊疊看！三角形分類</h1>
     <div class="seat">座號（可不填）：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
     <button class="btn" id="startBtn">從第 1 關開始</button>
     <p class="pick">或選一關：</p>
     <div class="levels">${levels}${chalBtn}</div>
     <p class="note">全部約 12 分鐘・<button class="linkbtn" id="clearBtn">清除這台平板的紀錄</button></p>`, "wide");
+  $("#homeTitle").addEventListener("click", onTitleTap);
   $("#chalBtn").addEventListener("click", () => {
     if (!challengeUnlocked()) {   // 還沒解鎖：搖一下，提醒看下面那行字
       const b = $("#chalBtn"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge");
@@ -1445,14 +1487,14 @@ function loseHeart() {
   mistakes++;
   renderHearts(true);
   if (mistakes < LIVES) return;
-  // 愛心用完：先停下來，讓學生看完答錯的說明，再去複習（挑戰關就直接結束）
+  // 愛心用完：先停一下（0.7 秒），讓學生看到答錯的說明，再去複習（挑戰關就直接結束）
   playing = false;
   drawHandle();
   const tok = pageToken;
   setTimeout(() => {
     if (tok !== pageToken) return;
     if (challenge) endChallenge("lives"); else showReview();
-  }, 1600);
+  }, 700);
 }
 
 // ================= 愛心用完：複習一下再重來 =================
@@ -1527,7 +1569,31 @@ function saveBest(key, val) {
   } catch (_) { return false; }
 }
 function clearBest() { try { localStorage.removeItem(BEST_KEY); } catch (_) {} }
-function challengeUnlocked() { const b = loadBest(); return SCORED.every((p) => b[p.id] === 3); }
+function challengeUnlocked() { const b = loadBest(); return !!b.teacher || SCORED.every((p) => b[p.id] === 3); }
+
+// 老師解鎖：在首頁連點標題 5 下（3 秒內），輸入老師密碼，就能直接打開挑戰關（存在這台平板上，清除紀錄會一起清掉）
+const TEACHER_CODE = "2580";
+let titleTaps = [];
+function onTitleTap() {
+  const now = Date.now();
+  titleTaps = titleTaps.filter((t) => now - t < 3000);
+  titleTaps.push(now);
+  if (titleTaps.length < 5) return;
+  titleTaps = [];
+  showPanel(`<h2>老師解鎖</h2>
+    <p>輸入老師密碼，就能直接打開挑戰關。</p>
+    <div class="seat"><input id="codeInput" inputmode="numeric" maxlength="4" autocomplete="off"></div>
+    <p id="codeMsg" class="note"></p>
+    <button class="btn" id="codeBtn">解鎖</button>
+    <button class="btn ghost" id="codeCancel">取消</button>`);
+  $("#codeBtn").addEventListener("click", () => {
+    if ($("#codeInput").value.trim() !== TEACHER_CODE) { $("#codeMsg").textContent = "密碼不對，再試一次。"; return; }
+    try { const b = loadBest(); b.teacher = true; localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch (_) {}
+    showHome();
+    say("挑戰關已經打開了。");
+  });
+  $("#codeCancel").addEventListener("click", showHome);
+}
 
 // ================= 挑戰關：限時 90 秒，綜合題型 =================
 // 題目一題接一題，輪流出現：以邊分類、以角分類、以邊和角分類、找全等、找對應。答對一題 1 分。
@@ -1594,7 +1660,7 @@ function nextChalTask() {
     measure();
     const p = makePiece(makeTri(pick(LIB[pick(keys)]), 0.85 + Math.random() * 0.25), "q" + chal.n++, pick(COLORS));
     p.nx = Math.max(100, W - TOOL_W) / 2 / W;
-    fitIn(p, 6, 50);
+    fitIn(p, 10, 50);
     pieces = [p];
     renderAll();
     updateTools();
@@ -1603,19 +1669,29 @@ function nextChalTask() {
   renderChalBar();
 }
 
+// 把三角形等比例放大或縮小（形狀一樣，大小不同）
+function scaleTri(t, k) {
+  return { v: t.v.map(([x, y]) => [x * k, y * k]), ang: t.ang, sides: t.sides.map((s) => s * k), size: t.size * k };
+}
+
 // 找全等：一個虛線框的三角形，另外三個裡只有一個和它全等（另外兩個：大小不同、形狀不同）
+// 不是點一下就判斷：要把候選的三角形拖過去疊在虛線框上（可以轉、翻），疊合了才算對（pickDrop()）
 function startPickTask() {
   const ang = pick(LIB[pick(ALL_KEYS.filter((k) => k !== "equi-acute"))]);
   const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => !sameAngles(a, ang));
   const size = 0.8 + Math.random() * 0.15, bigger = Math.random() < 0.5;
   const colors = shuffle([...COLORS]);
-  const target = makePiece(makeTri(ang, size), "k0", colors[0]);
+  // 全等和大小不同的都用同一份形狀，只差旋轉和翻面，才轉得到一樣的方向
+  const base = makeTri(ang, size);
+  const target = makePiece(base, "k0", colors[0]);
   target.target = true;
   const cands = shuffle([
-    Object.assign(makePiece(makeTri(ang, size), "k1", colors[1]), { answer: true }),
-    Object.assign(makePiece(makeTri(ang, size * (bigger ? 1.25 : 0.75)), "k2", colors[2]), { why: bigger ? "比較大" : "比較小" }),
+    Object.assign(makePiece(base, "k1", colors[1]), { answer: true }),
+    Object.assign(makePiece(scaleTri(base, bigger ? 1.25 : 0.75), "k2", colors[2]), { why: bigger ? "比較大" : "比較小" }),
     Object.assign(makePiece(makeTri(pick(others), size), "k3", colors[3]), { why: "形狀不一樣" }),
   ]);
+  const ans = cands.find((p) => p.answer);
+  if (ans.s === target.s && ans.r === target.r) ans.r += 90;   // 一開始不能已經對齊
   pieces = [target, ...cands];
   const availW = Math.max(100, W - TOOL_W);
   const cols = availW > H * 1.6 ? 4 : 2, rows = 4 / cols;
@@ -1624,21 +1700,35 @@ function startPickTask() {
   pieces.forEach((p, k) => {
     p.nx = ((k % cols) + 0.5) * availW / cols / W;
     p.ny = (Math.floor(k / cols) + 0.5) / rows;
-    fitIn(p, 6, 50);
+    fitIn(p, 10, 50);
   });
   renderAll();
   updateTools();
-  say("哪一個和<b>虛線框</b>的三角形<b>全等</b>？<br>點一下它。");
+  say("哪一個和<b>虛線框</b>的三角形是<b>全等三角形</b>？<br>把它拖過去疊疊看。");
 }
 
-function answerPick(p) {
+// 找全等：放下或轉完時檢查有沒有疊在虛線框上
+function pickDrop(p, quiet) {
   if (!playing || chal.over || chal.busy) return;
+  const target = pieces.find((q) => q.target);
+  // 拖的是虛線框那個時，改看最近的候選
+  const a = p.target
+    ? pieces.filter((q) => !q.target).sort((x, y) => Math.hypot(x.nx - p.nx, x.ny - p.ny) - Math.hypot(y.nx - p.nx, y.ny - p.ny))[0]
+    : p;
+  const near = Math.hypot((a.nx - target.nx) * W, (a.ny - target.ny) * H) < 0.6 * Math.max(lenPx(a), lenPx(target));
+  if (!near) return;   // 還沒疊上去，不判斷
   lastAct = Date.now();
-  if (p.target) { say("請在另外三個三角形裡，點一下和<b>虛線框</b>的三角形<b>全等</b>的那一個。"); return; }
-  if (p.answer) { flash(p, "pop", 700); chalRight("對了！形狀、大小都一樣，可以完全疊合。"); return; }
+  if (congruent(a, target)) {
+    if (isAligned(a, target)) { flash(a, "pop", 700); chalRight("完全疊合了！這兩個三角形是全等三角形。"); return; }
+    if (isAligned(a, target, true)) say("方向對了！再移動一點，讓三個角剛好疊在一起。");
+    else if (!quiet) say("這兩個大小、形狀都一樣。<br>再<b>轉一轉</b>或<b>翻面</b>，讓它們對齊。");
+    return;
+  }
+  if (quiet) return;
   loseHeart();
-  flash(p, "shake", 400);
-  say(`這一個${p.why}，不能完全疊合，不是全等。`, "bad");
+  flash(a, "shake", 400);
+  say(`這一個${a.why}，不能完全疊合，不是全等三角形。`, "bad");
+  pushAway(a, target);
 }
 
 function chalRight(msg) {
