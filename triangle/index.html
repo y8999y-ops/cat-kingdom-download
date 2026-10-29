@@ -342,8 +342,10 @@ const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = rand
 const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
 const sortNum = (a) => [...a].sort((x, y) => x - y);
 const sameAngles = (a, b) => { const x = sortNum(a), y = sortNum(b); return x.every((v, i) => Math.abs(v - y[i]) < 0.5); };
+// 兩組角度最多差幾度（排序後比較）：差太少的兩個三角形看起來會像全等
+const angleGap = (a, b) => { const x = sortNum(a), y = sortNum(b); return Math.max(...x.map((v, i) => Math.abs(v - y[i]))); };
 const PERMS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
-const ALIGN_TOL = 0.07;   // 疊合門檻：頂點誤差小於邊長的 7%（老師覺得原本 12% 太寬鬆）
+const ALIGN_TOL = 0.09;   // 疊合門檻：頂點誤差小於邊長的 9%（12% 太寬鬆、7% 對小學生用手指太難，老師選 8～9%）
 const ALIGN_DEG = 3;      // 而且方向誤差不超過 3°
 
 // 用三個角和最長邊長度做出三角形（頂點以重心為原點）
@@ -396,7 +398,8 @@ function genSpecs(mode, direct) {
       return { angles, size: sizes[i], role: "single", key };
     });
   }
-  for (let tries = 0; tries < 50; tries++) {
+  let last = [];
+  for (let tries = 0; tries < 100; tries++) {
     // 第 4 關每輪 2 組全等 + 1 個干擾題（玩三輪），三角形才夠大
     const keys = shuffle(["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"]).slice(0, 2);
     const sizes = shuffle([1.0, 1.15]);
@@ -408,20 +411,24 @@ function genSpecs(mode, direct) {
     });
     // 干擾題：看起來很像，但不全等
     const base = pick(specs);
-    const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)));
+    const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)) && angleGap(a, base.angles) >= 15);   // 角度要差得夠多，看起來才不會像全等
     let d;
     if (Math.random() < 0.5 || !alt.length) {
       const bigger = base.size <= 1.05;   // 大的放大、小的縮小，干擾題才不會太大或太小
-      d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.85, role: "distractor", key: base.key,
+      d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.8, role: "distractor", key: base.key,
             reason: `它和其中一組形狀一樣，但是${bigger ? "比較大" : "比較小"}，所以沒有和它全等的三角形。` };
     } else {
       d = { angles: pick(alt), size: base.size, role: "distractor", key: base.key,
             reason: "它和其中一組大小差不多，但是角的大小不一樣，所以沒有和它全等的三角形。" };
     }
     const clash = specs.some((s) => sameAngles(s.angles, d.angles) && Math.abs(s.size - d.size) < 0.05);
-    if (!clash) return [...specs, d];
+    // 同一輪裡，不同形狀之間的角度至少要差 15°，不然學生會以為有三個全等、怎麼疊都疊不起來
+    const all = [...specs, d];
+    const look = all.some((s, i) => all.some((t, j) => j > i && !sameAngles(s.angles, t.angles) && angleGap(s.angles, t.angles) < 15));
+    last = all;
+    if (!clash && !look) return all;
   }
-  return [];
+  return last;   // 試很多次都不行（幾乎不會發生）就用最後一次
 }
 
 // ================= 遊戲狀態 =================
@@ -546,11 +553,7 @@ function dealPieces(specs) {
   // 擺放：選格子最大的排法（幾欄幾列），再加一點亂數
   const n = pieces.length;
   const availW = Math.max(100, W - TOOL_W);
-  let best = null;
-  for (let c = 1; c <= n; c++) {
-    const r = Math.ceil(n / c), cell = Math.min(availW / c, H / r);
-    if (!best || cell > best.cell) best = { c, r, cell };
-  }
+  const best = bestGrid(n);
   const cols = best.c, rows = best.r;
   grid = { cols, rows };
   measure();
@@ -581,7 +584,7 @@ const TUT_TEXT = [
 function startTutorial(step) {
   tutStep = step;
   const tri = makeTri(step === 0 ? [90, 45, 45] : [90, 30, 60], 1.1);
-  const availW = Math.max(100, W - TOOL_W), wide = availW > H;
+  const availW = Math.max(100, W - TOOL_W), wide = bestGrid(2).c === 2;   // 和轉方向時用同一個排法
   grid = wide ? { cols: 2, rows: 1 } : { cols: 1, rows: 2 };
   measure();
   const colors = shuffle([...COLORS]);
@@ -652,7 +655,7 @@ function marksSvg(p, kind) {
       const [a, b] = sides[i];
       const M = [(v[a][0] + v[b][0]) / 2, (v[a][1] + v[b][1]) / 2];
       const d = norm([v[b][0] - v[a][0], v[b][1] - v[a][1]]), nrm = [-d[1], d[0]];
-      const t = 10;
+      const t = Math.max(5, Math.min(10, L * 0.07));   // 小圖上短線也跟著變短，才不會連在一起
       out += `<line x1="${M[0] - nrm[0] * t}" y1="${M[1] - nrm[1] * t}" x2="${M[0] + nrm[0] * t}" y2="${M[1] + nrm[1] * t}" stroke="#6a1b9a" stroke-width="5" stroke-linecap="round"/>`;
     }
   }
@@ -677,7 +680,7 @@ function pieceMarkup(p) {
   if (p.marks) inner += marksSvg(p, p.marks);
   if (p.labels) inner += corrSvg(p);
   // 打勾放在重心，反向轉回來，才不會跟著轉歪或翻面
-  if (p.state === "pair") inner += `<g class="badge" transform="${badgeT(p)}"><circle r="16"/><g transform="translate(-10,-10) scale(.84)">${ICONS.check}</g></g>`;
+  if (p.state === "pair" && !p.marks) inner += `<g class="badge" transform="${badgeT(p)}"><circle r="16"/><g transform="translate(-10,-10) scale(.84)">${ICONS.check}</g></g>`;
   return inner;
 }
 function badgeT(p) { return `scale(${p.s.toFixed(3)},1) rotate(${(-p.r).toFixed(2)})`; }
@@ -1019,7 +1022,7 @@ const CORR_WORD = { point: "對應點", side: "對應邊", angle: "對應角" };
 function startCorrRound() {
   const angles = pick(LIB[["sca-acute", "sca-right", "sca-obtuse"][corr.round % 3]]);
   const availW = Math.max(100, W - TOOL_W);
-  const wide = availW > H;
+  const wide = bestGrid(2).c === 2;   // 和轉方向時用同一個排法
   grid = wide ? { cols: 2, rows: 1 } : { cols: 1, rows: 2 };
   measure();
   const colors = shuffle([...COLORS]);
@@ -1264,7 +1267,7 @@ svg.addEventListener("pointermove", (e) => {
     const up = drag.moved ? drag.lift * Math.min(1, (performance.now() - drag.tm) / 150) : 0;
     p.nx = (pt.x + drag.dx) / W;
     p.ny = (pt.y + drag.dy - up) / H;
-    if (p.state === "free" && !direct) clampIn(p);   // 第 1～3 關可以直接拖到下面的格子，不要被桌面邊緣擋住
+    if (p.state === "free" && !direct && mode !== "both") clampIn(p);   // 第 1～4 關可以拖到下面的格子，不要被桌面邊緣擋住
     updT(p);
     const over = dropBin(e, p);
     for (const b of binsEl.querySelectorAll(".bin")) b.classList.toggle("over", b === over);
@@ -1321,7 +1324,13 @@ function endPointer(e) {
     return;
   }
   if (!dragMoved) return;
-  if (bin) say("這一關要先把<b>全等</b>的兩個三角形疊在一起，才能放進格子。");
+  // 第 4 關：還沒疊合就拖到格子 → 提醒要先疊合，再彈回桌面（不扣愛心，也不會拖不下去卡住）
+  const back = { ...p }; clampIn(back);
+  if (bin || back.nx !== p.nx || back.ny !== p.ny) {
+    if (bin) { say("要先把<b>全等</b>的兩個三角形<b>疊在一起</b>，<br>才能放進格子喔。", "bad"); flash(p, "shake", 400); }
+    tween(p, { nx: back.nx, ny: back.ny }, 260);
+    return;
+  }
   checkDrop(p, false);
 }
 svg.addEventListener("pointerup", endPointer);
@@ -1531,7 +1540,7 @@ function showHome() {
     <button class="btn ghost" id="scoreBtn">${ico("trophy")} 看成績</button>
     <p class="pick">或選一關：</p>
     <div class="levels">${levels}${chalBtn}</div>
-    <p class="note">全部約 12 分鐘・<button class="linkbtn" id="clearBtn">清除這台平板的紀錄</button></p>`, "wide");
+    <p class="note"><button class="linkbtn" id="clearBtn">清除這台平板的紀錄</button></p>`, "wide");
   $("#homeTitle").addEventListener("click", onTitleTap);
   $("#chalBtn").addEventListener("click", () => {
     if (!challengeUnlocked()) {   // 還沒解鎖：搖一下，提醒看下面那行字
@@ -1586,13 +1595,13 @@ function loseHeart() {
 
 // ================= 愛心用完：複習一下再重來 =================
 const REVIEW = {
-  side: [["正三角形", "三條邊都一樣長", [60, 60, 60]], ["等腰三角形", "有兩條邊一樣長", [40, 70, 70]], ["不等邊三角形", "三條邊都不一樣長", [50, 60, 70]]],
+  side: [["正三角形", "三條邊都一樣長", [60, 60, 60]], ["等腰三角形", "有兩條邊一樣長", [80, 50, 50]], ["不等邊三角形", "三條邊都不一樣長", [50, 60, 70]]],
   angle: [["銳角三角形", "三個角都是銳角", [50, 60, 70]], ["直角三角形", "有一個角是直角", [90, 30, 60]], ["鈍角三角形", "有一個角是鈍角", [120, 35, 25]]],
 };
 // 畫一個小三角形（含記號），借用 marksSvg，所以暫時把 S 換成小圖的大小
 function miniTri(angles, kind, color) {
   const keep = S;
-  S = 60;
+  S = 70;
   const t = makeTri(angles, 1);
   const p = { v: t.v, ang: t.ang, sides: t.sides, size: 1, cat: categorize(t.ang) };
   const body = `<polygon points="${pointsAttr(p)}" fill="${color}" stroke="#5d4037" stroke-width="3" stroke-linejoin="round"/>` + marksSvg(p, kind);
@@ -1770,7 +1779,7 @@ function scaleTri(t, k) {
 // 不是點一下就判斷：要把候選的三角形拖過去疊在虛線框上（可以轉、翻），疊合了才算對（pickDrop()）
 function startPickTask() {
   const ang = pick(LIB[pick(ALL_KEYS.filter((k) => k !== "equi-acute"))]);
-  const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => !sameAngles(a, ang));
+  const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => angleGap(a, ang) >= 15);   // 形狀要明顯不同
   const size = 0.85 + Math.random() * 0.15, bigger = Math.random() < 0.5;
   const colors = shuffle([...COLORS]);
   // 全等和大小不同的都用同一份形狀，只差旋轉和翻面，才轉得到一樣的方向
@@ -1786,7 +1795,7 @@ function startPickTask() {
   if (ans.s === target.s && ans.r === target.r) ans.r += 90;   // 一開始不能已經對齊
   pieces = [target, ...cands];
   const availW = Math.max(100, W - TOOL_W);
-  const cols = availW > H * 1.6 ? 4 : 2, rows = 4 / cols;
+  const g4 = bestGrid(4), cols = g4.c, rows = g4.r;
   grid = { cols, rows };
   measure();
   pieces.forEach((p, k) => {
@@ -1885,9 +1894,40 @@ $("#menuBtn").addEventListener("click", () => {
 new ResizeObserver(() => onResize()).observe(board);
 function onResize() {
   if (!pieces.length || (W === board.clientWidth && H === board.clientHeight)) return;
-  measure();
-  for (const p of pieces) if (p.state === "free" || p.state === "pair") clampIn(p);
+  W = board.clientWidth; H = board.clientHeight;
+  // 平板轉方向：如果現在最適合的排法（幾欄幾列）不一樣了，就重新排列，
+  // 三角形才不會為了維持原本的排法而變小
+  const act = pieces.filter((p) => p.state === "free" || p.state === "pair");
+  const best = bestGrid(act.length);
+  if (act.length && (best.c !== grid.cols || best.r !== grid.rows)) relayout(act, best);
+  else {
+    measure();
+    for (const p of act) clampIn(p);
+  }
   renderAll();
+}
+// n 個三角形，選格子最大的排法
+function bestGrid(n) {
+  const availW = Math.max(100, W - TOOL_W);
+  let best = { c: 1, r: 1, cell: 0 };
+  for (let c = 1; c <= Math.max(1, n); c++) {
+    const r = Math.ceil(n / c), cell = Math.min(availW / c, H / r);
+    if (cell > best.cell) best = { c, r, cell };
+  }
+  return best;
+}
+// 把還在桌面上的三角形照新的排法重新擺好（保留方向和翻面）
+function relayout(act, best) {
+  const availW = Math.max(100, W - TOOL_W);
+  grid = { cols: best.c, rows: best.r };
+  measure();
+  const side = mode === "corr" ? 52 : 10;
+  const top = mode === "corr" ? 96 : challenge ? 50 : mode === "both" && !direct ? 40 : 10;
+  act.forEach((p, k) => {
+    p.nx = ((k % best.c) + 0.5) * availW / best.c / W;
+    p.ny = (Math.floor(k / best.c) + 0.5) / best.r;
+    fitIn(p, side, top);
+  });
 }
 document.addEventListener("gesturestart", (e) => e.preventDefault());
 document.addEventListener("contextmenu", (e) => e.preventDefault());
