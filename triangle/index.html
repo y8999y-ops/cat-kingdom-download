@@ -343,8 +343,8 @@ const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
 const sortNum = (a) => [...a].sort((x, y) => x - y);
 const sameAngles = (a, b) => { const x = sortNum(a), y = sortNum(b); return x.every((v, i) => Math.abs(v - y[i]) < 0.5); };
 const PERMS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
-const ALIGN_TOL = 0.12;   // 疊合門檻：頂點誤差小於邊長的 12%
-const ALIGN_DEG = 5;      // 而且方向誤差不超過 5°
+const ALIGN_TOL = 0.07;   // 疊合門檻：頂點誤差小於邊長的 7%（老師覺得原本 12% 太寬鬆）
+const ALIGN_DEG = 3;      // 而且方向誤差不超過 3°
 
 // 用三個角和最長邊長度做出三角形（頂點以重心為原點）
 function makeTri(angles, size) {
@@ -388,7 +388,7 @@ function genSpecs(mode, direct) {
         ? [...two(["equi-acute", "iso-acute", "sca-acute"]), "iso-right", "sca-right", "iso-obtuse", "sca-obtuse"]
         // 角和邊一起看：2×3 格子每格一個（沒有正三角形）
         : ["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"];
-    const sizes = shuffle([0.9, 0.95, 1.0, 1.05, 1.1, 1.2]);
+    const sizes = shuffle([1.0, 1.04, 1.08, 1.12, 1.16, 1.2]);   // 不要太小的三角形
     const used = [];
     return keys.map((key, i) => {
       const angles = pickAngles(key, used);
@@ -412,7 +412,7 @@ function genSpecs(mode, direct) {
     let d;
     if (Math.random() < 0.5 || !alt.length) {
       const bigger = base.size <= 1.05;   // 大的放大、小的縮小，干擾題才不會太大或太小
-      d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.8, role: "distractor", key: base.key,
+      d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.85, role: "distractor", key: base.key,
             reason: `它和其中一組形狀一樣，但是${bigger ? "比較大" : "比較小"}，所以沒有和它全等的三角形。` };
     } else {
       d = { angles: pick(alt), size: base.size, role: "distractor", key: base.key,
@@ -441,6 +441,8 @@ function startPage(i) {
   direct = !!PAGES[i].direct;
   challenge = false;
   mistakes = 0;
+  hintsLeft = HINT_FLASHES;
+  nudged = false;
   pageDone = false;
   selected = null;
   pageStart = Date.now();
@@ -486,6 +488,8 @@ const L4_ROUNDS = 3;
 let l4 = null;
 function startL4Round() {
   selected = null;
+  // 換新的一輪：清掉格子裡上一輪放的小圖，避免誤導學生
+  for (const m of binsEl.querySelectorAll(".minis")) m.innerHTML = "";
   dealPieces(genSpecs(mode, false));
   renderProgress();
   say(l4.round === 0
@@ -599,7 +603,7 @@ function measure() {
   W = board.clientWidth; H = board.clientHeight;
   const availW = Math.max(100, W - TOOL_W);
   // 三角形盡量放大：最長邊約是格子的 75%（找對應那關只有兩個，可以更大）
-  const f = mode === "corr" ? 0.62 : mode === "both" && !direct && !challenge ? 0.8 : 0.75;
+  const f = mode === "corr" ? 0.62 : mode === "both" && !challenge ? 0.8 : 0.75;
   S = f * Math.min(availW / grid.cols, H / grid.rows);
   S = Math.max(50, Math.min(S, mode === "corr" ? 300 : 230));
 }
@@ -1339,10 +1343,32 @@ $("#flip").addEventListener("click", () => {
 });
 
 // ================= 提示 =================
+// 按燈泡先看「複習小卡」（只複習觀念，不給答案）；真的不會，每關可以讓答案閃一次（HINT_FLASHES）。
+// 老師擔心直接閃答案會讓學生一直按提示，所以練習以外都改成這樣。
+const HINT_FLASHES = 1;
+let hintsLeft = HINT_FLASHES, nudged = false;
 function giveHint() {
   if (!playing || pageDone) return;
   lastAct = Date.now();
   if (challenge) { say("挑戰關不能用提示，加油！"); return; }
+  if (mode === "tutorial") return flashHint();   // 練習不限次數
+  showHintCard();
+}
+function showHintCard() {
+  const left = hintsLeft > 0
+    ? `<button class="btn ghost" id="flashBtn">讓答案閃一下（剩 ${hintsLeft} 次）</button>`
+    : `<p class="note">這一關「讓答案閃一下」已經用完了。</p>`;
+  showPanel(`<div class="big-cat">${ico("bulb")}</div><h2>提示：複習一下</h2>${reviewBody()}
+    <button class="btn" id="backBtn">回去作答</button>${left}`, "wide");
+  const back = () => { hidePanel(); playing = true; lastAct = Date.now(); drawHandle(); };
+  $("#backBtn").addEventListener("click", back);
+  const f = $("#flashBtn");
+  if (f) f.addEventListener("click", () => { hintsLeft--; back(); flashHint(); });
+}
+// 讓答案閃一下
+function flashHint() {
+  if (!playing || pageDone) return;
+  lastAct = Date.now();
   if (mode === "corr") {
     if (corr.busy) return;
     const q = corr.qs[corr.q], b = pieces[1];
@@ -1386,7 +1412,13 @@ function giveHint() {
   }
 }
 $("#hintBtn").addEventListener("click", giveHint);
-setInterval(() => { if (playing && !pageDone && !challenge && Date.now() - lastAct > 30000) giveHint(); }, 1000);
+// 30 秒沒有動作：練習直接閃提示；其他關卡只提醒可以按燈泡看複習小卡（不自動給答案）
+setInterval(() => {
+  if (!playing || pageDone || challenge || Date.now() - lastAct < 30000) return;
+  lastAct = Date.now();
+  if (mode === "tutorial") flashHint();
+  else if (!nudged) { nudged = true; say("需要幫忙嗎？<br>按右上角的燈泡，可以看複習小卡。"); }
+}, 1000);
 
 // ================= 對話 =================
 function say(html, tone) {
@@ -1494,7 +1526,7 @@ function showHome() {
   const chalBtn = `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 90 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
   showPanel(`<h1 id="homeTitle">${ico("cat")} 疊疊看！三角形分類</h1>
-    <div class="seat">座號（可不填）：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
+    <div class="seat">座號：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
     <button class="btn" id="startBtn">從第 1 關開始</button>
     <button class="btn ghost" id="scoreBtn">${ico("trophy")} 看成績</button>
     <p class="pick">或選一關：</p>
@@ -1589,17 +1621,22 @@ function corrReviewSvg() {
   };
   return `<svg class="mini-corr" viewBox="-85 -80 330 160">${draw(["A", "B", "C"], 0, "#ffcc80")}<g transform="translate(160,0)">${draw(["D", "E", "F"], 150, "#b3e5fc")}</g></svg>`;
 }
-function showReview() {
+// 複習小卡的內容（愛心用完的複習畫面和提示都用這一份）
+function reviewBody() {
   const card = ([name, why, ang], kind, i) =>
     `<div class="rv">${miniTri(ang, kind, COLORS[i])}<b>${name}</b><span>${why}</span></div>`;
-  let html = `<div class="big-cat">${ico("book")}</div><h2>愛心用完了，先複習一下</h2>`;
+  let html = "";
   if (mode === "side" || mode === "both") html += `<div class="review">${REVIEW.side.map((c, i) => card(c, "side", i)).join("")}</div>`;
   if (mode === "angle" || mode === "both") html += `<div class="review">${REVIEW.angle.map((c, i) => card(c, "angle", i + 3)).join("")}</div>`;
-  if (mode === "both" && !direct) html += `<p><b>全等</b>：形狀、大小都一樣，可以完全疊合。<br>可以移動、旋轉、翻面來疊疊看。</p>`;
+  if (mode === "both" && !direct) html += `<p><b>全等三角形</b>：形狀、大小都一樣，可以完全疊合。<br>可以移動、旋轉、翻面來疊疊看。</p>`;
   if (mode === "corr") {
     html += `<div class="review one">${corrReviewSvg()}</div>
       <p>兩個三角形<b>全等</b>時，疊合在一起的點、邊、角，<br>叫做<b>對應點、對應邊、對應角</b>。<br>對應邊一樣長，對應角一樣大。</p>`;
   }
+  return html;
+}
+function showReview() {
+  let html = `<div class="big-cat">${ico("book")}</div><h2>愛心用完了，先複習一下</h2>` + reviewBody();
   html += `<button class="btn" id="retryBtn">我懂了，重新開始這一關</button>
     <button class="btn ghost" id="toMenuBtn">回選單</button>`;
   showPanel(html, "wide");
@@ -1713,7 +1750,7 @@ function nextChalTask() {
     const keys = type === "both" ? ALL_KEYS.filter((k) => k !== "equi-acute") : ALL_KEYS;
     grid = { cols: 1, rows: 1 };
     measure();
-    const p = makePiece(makeTri(pick(LIB[pick(keys)]), 0.85 + Math.random() * 0.25), "q" + chal.n++, pick(COLORS));
+    const p = makePiece(makeTri(pick(LIB[pick(keys)]), 0.95 + Math.random() * 0.2), "q" + chal.n++, pick(COLORS));
     p.nx = Math.max(100, W - TOOL_W) / 2 / W;
     fitIn(p, 10, 50);
     pieces = [p];
@@ -1734,7 +1771,7 @@ function scaleTri(t, k) {
 function startPickTask() {
   const ang = pick(LIB[pick(ALL_KEYS.filter((k) => k !== "equi-acute"))]);
   const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => !sameAngles(a, ang));
-  const size = 0.8 + Math.random() * 0.15, bigger = Math.random() < 0.5;
+  const size = 0.85 + Math.random() * 0.15, bigger = Math.random() < 0.5;
   const colors = shuffle([...COLORS]);
   // 全等和大小不同的都用同一份形狀，只差旋轉和翻面，才轉得到一樣的方向
   const base = makeTri(ang, size);
@@ -1742,7 +1779,7 @@ function startPickTask() {
   target.target = true;
   const cands = shuffle([
     Object.assign(makePiece(base, "k1", colors[1]), { answer: true }),
-    Object.assign(makePiece(scaleTri(base, bigger ? 1.25 : 0.75), "k2", colors[2]), { why: bigger ? "比較大" : "比較小" }),
+    Object.assign(makePiece(scaleTri(base, bigger ? 1.2 : 0.8), "k2", colors[2]), { why: bigger ? "比較大" : "比較小" }),
     Object.assign(makePiece(makeTri(pick(others), size), "k3", colors[3]), { why: "形狀不一樣" }),
   ]);
   const ans = cands.find((p) => p.answer);
