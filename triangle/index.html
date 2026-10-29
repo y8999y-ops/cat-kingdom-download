@@ -104,6 +104,9 @@
   #progress .chal-bar { width: 180px; height: 14px; border-radius: 8px; background: #efe3d3; overflow: hidden; }
   #progress .chal-bar i { display: block; height: 100%; background: var(--accent); transition: width .2s linear; }
   /* 找對應的進度點：3 組 × 3 題 */
+  /* 第 4 關一輪結束，看完說明再按「下一輪」 */
+  #roundBtn { position: absolute; left: 0; right: 0; bottom: 12px; width: fit-content; margin: 0 auto; z-index: 4; }
+  #roundBtn[hidden] { display: none; }
   #progress { position: absolute; left: 12px; top: 8px; z-index: 3; display: flex; gap: 16px; pointer-events: none; }
   #progress .grp { display: flex; gap: 6px; }
   #progress .dot { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--line); background: var(--card); }
@@ -260,6 +263,7 @@
   <div id="board">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="handle"></g></svg>
     <div id="progress" aria-hidden="true"></div>
+    <button class="btn" id="roundBtn" hidden>下一輪</button>
     <div id="tools">
       <button id="rotL" aria-label="向左轉" disabled></button>
       <button id="rotR" aria-label="向右轉" disabled></button>
@@ -345,7 +349,7 @@ const sameAngles = (a, b) => { const x = sortNum(a), y = sortNum(b); return x.ev
 // 兩組角度最多差幾度（排序後比較）：差太少的兩個三角形看起來會像全等
 const angleGap = (a, b) => { const x = sortNum(a), y = sortNum(b); return Math.max(...x.map((v, i) => Math.abs(v - y[i]))); };
 const PERMS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
-const ALIGN_TOL = 0.09;   // 疊合門檻：頂點誤差小於邊長的 9%（12% 太寬鬆、7% 對小學生用手指太難，老師選 8～9%）
+const ALIGN_TOL = 0.08;   // 疊合門檻：頂點誤差小於邊長的 8%（12%、9% 太寬鬆，7% 對小學生用手指太難）
 const ALIGN_DEG = 3;      // 而且方向誤差不超過 3°
 
 // 用三個角和最長邊長度做出三角形（頂點以重心為原點）
@@ -456,6 +460,7 @@ function startPage(i) {
   lastAct = Date.now();
   $("#pageLabel").textContent = PAGES[i].title;
   $("#progress").innerHTML = "";
+  $("#roundBtn").hidden = true;
   renderHearts();
   buildBins();
   measure();
@@ -495,6 +500,7 @@ const L4_ROUNDS = 3;
 let l4 = null;
 function startL4Round() {
   selected = null;
+  $("#roundBtn").hidden = true;
   // 換新的一輪：清掉格子裡上一輪放的小圖，避免誤導學生
   for (const m of binsEl.querySelectorAll(".minis")) m.innerHTML = "";
   dealPieces(genSpecs(mode, false));
@@ -511,15 +517,14 @@ function roundOrFinish() {
     l4.round++;   // 進度點等下一輪開始時再更新
     playing = false;
     drawHandle();
-    // 先說明剩下的干擾題，再換下一輪
+    // 先說明剩下的干擾題，學生看完自己按「下一輪」（老師覺得自動跳太快，來不及看）
     const d = pieces.find((p) => p.distractor && p.state === "free");
     if (d) {
-      showMarks(d, mode, 6000);
-      flash(d, "pulse", 2900);
+      showMarks(d, mode, 600000);
+      flash(d, "pulse", 4300);
       say("這一輪分好了！還剩下一閃一閃的這一個：<br>" + d.reason, "good");
     }
-    const tok = pageToken;
-    setTimeout(() => { if (tok === pageToken) startL4Round(); }, d ? 2600 : 800);
+    $("#roundBtn").hidden = false;
     return;
   }
   finishPage();
@@ -555,7 +560,7 @@ function dealPieces(specs) {
   const availW = Math.max(100, W - TOOL_W);
   const best = bestGrid(n);
   const cols = best.c, rows = best.r;
-  grid = { cols, rows };
+  grid = { cols, rows, n };   // n：出題時的個數，轉方向時用來重新排列
   measure();
   const top = mode === "both" && !direct ? 40 : 10;   // 第 4 關左上角有進度點
   // 三角形很大，偶爾會碰到隔壁的：碰到就換位置重新排，最多試 30 次
@@ -1421,6 +1426,7 @@ function flashHint() {
   }
 }
 $("#hintBtn").addEventListener("click", giveHint);
+$("#roundBtn").addEventListener("click", () => { if (l4 && mode === "both" && !direct) startL4Round(); });
 // 30 秒沒有動作：練習直接閃提示；其他關卡只提醒可以按燈泡看複習小卡（不自動給答案）
 setInterval(() => {
   if (!playing || pageDone || challenge || Date.now() - lastAct < 30000) return;
@@ -1520,6 +1526,7 @@ function showHome() {
   layer.innerHTML = ""; binsEl.innerHTML = ""; pieces = []; selected = null;
   $("#pageLabel").textContent = "";
   $("#progress").innerHTML = "";
+  $("#roundBtn").hidden = true;
   $("#hearts").innerHTML = "";
   say("從第 1 關開始，或選一關。");
   const best = loadBest();
@@ -1532,7 +1539,7 @@ function showHome() {
   const open = challengeUnlocked();
   const chalNote = !open ? "第 1～5 關都拿到 3 顆星，就能挑戰"
     : best.challenge != null ? `最佳成績 ${best.challenge} 分` : "可以挑戰了！";
-  const chalBtn = `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 90 秒</b><span>${chalNote}</span></button>`;
+  const chalBtn = `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 60 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
   showPanel(`<h1 id="homeTitle">${ico("cat")} 疊疊看！三角形分類</h1>
     <div class="seat">座號：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
@@ -1696,10 +1703,10 @@ function onTitleTap() {
   $("#codeCancel").addEventListener("click", showHome);
 }
 
-// ================= 挑戰關：限時 90 秒，綜合題型 =================
+// ================= 挑戰關：限時 60 秒，綜合題型 =================
 // 題目一題接一題，輪流出現：以邊分類、以角分類、以邊和角分類、找全等、找對應。答對一題 1 分。
 // 3 顆愛心，答錯 3 次就結束；時間到時，剩幾顆愛心就再加幾分。
-const CHAL_SEC = 90;
+const CHAL_SEC = 60;
 const CHAL_TYPES = ["side", "angle", "both", "pick", "corr"];
 
 function makePiece(tri, id, color) {
@@ -1895,15 +1902,13 @@ new ResizeObserver(() => onResize()).observe(board);
 function onResize() {
   if (!pieces.length || (W === board.clientWidth && H === board.clientHeight)) return;
   W = board.clientWidth; H = board.clientHeight;
-  // 平板轉方向：如果現在最適合的排法（幾欄幾列）不一樣了，就重新排列，
-  // 三角形才不會為了維持原本的排法而變小
+  // 平板轉方向：如果「出題時的三角形個數」最適合的排法（幾欄幾列）不一樣了，就重新排列，
+  // 三角形才不會為了維持原本的排法而變小。
+  // 用出題時的個數（grid.n），不是現在剩下的個數：分類掉幾個以後有空位，三角形也不會突然變大（老師要求）。
   const act = pieces.filter((p) => p.state === "free" || p.state === "pair");
-  const best = bestGrid(act.length);
+  const best = bestGrid(grid.n || grid.cols * grid.rows);
   if (act.length && (best.c !== grid.cols || best.r !== grid.rows)) relayout(act, best);
-  else {
-    measure();
-    for (const p of act) clampIn(p);
-  }
+  else for (const p of act) clampIn(p);   // 其他大小變化（例如格子變高）：三角形大小不變，只拉回桌面內
   renderAll();
 }
 // n 個三角形，選格子最大的排法
@@ -1919,7 +1924,7 @@ function bestGrid(n) {
 // 把還在桌面上的三角形照新的排法重新擺好（保留方向和翻面）
 function relayout(act, best) {
   const availW = Math.max(100, W - TOOL_W);
-  grid = { cols: best.c, rows: best.r };
+  grid = { cols: best.c, rows: best.r, n: grid.n };
   measure();
   const side = mode === "corr" ? 52 : 10;
   const top = mode === "corr" ? 96 : challenge ? 50 : mode === "both" && !direct ? 40 : 10;
