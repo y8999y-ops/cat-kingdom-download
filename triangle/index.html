@@ -164,6 +164,30 @@
   table.result { margin: 10px auto; border-collapse: collapse; font-size: 23px; }
   table.result td, table.result th { padding: 6px 12px; border-bottom: 2px solid var(--line); }
   .note { font-size: 18px !important; color: var(--soft); }
+  /* 首頁選關 */
+  .panel.wide { max-width: 720px; }
+  .panel .pick { margin: 14px 0 4px; font-weight: bold; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .lvl {
+    border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 8px 6px; color: var(--ink);
+    box-shadow: 0 3px 0 var(--line); line-height: 1.3;
+  }
+  .lvl b { display: block; font-size: 21px; }
+  .lvl span { display: block; font-size: 16px; color: var(--soft); }
+  .lvl:active { transform: translateY(2px); box-shadow: none; background: #fff8e1; }
+  @media (max-width: 600px) {
+    .levels { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .panel.wide { padding: 16px 14px; }
+    .panel.wide h1 { font-size: 26px; }
+    .panel.wide .howto { font-size: 17px; line-height: 1.6; }
+    .panel.wide .btn { margin-top: 6px; }
+    .lvl { padding: 6px 4px; }
+    .lvl b { font-size: 19px; }
+    .lvl span { font-size: 14px; }
+    /* 手機上 ☰ 和 💡 縮小，留空間給小貓的對話 */
+    .icon-btn { width: 40px; height: 40px; font-size: 20px; }
+    .topbtns div { gap: 4px; }
+  }
 </style>
 </head>
 <body>
@@ -174,6 +198,7 @@
     <div class="topbtns">
       <div id="pageLabel"></div>
       <div>
+        <button class="icon-btn" id="menuBtn" aria-label="選關">☰</button>
         <button class="icon-btn" id="hintBtn" aria-label="提示">💡</button>
       </div>
     </div>
@@ -224,9 +249,10 @@ const COLORS = ["#ff8a80", "#ffb74d", "#ffd54f", "#aed581", "#4fc3f7", "#9575cd"
 const PAGES = [
   { mode: "side", direct: true, title: "第 1 關：用「邊」分類" },
   { mode: "angle", direct: true, title: "第 2 關：用「角」分類" },
+  { mode: "both", direct: true, title: "第 3 關：角和邊一起看" },
   { mode: "tutorial", title: "練習：疊疊看" },
-  { mode: "both", title: "第 3 關：疊疊看，再分類" },
-  { mode: "corr", title: "第 4 關：找對應" },
+  { mode: "both", title: "第 4 關：疊疊看，再分類" },
+  { mode: "corr", title: "第 5 關：找對應" },
 ];
 
 // ================= 小工具 =================
@@ -280,7 +306,10 @@ function genSpecs(mode, direct) {
     const two = (ks) => shuffle([...ks]).slice(0, 2);
     const keys = mode === "side"
       ? ["equi-acute", "equi-acute", ...two(["iso-acute", "iso-right", "iso-obtuse"]), ...two(["sca-acute", "sca-right", "sca-obtuse"])]
-      : [...two(["equi-acute", "iso-acute", "sca-acute"]), "iso-right", "sca-right", "iso-obtuse", "sca-obtuse"];
+      : mode === "angle"
+        ? [...two(["equi-acute", "iso-acute", "sca-acute"]), "iso-right", "sca-right", "iso-obtuse", "sca-obtuse"]
+        // 角和邊一起看：2×3 格子每格一個（沒有正三角形）
+        : ["iso-acute", "iso-right", "iso-obtuse", "sca-acute", "sca-right", "sca-obtuse"];
     const sizes = shuffle([0.85, 0.9, 0.95, 1.0, 1.1, 1.2]);
     const used = [];
     return keys.map((key, i) => {
@@ -321,11 +350,13 @@ let pageIdx = 0, pieces = [], mode = "tutorial", grid = { cols: 1, rows: 1 };
 let mistakes = 0, pageStart = 0, gameStart = 0, results = [], seatNo = "";
 let selected = null, playing = false, lastAct = 0, pageDone = false;
 let direct = false, replay = false, corr = null;
+let pageToken = 0;   // 換關或回選單時加 1，舊關卡的計時器就不會再跳出畫面
 let W = 0, H = 0, S = 60;
 const TOOL_W = 100;
 const svg = $("#svg"), layer = $("#layer"), board = $("#board"), binsEl = $("#bins");
 
 function startPage(i) {
+  pageToken++;
   pageIdx = i;
   mode = PAGES[i].mode;
   direct = !!PAGES[i].direct;
@@ -395,6 +426,8 @@ function startPage(i) {
     say("把每個三角形<b>拖到下面</b>正確的籃子。看<b>邊</b>：有幾條邊一樣長？");
   } else if (mode === "angle") {
     say("這一關看<b>角</b>：有沒有直角？有沒有比直角大的角？把三角形拖到正確的籃子。");
+  } else if (direct) {
+    say("這一關<b>角</b>和<b>邊</b>要一起看：把每個三角形拖進正確的格子。");
   } else {
     say("把<b>全等</b>的兩個三角形疊在一起，再看<b>角</b>和<b>邊</b>，放進正確的格子。");
   }
@@ -729,7 +762,8 @@ function doMatch(p, t) {
   lastAct = Date.now();
   if (mode === "tutorial") {
     say("完全疊合，變透明了！✨ 形狀和大小都一樣，可以完全疊在一起，就是<b>全等</b>。", "good");
-    setTimeout(finishPage, 1800);
+    const tok = pageToken;
+    setTimeout(() => { if (tok === pageToken) finishPage(); }, 1800);
   } else {
     say("完全疊合！✨ 它們是全等三角形。把這一組<b>拖到下面</b>正確的籃子裡。", "good");
   }
@@ -851,7 +885,9 @@ function answerCorr(p, tap) {
     const same = wantSide ? "對應邊一樣長。" : q.kind === "point" ? "疊合時這兩個點會疊在一起。" : "對應角一樣大。";
     const end = corr.q < 3 ? "" : corr.round + 1 < CORR_ROUNDS ? "<br>這一組都找到了！換下一組。" : "";
     say(`答對了！${corrName(a, q.kind, q.i)} 的${CORR_WORD[q.kind]}是 <b>${corrName(b, q.kind, want)}</b>，${same}${end}`, "good");
+    const tok = pageToken;
     setTimeout(() => {
+      if (tok !== pageToken) return;
       corr.busy = false;
       if (corr.q < 3) askCorr();
       else if (corr.round + 1 < CORR_ROUNDS) { corr.round++; startCorrRound(); }
@@ -1126,7 +1162,9 @@ function finishPage() {
     extra = `<p>剩下的那個三角形：${d.reason}</p>`;
   }
   const last = pageIdx === PAGES.length - 1;
+  const tok = pageToken;
   setTimeout(() => {
+    if (tok !== pageToken) return;
     if (mode === "tutorial") {
       showPanel(`<div class="big-cat">😺</div><h2>練習完成！</h2>
         <p>兩個三角形經過<b>滑動、旋轉、翻面</b>以後，可以<b>完全疊合</b>，它們就是<b>全等</b>。</p>
@@ -1136,8 +1174,11 @@ function finishPage() {
       showPanel(`<div class="big-cat">😸</div><h2>${PAGES[pageIdx].title.split("：")[0]} 完成！</h2>
         <div class="stars">${starHtml(stars)}</div>
         <p>錯誤 ${mistakes} 次・用了 ${fmtTime(time)}</p>${extra}
-        <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>`);
+        <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>
+        <button class="btn ghost" id="toMenuBtn">回選單</button>`);
     }
+    const toMenu = $("#toMenuBtn");
+    if (toMenu) toMenu.addEventListener("click", showHome);
     $("#nextBtn").addEventListener("click", () => {
       hidePanel();
       if (last) return showFinal();
@@ -1148,7 +1189,7 @@ function finishPage() {
   }, d ? 3200 : 1400);
 }
 
-function showPanel(html) { playing = false; drawHandle(); $("#panel").innerHTML = html; $("#overlay").classList.add("show"); }
+function showPanel(html, cls) { playing = false; drawHandle(); $("#panel").className = "panel" + (cls ? " " + cls : ""); $("#panel").innerHTML = html; $("#overlay").classList.add("show"); }
 function hidePanel() { $("#overlay").classList.remove("show"); }
 
 function showFinal() {
@@ -1157,44 +1198,63 @@ function showFinal() {
   const rows = results.map((r) => `<tr><td>${r.title.split("：")[0]}</td><td>${starHtml(r.stars)}</td><td>錯 ${r.mistakes} 次</td></tr>`).join("");
   const max = results.length * 3;
   const msg = allStars >= max - 1 ? "太厲害了！你是三角形大師！" : allStars >= max * 0.66 ? "很棒！分類、全等和對應都學會了！" : "完成了！再玩一次會更熟練喔！";
-  showPanel(`<div class="big-cat">🏆</div><h1>全部完成！</h1>
+  const all = results.length === PAGES.filter((p) => p.mode !== "tutorial").length;
+  showPanel(`<div class="big-cat">🏆</div><h1>${all ? "全部完成！" : "完成了！"}</h1>
     ${seatNo ? `<p><b>座號 ${escapeHtml(seatNo)}</b></p>` : ""}
     <table class="result">${rows}</table>
     <p>總共 ${allStars} 顆星・${fmtTime(total)}</p>
     <p>${msg}</p>
     <button class="btn" id="againBtn">再玩一次</button>
-    <button class="btn ghost" id="homeBtn">回首頁</button>
+    <button class="btn ghost" id="homeBtn">回選單</button>
     <p class="note">每次的題目都不一樣，可以多挑戰幾次！</p>`);
   $("#againBtn").addEventListener("click", () => { hidePanel(); results = []; gameStart = Date.now(); replay = true; startPage(0); });
   $("#homeBtn").addEventListener("click", showHome);
 }
 function escapeHtml(s) { return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
+// 首頁兼選關：可以從第 1 關開始，也可以直接選一關，玩完會接著下一關
 function showHome() {
-  layer.innerHTML = ""; binsEl.innerHTML = ""; pieces = [];
+  pageToken++;
+  layer.innerHTML = ""; binsEl.innerHTML = ""; pieces = []; selected = null;
   $("#pageLabel").textContent = "";
   say("一起來疊疊看！");
-  showPanel(`<div class="big-cat">🐱📐</div>
-    <h1>疊疊看！三角形分類</h1>
+  const levels = PAGES.map((pg, i) => {
+    const [num, name] = pg.title.split("：");
+    return `<button class="lvl" data-i="${i}"><b>${num}</b><span>${name}</span></button>`;
+  }).join("");
+  showPanel(`<h1>🐱📐 疊疊看！三角形分類</h1>
     <div class="howto">
-      🧺 第 1、2 關：把三角形拖進正確的<b>分類籃</b><br>
-      ✨ 第 3 關：<b>全等</b>的疊上去會變透明，再分類<br>
-      🔤 第 4 關：找<b>對應點、對應邊、對應角</b><br>
-      ↻ <b>旋轉</b>：拖<b>橘色圓圈</b>、兩指轉或按按鈕<br>
-      ⇋ <b>翻面</b>：把三角形翻過來
+      🧺 第 1～3 關：把三角形拖進正確的<b>分類籃</b><br>
+      ✨ 第 4 關：<b>全等</b>的疊上去會變透明，再分類<br>
+      🔤 第 5 關：找<b>對應點、對應邊、對應角</b>
     </div>
     <div class="seat">座號（可不填）：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
-    <button class="btn" id="startBtn">開始</button>
-    <p class="note">約 10～12 分鐘・4 關</p>`);
-  $("#startBtn").addEventListener("click", () => {
+    <button class="btn" id="startBtn">從第 1 關開始</button>
+    <p class="pick">或選一關：</p>
+    <div class="levels">${levels}</div>
+    <p class="note">全部約 12 分鐘・旋轉：拖橘色圓圈、兩指轉或按按鈕</p>`, "wide");
+  const go = (i) => {
     seatNo = $("#seatInput").value.trim();
     replay = false;
     hidePanel();
     results = [];
     gameStart = Date.now();
-    startPage(0);
-  });
+    startPage(i);
+  };
+  $("#startBtn").addEventListener("click", () => go(0));
+  for (const b of document.querySelectorAll(".lvl")) b.addEventListener("click", () => go(+b.dataset.i));
 }
+
+// 遊戲中按 ☰：先確認，避免學生不小心按到
+$("#menuBtn").addEventListener("click", () => {
+  if (!playing || pageDone) return;   // 關卡完成時，完成畫面本身就有「回選單」
+  showPanel(`<div class="big-cat">🐱</div><h2>要回到選關畫面嗎？</h2>
+    <p>這一關還沒完成的部分會不見喔。</p>
+    <button class="btn" id="keepBtn">繼續玩</button>
+    <button class="btn ghost" id="leaveBtn">回選單</button>`);
+  $("#keepBtn").addEventListener("click", () => { hidePanel(); playing = true; lastAct = Date.now(); drawHandle(); });
+  $("#leaveBtn").addEventListener("click", showHome);
+});
 
 // ================= 其他 =================
 new ResizeObserver(() => onResize()).observe(board);
