@@ -32,7 +32,7 @@
     padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 18px);   /* 畫面四周留白，看起來不會太靠邊 */
   }
 
-  /* ---------- 上方：小貓和對話 ---------- */
+  /* ---------- 上方：小猴子和對話 ---------- */
   #top { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
   #cat { font-size: 56px; line-height: 1; flex: none; transition: transform .2s; }
   #cat.bounce { animation: bounce .5s; }
@@ -178,7 +178,8 @@
   /* 圖示：同一種線條風格 */
   .ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.16em; }
   .ico .f { fill: currentColor; stroke: none; }
-  .ico .cat-head { fill: #ffcc80; }
+  .ico .monkey-fur { fill: #c8945c; }
+  .ico .monkey-face { fill: #ffe0b2; }
   #cat .ico { display: block; color: var(--ink); }
   .ico.star { color: #ffb300; }
   .ico.star.off { color: #e3d7cc; }   /* 灰色星星是全域樣式，成績表才會正確 */
@@ -232,7 +233,7 @@
     .lvl { padding: 6px 4px; }
     .lvl b { font-size: 19px; }
     .lvl span { font-size: 14px; }
-    /* 手機上選單和提示按鈕縮小，留空間給小貓的對話 */
+    /* 手機上選單和提示按鈕縮小，留空間給小猴子的對話 */
     #app { padding: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 6px); }
     .icon-btn { width: 40px; height: 40px; font-size: 20px; }
     .topbtns div { gap: 4px; }
@@ -281,12 +282,12 @@
 // ================= 題庫：三個角的度數 =================
 const LIB = {
   "equi-acute": [[60, 60, 60]],
-  "iso-acute":  [[40, 70, 70], [50, 65, 65], [80, 50, 50], [30, 75, 75]],
+  "iso-acute":  [[40, 70, 70], [50, 65, 65], [30, 75, 75]],   // 銳角最大不超過 75°，和直角差得夠多
   "iso-right":  [[90, 45, 45]],
   "iso-obtuse": [[110, 35, 35], [120, 30, 30], [116, 32, 32]],   // 不放 130° 那種很扁的，手指才不會整個蓋住
-  "sca-acute":  [[50, 60, 70], [45, 65, 70], [40, 65, 75], [55, 48, 77]],
+  "sca-acute":  [[50, 60, 70], [40, 65, 75], [45, 60, 75]],   // 不等邊：三個角兩兩至少差 10°，邊才不會看起來一樣長
   "sca-right":  [[90, 30, 60], [90, 35, 55], [90, 25, 65]],
-  "sca-obtuse": [[110, 40, 30], [120, 35, 25], [105, 45, 30], [115, 35, 30], [112, 43, 25]],
+  "sca-obtuse": [[110, 40, 30], [120, 35, 25], [105, 45, 30], [115, 40, 25]],
 };
 const ALL_KEYS = Object.keys(LIB);
 const NAME_ANGLE = { acute: "銳角三角形", right: "直角三角形", obtuse: "鈍角三角形" };
@@ -308,7 +309,7 @@ const COLORS = ["#ff8a80", "#ffb74d", "#ffd54f", "#aed581", "#4fc3f7", "#9575cd"
 // ================= 圖示：同一種線條風格（24×24、圓角線條），不用 emoji =================
 // 平板和電腦的 emoji 長得不一樣，所以全部用自己畫的 SVG；.f 是填色的部分
 const ICONS = {
-  cat: `<path class="cat-head" d="M4 10.5V3.5l4.5 3.5h7L20 3.5v7a8 8 0 0 1-16 0z"/><circle class="f" cx="9" cy="12" r="1.2"/><circle class="f" cx="15" cy="12" r="1.2"/><path d="M10.8 15.2l1.2 1 1.2-1M2.5 13.5l4 .6M2.5 16.4l4-.6M21.5 13.5l-4 .6M21.5 16.4l-4-.6"/>`,
+  monkey: `<circle class="monkey-fur" cx="4.3" cy="11.6" r="2.8"/><circle class="monkey-fur" cx="19.7" cy="11.6" r="2.8"/><circle class="monkey-face" cx="3.9" cy="11.6" r="1.1"/><circle class="monkey-face" cx="20.1" cy="11.6" r="1.1"/><circle class="monkey-fur" cx="12" cy="12" r="8"/><path class="monkey-face" d="M12 9.6c-1.1-1.6-5.2-1.6-5.2 1.4 0 .8.3 1.4.7 1.9-.6.6-1 1.4-1 2.3 0 2.4 2.5 3.8 5.5 3.8s5.5-1.4 5.5-3.8c0-.9-.4-1.7-1-2.3.4-.5.7-1.1.7-1.9 0-3-4.1-3-5.2-1.4z"/><circle class="f" cx="9.7" cy="11.5" r="1.1"/><circle class="f" cx="14.3" cy="11.5" r="1.1"/><path d="M11 14.5h.01M13 14.5h.01M10.2 16.4c1.1.8 2.5.8 3.6 0M10.8 4.5c.5-1 1.5-1.3 2.4-.9"/>`,
   bulb: `<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>`,
   menu: `<path d="M4 6h16M4 12h16M4 18h16"/>`,
   rotL: `<path d="M4 4v6h6"/><path d="M5.6 15a7 7 0 1 0 1.6-7.4L4 10"/>`,
@@ -415,7 +416,7 @@ function genSpecs(mode, direct) {
     });
     // 干擾題：看起來很像，但不全等
     const base = pick(specs);
-    const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)) && angleGap(a, base.angles) >= 15);   // 角度要差得夠多，看起來才不會像全等
+    const alt = LIB[base.key].filter((a) => !used.some((u) => sameAngles(u, a)) && angleGap(a, base.angles) >= 20);   // 角度要差得夠多，看起來才不會像全等
     let d;
     if (Math.random() < 0.5 || !alt.length) {
       const bigger = base.size <= 1.05;   // 大的放大、小的縮小，干擾題才不會太大或太小
@@ -426,9 +427,9 @@ function genSpecs(mode, direct) {
             reason: "它和其中一組大小差不多，但是角的大小不一樣，所以沒有和它全等的三角形。" };
     }
     const clash = specs.some((s) => sameAngles(s.angles, d.angles) && Math.abs(s.size - d.size) < 0.05);
-    // 同一輪裡，不同形狀之間的角度至少要差 15°，不然學生會以為有三個全等、怎麼疊都疊不起來
+    // 同一輪裡，不同形狀之間的角度至少要差 20°，不然學生會以為有三個全等、怎麼疊都疊不起來
     const all = [...specs, d];
-    const look = all.some((s, i) => all.some((t, j) => j > i && !sameAngles(s.angles, t.angles) && angleGap(s.angles, t.angles) < 15));
+    const look = all.some((s, i) => all.some((t, j) => j > i && !sameAngles(s.angles, t.angles) && angleGap(s.angles, t.angles) < 20));
     last = all;
     if (!clash && !look) return all;
   }
@@ -1472,12 +1473,12 @@ function finishPage() {
   setTimeout(() => {
     if (tok !== pageToken) return;
     if (mode === "tutorial") {
-      showPanel(`<div class="big-cat">${ico("cat")}</div><h2>練習完成！</h2>
+      showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>練習完成！</h2>
         <p>一個三角形經過<b>移動、旋轉、翻面</b>，如果能和另一個<b>完全疊合</b>，這兩個三角形就是<b>全等三角形</b>。</p>
         <p>下一關：先疊合，再分類。</p>
         <button class="btn" id="nextBtn">開始${PAGES[pageIdx + 1].title.split("：")[0]}</button>`);
     } else {
-      showPanel(`<div class="big-cat">${ico("cat")}</div><h2>${PAGES[pageIdx].title.split("：")[0]} 完成！</h2>
+      showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>${PAGES[pageIdx].title.split("：")[0]} 完成！</h2>
         <div class="stars">${starHtml(stars)}</div>
         <p>錯誤 ${mistakes} 次・用了 ${fmtTime(time)}</p>${extra}
         <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>
@@ -1541,7 +1542,7 @@ function showHome() {
     : best.challenge != null ? `最佳成績 ${best.challenge} 分` : "可以挑戰了！";
   const chalBtn = `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 60 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
-  showPanel(`<h1 id="homeTitle">${ico("cat")} 疊疊看！三角形分類</h1>
+  showPanel(`<h1 id="homeTitle">${ico("monkey")} 疊疊看！三角形分類</h1>
     <div class="seat">座號：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}"></div>
     <button class="btn" id="startBtn">從第 1 關開始</button>
     <button class="btn ghost" id="scoreBtn">${ico("trophy")} 看成績</button>
@@ -1786,7 +1787,7 @@ function scaleTri(t, k) {
 // 不是點一下就判斷：要把候選的三角形拖過去疊在虛線框上（可以轉、翻），疊合了才算對（pickDrop()）
 function startPickTask() {
   const ang = pick(LIB[pick(ALL_KEYS.filter((k) => k !== "equi-acute"))]);
-  const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => angleGap(a, ang) >= 15);   // 形狀要明顯不同
+  const others = ALL_KEYS.flatMap((k) => LIB[k]).filter((a) => angleGap(a, ang) >= 20);   // 形狀要明顯不同
   const size = 0.85 + Math.random() * 0.15, bigger = Math.random() < 0.5;
   const colors = shuffle([...COLORS]);
   // 全等和大小不同的都用同一份形狀，只差旋轉和翻面，才轉得到一樣的方向
@@ -1889,7 +1890,7 @@ function showScores() {
 // 遊戲中按選單按鈕：先確認，避免學生不小心按到
 $("#menuBtn").addEventListener("click", () => {
   if (!playing || pageDone) return;   // 關卡完成時，完成畫面本身就有「回選單」
-  showPanel(`<div class="big-cat">${ico("cat")}</div><h2>要回到選關畫面嗎？</h2>
+  showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>要回到選關畫面嗎？</h2>
     <p>這一關還沒做完的部分不會保留。</p>
     <button class="btn" id="keepBtn">繼續玩</button>
     <button class="btn ghost" id="leaveBtn">回選單</button>`);
@@ -1939,7 +1940,7 @@ document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("dblclick", (e) => e.preventDefault());
 
 // 放上圖示
-$("#cat").innerHTML = ico("cat");
+$("#cat").innerHTML = ico("monkey");
 $("#menuBtn").innerHTML = ico("menu");
 $("#hintBtn").innerHTML = ico("bulb");
 $("#rotL").innerHTML = ico("rotL") + "<span>左轉</span>";
