@@ -84,8 +84,8 @@
   }
   .topbtns div { display: flex; gap: 6px; }
   .icon-btn {
-    width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--line); background: var(--card);   /* 老師要圖示大一點 */
-    font-size: 33px; display: grid; place-items: center; padding: 0;
+    width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--line); background: var(--card);   /* 圓形按鈕維持最一開始的大小（老師喜歡） */
+    font-size: 28px; display: grid; place-items: center; padding: 0;
   }
   .icon-btn:active { transform: translateY(2px); background: #fff8e1; }
   /* 平板直放：右上角四顆按鈕排成 2×2，對話框才夠寬（圖示放大以後，一排太佔位置） */
@@ -161,13 +161,10 @@
 
   /* 右側工具列 */
   #tools {
-    position: absolute; right: 10px; top: calc(50% + 27px); transform: translateY(-50%);   /* 上面留給放大縮小 */ z-index: 3;
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 3;
     display: flex; flex-direction: column; gap: 6px;
   }
   /* 放大縮小：桌面右上角、工具列上面（以前在最上面一排，老師要對話框長一點，所以移到這裡） */
-  #zoomBox { position: absolute; right: 6px; top: 2px; z-index: 3; display: flex; gap: 6px; }
-  #zoomBox .icon-btn { width: 44px; height: 44px; font-size: 24px; }   /* 兩顆加起來不超過右邊工具列的寬度 */
-  @media (max-width: 600px) { #zoomBox .icon-btn { width: 36px; height: 36px; font-size: 19px; } #zoomBox { gap: 4px; } }
   /* 最多 5 個按鈕（左轉、右轉、翻面、直角尺、做記號），桌面最矮約 340px 也放得下 */
   #tools button {
     width: 62px; height: 60px; border-radius: 16px; border: 3px solid var(--line); background: var(--card);
@@ -280,6 +277,23 @@
   .ico .acc-pom { fill: #ffeb3b; stroke: #4e342e; stroke-width: .5; }
   .ico .acc-crown { fill: #ffca28; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
   .ico .acc-gem { fill: #e53935; stroke: none; }
+  /* 龍角、龍鬚、眼睛、嘴巴的各種樣子 */
+  .ico .dg-hn-o { fill: none; stroke: #4e342e; stroke-width: 2.4; stroke-linecap: round; }
+  .ico .dg-hn-i { fill: none; stroke-width: 1.1; stroke-linecap: round; }
+  .ico .dg-hn { fill: none; stroke: #ff8f00; stroke-width: 1.4; stroke-linecap: round; }
+  .ico .dg-crys { fill: #80deea; stroke: #006064; stroke-width: .7; stroke-linejoin: round; }
+  .ico .dg-wh { fill: none; stroke: #4e342e; stroke-width: .75; stroke-linecap: round; }
+  .ico .dg-beard { fill: #fff3c4; stroke: #4e342e; stroke-width: .7; }
+  .ico .dg-eline { fill: none; stroke-width: 1.3; }
+  .ico .dg-eye-star { fill: #ffb300; stroke: #4e342e; stroke-width: .5; stroke-linejoin: round; }
+  .ico .dg-eye-heart { fill: #e91e63; stroke: #4e342e; stroke-width: .4; }
+  .ico .dg-tongue { fill: #ef5350; stroke: #4e342e; stroke-width: .5; }
+  .ico .dg-fang { fill: #fff; stroke: #4e342e; stroke-width: .4; }
+  .ico .acc-flower circle { fill: #f48fb1; stroke: #4e342e; stroke-width: .5; }
+  .ico .acc-shades { fill: #263238; stroke: #000; stroke-width: .6; }
+  .ico .acc-phone-b { fill: none; stroke: #5c6bc0; stroke-width: 1.3; }
+  .ico .acc-phone { fill: #5c6bc0; stroke: #283593; stroke-width: .6; }
+  .ico .acc-wiz { fill: #7e57c2; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
   #cat .ico { display: block; color: var(--ink); }
   .ico.star { color: #ffb300; }
   .ico.star.off { color: #e3d7cc; }   /* 灰色星星是全域樣式，成績表才會正確 */
@@ -360,6 +374,10 @@
   .panel .big-score { font-size: 60px; font-weight: bold; color: var(--accent); margin: 0; line-height: 1.1; }
   @media (max-width: 600px) {
     .levels { gap: 8px; }
+    .panel h2 { font-size: 28px; margin: 0 0 4px; }
+    .shop-top .big-cat { font-size: 64px; }
+    .shop-item > .ico.dragon { font-size: 48px; }
+    .shop-tabs { margin: 2px 0 6px; }
     .levels .lvl { flex-basis: calc((100% - 8px) / 2); }
     .panel.wide { padding: 16px 14px; }
     .panel.wide h1 { font-size: 26px; }
@@ -411,8 +429,8 @@
   .shop-top { display: flex; align-items: center; justify-content: center; gap: 16px; }
   .shop-top .big-cat { font-size: 96px; }
   .shop-top p { margin: 0; }
-  .shop-tabs { display: flex; justify-content: center; gap: 8px; margin: 6px 0 10px; }
-  .shop-tabs .tab { border: 3px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 22px; font-size: 20px; color: var(--soft); }
+  .shop-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 6px 0 10px; }
+  .shop-tabs .tab { border: 3px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 16px; font-size: 19px; color: var(--soft); }
   .shop-tabs .tab.on { border-color: var(--accent); background: var(--accent); color: #fff; }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
   .shop-item { border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 4px; color: var(--ink); box-shadow: 0 3px 0 var(--line); }
@@ -437,17 +455,15 @@
   .jar-box { display: inline-block; }
   .jar-box.gulp { animation: gulp .35s ease-out; }
   @keyframes gulp { 40% { transform: scale(1.18) rotate(-6deg); } }
-  /* ---------- 筆電這種又寬又矮的螢幕（老師用 Acer 觸控筆電）：格子放在桌面右邊，桌面才夠高 ---------- */
-  @media (min-width: 1000px) and (max-height: 780px) and (min-aspect-ratio: 3/2) {
-    #app { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 32%); grid-template-rows: auto minmax(0, 1fr); column-gap: 14px; }
-    #top { grid-column: 1 / -1; }
-    #board { grid-column: 1; grid-row: 2; }
-    #bins { grid-column: 2; grid-row: 2; align-content: center; padding: 0 0 6px; }
-    #app.nobins #board { grid-column: 1 / -1; }
-    #say { height: 112px; font-size: clamp(19px, 1.8vw, 24px); }
-    #cat { font-size: 84px; }
-    .bin { min-height: 96px; }
-    #bins.both .bin { min-height: 78px; }
+  /* ---------- 筆電這種比較矮的螢幕（老師用 Acer 觸控筆電，約 1280×610～1536×740） ----------
+     格子還是放在下面（老師喜歡往下分類；第 18 次試過放右邊，老師不喜歡），上面的對話框、小龍和下面的格子變矮一點，桌面才夠高 */
+  @media (min-width: 1000px) and (max-height: 780px) {
+    #top { padding: 4px 12px; }
+    #say { height: 100px; font-size: clamp(18px, 1.7vw, 23px); }
+    #cat { font-size: 76px; }
+    #bins { gap: 6px; padding-top: 6px; }
+    .bin { min-height: 74px; padding: 3px 6px; }
+    #bins.both .bin { min-height: 54px; }
     #bins.both .bin b { font-size: 17px; }
     .bin b { font-size: 21px; }
     .bin small { font-size: 15px; }
@@ -460,6 +476,10 @@
     .jar-row .jar { width: 38px; height: 44px; }
     .lvl { padding: 5px 6px; }
     .levels { gap: 8px; }
+    .panel h2 { font-size: 28px; margin: 0 0 4px; }
+    .shop-top .big-cat { font-size: 64px; }
+    .shop-item > .ico.dragon { font-size: 48px; }
+    .shop-tabs { margin: 2px 0 6px; }
   }
 </style>
 </head>
@@ -472,6 +492,8 @@
       <div id="pageLabel"></div>
       <div id="hearts" aria-label="愛心"></div>
       <div>
+        <button class="icon-btn" id="zoomOut" aria-label="縮小"></button>
+        <button class="icon-btn" id="zoomIn" aria-label="放大"></button>
         <button class="icon-btn" id="menuBtn" aria-label="選關"></button>
         <button class="icon-btn" id="hintBtn" aria-label="提示"></button>
       </div>
@@ -481,7 +503,7 @@
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g><g id="guide"></g></svg>
     <div id="progress" aria-hidden="true"></div>
     <div id="combo" aria-live="polite"></div>
-    <div id="zoomBox"><button class="icon-btn" id="zoomOut" aria-label="縮小"></button><button class="icon-btn" id="zoomIn" aria-label="放大"></button></div>
+
     <div id="tools">
       <button id="rotL" aria-label="向左轉" disabled></button>
       <button id="rotR" aria-label="向右轉" disabled></button>
@@ -551,49 +573,91 @@ const ICONS = {
   book: `<path d="M3 5.5c3-1.3 6-1.3 9 .5v14c-3-1.8-6-1.8-9-.5zM21 5.5c-3-1.3-6-1.3-9 .5v14c3-1.8 6-1.8 9-.5z"/>`,
 };
 function ico(name, cls = "") { return `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`; }
-// ================= 小龍：顏色、配件、表情（老師要求：不要牛角、會眨眼、有不同表情、可以用星星變裝） =================
-// 頭頂一排小刺、後面一條捲捲的小尾巴（最像龍的地方），沒有角和翅膀（以前像牛角、像蝙蝠）。
-// 表情：平常（會眨眼）、開心（答對：眼睛彎彎、張嘴笑）、想一想（答錯：嘴巴圓圓、冒一滴汗）。
-const DG_COLORS = [
-  { id: "yellow", name: "黃色", c: "#ffd54f", c2: "#fff3c4", price: 0 },
-  { id: "green", name: "綠色", c: "#aed581", c2: "#f1f8e9", price: 5 },
-  { id: "blue", name: "藍色", c: "#81d4fa", c2: "#e1f5fe", price: 5 },
-  { id: "pink", name: "粉紅色", c: "#f8bbd0", c2: "#fff0f5", price: 5 },
-  { id: "purple", name: "紫色", c: "#ce93d8", c2: "#f3e5f5", price: 8 },
-  { id: "orange", name: "橘色", c: "#ffb74d", c2: "#fff3e0", price: 8 },
-];
-const DG_ACCS = [
-  { id: "none", name: "不戴", price: 0, svg: "" },
-  { id: "glasses", name: "眼鏡", price: 0, svg: `<g class="acc-glass"><circle cx="9.1" cy="11" r="2.8"/><circle cx="14.9" cy="11" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>` },
-  { id: "band", name: "頭帶", price: 0, svg: `<path class="acc-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="acc-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>` },
-  { id: "bow", name: "蝴蝶結", price: 6, svg: `<path class="acc-bow" d="M16 5.6l-2.8-1.9v3.8zM16 5.6l2.8-1.9v3.8z"/><circle class="acc-bow" cx="16" cy="5.6" r=".9"/>` },
-  { id: "scarf", name: "圍巾", price: 6, svg: `<path class="acc-scarf" d="M5.4 17.4c4.2 2.5 9 2.5 13.2 0l.5 1.8c-4.4 2.7-9.8 2.7-14.2 0zM15.4 19.3l1.1 3.4 1.8-.7-.9-3.4z"/>` },
-  { id: "hat", name: "派對帽", price: 8, svg: `<path class="acc-hat" d="M12 .4L8.8 6.6h6.4z"/><path class="acc-hat2" d="M10.2 3.9h3.6M9.4 5.4h5.2"/><circle class="acc-pom" cx="12" cy=".7" r=".9"/>` },
-  { id: "crown", name: "皇冠", price: 12, svg: `<path class="acc-crown" d="M8.4 6.8l.5-3.6 1.8 1.8 1.3-2.7 1.3 2.7 1.8-1.8.5 3.6z"/><circle class="acc-gem" cx="12" cy="5.4" r=".7"/>` },
-];
-function dragonSvg(colorId, accId, mood) {
-  const col = DG_COLORS.find((c) => c.id === colorId) || DG_COLORS[0];
-  const acc = DG_ACCS.find((a) => a.id === accId) || DG_ACCS[0];
+// ================= 小龍：可以變裝（顏色、龍角、龍鬚、眼睛、表情、配件） =================
+// 老師要求：要有明顯的龍角和龍鬚（第 18 次沒有角，老師說像小蛇）；會眨眼、有不同表情；變裝用星星買，學生喜歡的比較貴。
+// 每一種都有一個免費的預設。表情（開心、想一想）會暫時蓋過眼睛和嘴巴。
+const DG_PARTS = {
+  color: { name: "顏色", items: [
+    { id: "yellow", name: "黃色", price: 0, c: "#ffd54f", c2: "#fff3c4" },
+    { id: "green", name: "綠色", price: 15, c: "#aed581", c2: "#f1f8e9" },
+    { id: "orange", name: "橘色", price: 15, c: "#ffb74d", c2: "#fff3e0" },
+    { id: "blue", name: "藍色", price: 20, c: "#81d4fa", c2: "#e1f5fe" },
+    { id: "red", name: "紅色", price: 25, c: "#ef9a9a", c2: "#ffebee" },
+    { id: "pink", name: "粉紅色", price: 30, c: "#f8bbd0", c2: "#fff0f5" },
+    { id: "purple", name: "紫色", price: 30, c: "#ce93d8", c2: "#f3e5f5" },
+    { id: "gold", name: "金色", price: 45, c: "#ffca28", c2: "#fff8e1", shine: true },
+  ] },
+  horn: { name: "龍角", items: [
+    { id: "antler", name: "龍角", price: 0, svg: hornSvg("#fff3c4") },
+    { id: "spiral", name: "捲捲角", price: 15, svg: `<path class="dg-hn" d="M8 7.2C6.4 6 6 3.9 7.4 2.8c1.2-.9 2.6.2 2 1.4-.4.8-1.4.6-1.3-.1"/><path class="dg-hn" d="M16 7.2c1.6-1.2 2-3.3.6-4.4-1.2-.9-2.6.2-2 1.4.4.8 1.4.6 1.3-.1"/>` },
+    { id: "goldhorn", name: "金色龍角", price: 30, svg: hornSvg("#ffca28") },
+    { id: "crystal", name: "水晶角", price: 35, svg: `<path class="dg-crys" d="M8.6 6.9L6.8 1.6l3.3 4.2zM15.4 6.9l1.8-5.3-3.3 4.2z"/><path d="M7.6 3.4l.8 2.2M16.4 3.4l-.8 2.2" stroke="#fff" stroke-width=".5"/>` },
+  ] },
+  whisk: { name: "龍鬚", items: [
+    { id: "long", name: "長龍鬚", price: 0, svg: `<path class="dg-wh" d="M8.4 15.4c-2.6-.4-4.6.6-6.2 2.8M8.6 16.4c-2 .4-3.3 1.6-4 3.4M15.6 15.4c2.6-.4 4.6.6 6.2 2.8M15.4 16.4c2 .4 3.3 1.6 4 3.4"/>` },
+    { id: "curly", name: "捲捲鬚", price: 15, svg: `<path class="dg-wh" d="M8.4 15.6c-2.8-.2-4.4 1.4-4.2 3.2.1 1.2 1.6 1.4 1.9.4.2-.7-.6-1-.9-.5M15.6 15.6c2.8-.2 4.4 1.4 4.2 3.2-.1 1.2-1.6 1.4-1.9.4-.2-.7.6-1 .9-.5"/>` },
+    { id: "beard", name: "大鬍子", price: 20, svg: `<path class="dg-beard" d="M9.4 19.4c.6 2.4 1.6 3.6 2.6 3.6s2-1.2 2.6-3.6c-1.7.6-3.5.6-5.2 0z"/><path class="dg-wh" d="M8.4 15.4c-2.6-.4-4.6.6-6.2 2.8M15.6 15.4c2.6-.4 4.6.6 6.2 2.8"/>` },
+    { id: "nowhisk", name: "不要鬍鬚", price: 0, svg: "" },
+  ] },
+  eyes: { name: "眼睛", items: [
+    { id: "round", name: "圓眼睛", price: 0, svg: `<circle class="f" cx="9.1" cy="11" r="1.75"/><circle class="f" cx="14.9" cy="11" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.4" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.4" r=".6"/>` },
+    { id: "sleepy", name: "瞇瞇眼", price: 10, svg: `<path class="dg-eline" d="M7.6 11.2c.9.9 2.1.9 3 0M13.4 11.2c.9.9 2.1.9 3 0"/>` },
+    { id: "staryes", name: "星星眼", price: 25, svg: `<path class="dg-eye-star" d="M9.1 8.9l.6 1.3 1.4.2-1 1 .2 1.4-1.2-.7-1.2.7.2-1.4-1-1 1.4-.2zM14.9 8.9l.6 1.3 1.4.2-1 1 .2 1.4-1.2-.7-1.2.7.2-1.4-1-1 1.4-.2z"/>` },
+    { id: "hearteyes", name: "愛心眼", price: 25, svg: `<path class="dg-eye-heart" d="M9.1 12.6s-2-1.2-2-2.4c0-.8.9-1.3 1.6-.8l.4.4.4-.4c.7-.5 1.6 0 1.6.8 0 1.2-2 2.4-2 2.4zM14.9 12.6s-2-1.2-2-2.4c0-.8.9-1.3 1.6-.8l.4.4.4-.4c.7-.5 1.6 0 1.6.8 0 1.2-2 2.4-2 2.4z"/>` },
+  ] },
+  mouth: { name: "表情", items: [
+    { id: "smile", name: "微笑", price: 0, svg: `<path class="dg-line" d="M10.5 17.6c1 .8 2 .8 3 0"/>` },
+    { id: "grin", name: "大笑", price: 10, svg: `<path class="dg-m-h" style="display:inline" d="M10.1 17.1c.5 1.9 3.3 1.9 3.8 0z"/>` },
+    { id: "tongue", name: "吐舌頭", price: 15, svg: `<path class="dg-line" d="M10.3 17.4c1.1.7 2.3.7 3.4 0"/><path class="dg-tongue" d="M11.4 17.8c0 1.2 1.2 1.2 1.2 0z"/>` },
+    { id: "fang", name: "小虎牙", price: 15, svg: `<path class="dg-line" d="M10.3 17.4c1.1.8 2.3.8 3.4 0"/><path class="dg-fang" d="M10.9 17.7l.3.9.4-.7zM13.1 17.7l-.3.9-.4-.7z"/>` },
+  ] },
+  acc: { name: "配件", items: [
+    { id: "none", name: "不戴", price: 0, svg: "" },
+    { id: "glasses", name: "眼鏡", price: 0, svg: `<g class="acc-glass"><circle cx="9.1" cy="11" r="2.8"/><circle cx="14.9" cy="11" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>` },
+    { id: "band", name: "頭帶", price: 0, svg: `<path class="acc-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="acc-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>` },
+    { id: "flower", name: "小花", price: 15, svg: `<g class="acc-flower"><circle cx="17" cy="6.2" r="1.2"/><circle cx="18.6" cy="7.2" r="1.2"/><circle cx="18.2" cy="8.9" r="1.2"/><circle cx="16.4" cy="9.1" r="1.2"/><circle cx="15.7" cy="7.5" r="1.2"/></g><circle class="acc-pom" cx="17.2" cy="7.8" r=".9"/>` },
+    { id: "bow", name: "蝴蝶結", price: 15, svg: `<path class="acc-bow" d="M16 5.6l-2.8-1.9v3.8zM16 5.6l2.8-1.9v3.8z"/><circle class="acc-bow" cx="16" cy="5.6" r=".9"/>` },
+    { id: "scarf", name: "圍巾", price: 20, svg: `<path class="acc-scarf" d="M5.4 17.4c4.2 2.5 9 2.5 13.2 0l.5 1.8c-4.4 2.7-9.8 2.7-14.2 0zM15.4 19.3l1.1 3.4 1.8-.7-.9-3.4z"/>` },
+    { id: "hat", name: "派對帽", price: 20, svg: `<path class="acc-hat" d="M12 .4L8.8 6.6h6.4z"/><path class="acc-hat2" d="M10.2 3.9h3.6M9.4 5.4h5.2"/><circle class="acc-pom" cx="12" cy=".7" r=".9"/>` },
+    { id: "shades", name: "太陽眼鏡", price: 25, svg: `<path class="acc-shades" d="M6.2 9.9h5v1.8a2.5 2.5 0 0 1-5 0zM12.8 9.9h5v1.8a2.5 2.5 0 0 1-5 0zM11.2 10.4h1.6"/>` },
+    { id: "phones", name: "耳機", price: 30, svg: `<path class="acc-phone-b" d="M4.6 11.4C4.6 5 19.4 5 19.4 11.4"/><rect class="acc-phone" x="3" y="10.6" width="3" height="4.4" rx="1.2"/><rect class="acc-phone" x="18" y="10.6" width="3" height="4.4" rx="1.2"/>` },
+    { id: "wizard", name: "魔法帽", price: 35, svg: `<path class="acc-wiz" d="M12 .2l-3.6 6.2h7.6zM7.2 6.5h9.6"/><path class="acc-bstar" d="M12.6 2.6l.4.8.9.1-.6.6.1.9-.8-.4-.8.4.1-.9-.6-.6.9-.1z"/>` },
+    { id: "crown", name: "皇冠", price: 45, svg: `<path class="acc-crown" d="M8.4 6.8l.5-3.6 1.8 1.8 1.3-2.7 1.3 2.7 1.8-1.8.5 3.6z"/><circle class="acc-gem" cx="12" cy="5.4" r=".7"/>` },
+  ] },
+};
+// 鹿角形的龍角（有分岔，才不會像牛角）
+function hornSvg(col) {
+  const one = (m) => `<g transform="${m}"><path class="dg-hn-o" d="M8.4 7.4C7.6 5.8 7.4 4 8 2.2M7.9 4.6L6.2 3.4M7.8 3.4l1.3-1.1"/><path class="dg-hn-i" style="stroke:${col}" d="M8.4 7.4C7.6 5.8 7.4 4 8 2.2M7.9 4.6L6.2 3.4M7.8 3.4l1.3-1.1"/></g>`;
+  return one("") + one("translate(24,0) scale(-1,1)");
+}
+const DG_DEFAULT = { color: "yellow", horn: "antler", whisk: "long", eyes: "round", mouth: "smile", acc: null };
+function dgPick(kind, id) { const list = DG_PARTS[kind].items; return list.find((x) => x.id === id) || list[0]; }
+function dragonSvg(look, mood) {
+  const L = { ...DG_DEFAULT, ...look };
+  const col = dgPick("color", L.color);
   return `<svg class="ico dragon${mood ? " mood-" + mood : ""}" viewBox="0 0 24 24" aria-hidden="true" style="--dg:${col.c};--dg2:${col.c2}">` +
     `<path class="dg-tail-o" d="M17.2 17.6c2.8 1.2 5 .1 5.6-2.4"/><path class="dg-tail" d="M17.2 17.6c2.8 1.2 5 .1 5.6-2.4"/><path class="dg-spike" d="M22 15.6l1.6-2.6-2.8.9z"/>` +
-    `<path class="dg-spike" d="M8.6 6.7l.9-3.6 1.6 2.4.9-3.8.9 3.8 1.6-2.4.9 3.6z"/>` +
-    `<ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/><ellipse class="dg-belly" cx="12" cy="16.1" rx="5.2" ry="3.5"/>` +
+    dgPick("horn", L.horn).svg +
+    `<path class="dg-spike" d="M10.2 6.2l.9-2.6.9 1.8.9-1.8.9 2.6z"/>` +
+    `<ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/>` + (col.shine ? `<path d="M7.4 9.2c.6-1.6 1.8-2.6 3.2-3" stroke="#fff" stroke-width=".9" opacity=".8"/>` : "") +
+    `<ellipse class="dg-belly" cx="12" cy="16.1" rx="5.2" ry="3.5"/>` +
     `<ellipse class="f" cx="10.7" cy="15.2" rx=".45" ry=".35"/><ellipse class="f" cx="13.3" cy="15.2" rx=".45" ry=".35"/>` +
-    `<g class="dg-eyes"><circle class="f" cx="9.1" cy="11" r="1.75"/><circle class="f" cx="14.9" cy="11" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.4" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.4" r=".6"/></g>` +
+    dgPick("whisk", L.whisk).svg +
+    `<g class="dg-eyes">${dgPick("eyes", L.eyes).svg}</g>` +
     `<path class="dg-eyes-h" d="M7.5 11.6c.9-1.6 2.3-1.6 3.2 0M13.3 11.6c.9-1.6 2.3-1.6 3.2 0"/>` +
     `<circle class="dg-cheek" cx="6.6" cy="13.8" r="1.1"/><circle class="dg-cheek" cx="17.4" cy="13.8" r="1.1"/>` +
-    `<path class="dg-line dg-m-n" d="M10.5 17.6c1 .8 2 .8 3 0"/><path class="dg-m-h" d="M10.1 17.1c.5 1.9 3.3 1.9 3.8 0z"/><circle class="dg-m-o" cx="12" cy="17.9" r=".75"/>` +
+    `<g class="dg-m-n">${dgPick("mouth", L.mouth).svg}</g><path class="dg-m-h" d="M10.1 17.1c.5 1.9 3.3 1.9 3.8 0z"/><circle class="dg-m-o" cx="12" cy="17.9" r=".75"/>` +
     `<path class="dg-sweat" d="M19.2 6.4c.7 1 1.1 1.7 1.1 2.2a1.1 1.1 0 0 1-2.2 0c0-.5.4-1.2 1.1-2.2z"/>` +
-    `<path class="dg-scale" d="M10.6 7.8c.5.5.9.5 1.4 0 .5.5.9.5 1.4 0"/>` + acc.svg + `</svg>`;
+    (L.acc ? dgPick("acc", L.acc).svg : "") + `</svg>`;
 }
-// 這台平板的小龍造型（挑戰模式用星星買）。沒選配件時：學習模式戴眼鏡、挑戰模式綁頭帶
-function dgState() { const b = loadBest(); return { color: (b.dg && b.dg.color) || "yellow", acc: b.dg ? b.dg.acc : null, own: b.own || [] }; }
+// 這台平板的小龍造型。沒選配件時：學習模式戴眼鏡、挑戰模式綁頭帶
+function dgState() { const b = loadBest(); return { look: { ...DG_DEFAULT, ...(b.dg || {}) }, own: b.own || [] }; }
 function dragonIco(mood) {
-  const s = dgState();
-  const acc = s.acc != null ? s.acc : learn === true ? "glasses" : learn === false ? "band" : "none";
-  return dragonSvg(s.color, acc, mood);
+  const { look } = dgState();
+  if (!look.acc) look.acc = learn === true ? "glasses" : learn === false ? "band" : "none";
+  return dragonSvg(look, mood);
 }
-ICONS.dragon = dragonSvg("yellow", "none").replace(/^<svg[^>]*>|<\/svg>$/g, "");
+ICONS.dragon = dragonSvg({ acc: "none" }).replace(/^<svg[^>]*>|<\/svg>$/g, "");
 
 // direct：直接把三角形拖進格子，不用先配對全等；id 用來記錄每關的最佳星星
 const PAGES = [
@@ -1412,7 +1476,9 @@ function startGuide() {
   ], k: -1, turn: false };
   playing = true;
   showSkip(skipGuide);
-  nextGuide();
+  // 第 1 步換第 2 步：先說明，學生按「開始」才示範（老師說以前一下就跳到下一個提示，太快）
+  say("第 2 步　<b>做記號</b><br>先看小手指怎麼做，再換你做。");
+  showNext("開始", nextGuide);
 }
 function guideStep() { return corr.guide.steps[corr.guide.k]; }
 function setGuideFlash(onA, onB) {
@@ -1629,8 +1695,9 @@ function corrMarksDone() {
   say("記號都畫對了！<br>對應邊一樣長，對應角一樣大。", "good");
   const tok = pageToken;
   const go = () => { if (tok === pageToken) { corr.step = "ask"; askCorr(); } };
-  if (corr.still) { setTimeout(go, 1500); return; }   // 最後一組：三角形不動
-  setTimeout(() => { if (tok === pageToken) tween(b, { r: b.r + 30 * (2 + rand(8)) }, 900, go); }, 1200);   // 記號畫對了，看一下就轉方向、出題（老師說 2.6 秒太久）
+  if (corr.still) { setTimeout(go, 900); return; }   // 最後一組：三角形不動
+  // 記號畫對了：馬上轉方向、出題（老師說等太久）
+  setTimeout(() => { if (tok === pageToken) tween(b, { r: b.r + 30 * (2 + rand(8)) }, 700, go); }, 300);
 }
 $("#checkBtn").addEventListener("click", checkCorrMarks);
 
@@ -1981,7 +2048,7 @@ function updateToolButtons() {
 // 桌面比較矮時（例如平板橫放、瀏覽器網址列佔掉高度），工具列的按鈕跟著變矮，才不會撞到上面的按鈕和下面的格子
 function fitTools() {
   const btns = [...document.querySelectorAll("#tools button")].filter((b) => !b.hidden);
-  const h = board.clientHeight - 8 - 54, n = btns.length || 1;   // 上面 54px 是放大縮小
+  const h = board.clientHeight - 8, n = btns.length || 1;
   const bh = Math.max(36, Math.min(60, Math.floor((h - 6 * (n - 1)) / n)));
   $("#tools").classList.toggle("tight", bh < 50);
   for (const b of btns) b.style.height = bh + "px";
@@ -2535,10 +2602,12 @@ function showModePick() {
     <div class="modes">
       <button class="mode-btn learn-btn" id="learnBtn"><b>${ico("book")} 學習模式</b><span>上課一起學<br>提示可以一直用</span></button>
       <button class="mode-btn play-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己挑戰<br>收集星星、挑戰關、小龍變裝</span></button>
-    </div>`, "wide");
+    </div>
+    <button class="btn ghost" id="modeShopBtn">${dragonIco()} 小龍變裝</button>`, "wide");
   $("#homeTitle").addEventListener("click", onTitleTap);
   $("#learnBtn").addEventListener("click", () => { learn = true; showHome(); });
   $("#playBtn").addEventListener("click", () => { learn = false; showHome(); });
+  $("#modeShopBtn").addEventListener("click", () => showShop("color", showModePick));
 }
 // 挑戰模式不放「練習：轉一轉、翻一翻」（老師要求）
 function levelList() { return PAGES.map((pg, i) => i).filter((i) => learn || PAGES[i].mode !== "tutorial"); }
@@ -2576,7 +2645,7 @@ function showHome() {
   for (const b of document.querySelectorAll(".lvl[data-i]")) b.addEventListener("click", () => go(+b.dataset.i));
   if (learn) return;
   $("#scoreBtn").addEventListener("click", showScores);
-  $("#shopBtn").addEventListener("click", () => showShop("color"));
+  $("#shopBtn").addEventListener("click", () => showShop("color", showHome));
   $("#chalBtn").addEventListener("click", () => {
     if (!challengeUnlocked()) {   // 還沒解鎖：搖一下，提醒看下面那行字
       const b = $("#chalBtn"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge");
@@ -2740,35 +2809,42 @@ function challengeUnlocked() { return teacherOpen || jarStars() >= JAR_GOAL; }
 // 儲存罐（jar）只會增加，用來打開挑戰關；買東西花掉的記在 spent，可用星星 = 儲存罐 − 花掉的，所以花星星不會讓挑戰關又鎖起來
 function walletStars() { return Math.max(0, jarStars() - (loadBest().spent || 0)); }
 function saveDg(fn) { try { const b = loadBest(); fn(b); localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch (_) {} }
-function showShop(tab) {
-  const s = dgState(), wallet = walletStars();
-  const owned = (id, price) => price === 0 || s.own.includes(id);
-  const items = tab === "color" ? DG_COLORS : DG_ACCS;
-  const cur = tab === "color" ? s.color : (s.acc != null ? s.acc : "band");
-  const cells = items.map((it) => {
-    const has = owned(it.id, it.price), on = it.id === cur;
-    const pv = tab === "color" ? dragonSvg(it.id, s.acc != null ? s.acc : "band") : dragonSvg(s.color, it.id);
-    const tag = on ? "使用中" : has ? "換上" : `${ico("star", "star")} ${it.price}`;
-    return `<button class="shop-item${on ? " on" : ""}${!has && it.price > wallet ? " poor" : ""}" data-id="${it.id}">${pv}<b>${it.name}</b><span>${tag}</span></button>`;
+// 小龍變裝（選模式畫面、挑戰模式首頁都可以進來）：顏色、龍角、龍鬚、眼睛、表情、配件六種。
+// 沒有的東西要先問「要不要買」（老師要求），買了就換上；已經有的點一下就換上。
+let shopBack = null;
+function showShop(tab, back) {
+  if (back) shopBack = back;
+  const { look, own } = dgState(), wallet = walletStars(), part = DG_PARTS[tab];
+  const has = (it) => it.price === 0 || own.includes(it.id);
+  const cur = look[tab] || (tab === "acc" ? "none" : DG_DEFAULT[tab]);
+  const cells = part.items.map((it) => {
+    const on = it.id === cur;
+    const tag = on ? "使用中" : has(it) ? "換上" : `${ico("star", "star")} ${it.price}`;
+    return `<button class="shop-item${on ? " on" : ""}${!has(it) && it.price > wallet ? " poor" : ""}" data-id="${it.id}">${dragonSvg({ ...look, [tab]: it.id })}<b>${it.name}</b><span>${tag}</span></button>`;
   }).join("");
+  const tabs = Object.keys(DG_PARTS).map((k) => `<button class="tab${k === tab ? " on" : ""}" data-tab="${k}">${DG_PARTS[k].name}</button>`).join("");
   showPanel(`<h2>小龍變裝</h2>
-    <div class="shop-top"><div class="big-cat">${dragonIco("happy")}</div><p>可用星星：${ico("star", "star")} <b>${wallet}</b> 顆</p></div>
-    <div class="shop-tabs"><button class="tab${tab === "color" ? " on" : ""}" data-tab="color">顏色</button><button class="tab${tab === "acc" ? " on" : ""}" data-tab="acc">配件</button></div>
+    <div class="shop-top"><div class="big-cat">${dragonSvg(look, "happy")}</div><p>可用星星：${ico("star", "star")} <b>${wallet}</b> 顆</p></div>
+    <div class="shop-tabs">${tabs}</div>
     <div class="shop-grid">${cells}</div>
     <p class="note" id="shopMsg">挑戰模式過關、挑戰關答對，都可以得到星星。</p>
-    <button class="btn" id="toMenuBtn">回選單</button>`, "wide");
+    <button class="btn" id="shopBackBtn">返回</button>`, "wide");
   for (const b of document.querySelectorAll(".shop-tabs .tab")) b.addEventListener("click", () => showShop(b.dataset.tab));
   for (const b of document.querySelectorAll(".shop-item")) b.addEventListener("click", () => {
-    const it = items.find((x) => x.id === b.dataset.id);
-    if (!owned(it.id, it.price)) {
-      if (walletStars() < it.price) { $("#shopMsg").textContent = `還差 ${it.price - walletStars()} 顆星，多玩幾關再來！`; b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); return; }
-      saveDg((d) => { d.spent = (d.spent || 0) + it.price; d.own = [...(d.own || []), it.id]; });
-    }
-    saveDg((d) => { d.dg = { color: tab === "color" ? it.id : (d.dg && d.dg.color) || "yellow", acc: tab === "acc" ? it.id : d.dg ? d.dg.acc : null }; });
-    $("#cat").innerHTML = dragonIco();
-    showShop(tab);
+    const it = part.items.find((x) => x.id === b.dataset.id);
+    const wear = () => { saveDg((d) => { d.dg = { ...(d.dg || {}), [tab]: it.id }; }); $("#cat").innerHTML = dragonIco(); showShop(tab); };
+    if (has(it)) return wear();
+    if (walletStars() < it.price) { $("#shopMsg").textContent = `還差 ${it.price - walletStars()} 顆星，多玩幾關再來！`; b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); return; }
+    // 先問要不要買
+    showPanel(`<h2>要買嗎？</h2>
+      <div class="big-cat">${dragonSvg({ ...look, [tab]: it.id }, "happy")}</div>
+      <p>用 ${ico("star", "star")} <b>${it.price}</b> 顆星買「<b>${it.name}</b>」？<br><span class="note">買了以後還剩 ${walletStars() - it.price} 顆。</span></p>
+      <button class="btn" id="buyYes">買！</button>
+      <button class="btn ghost" id="buyNo">先不要</button>`);
+    $("#buyYes").addEventListener("click", () => { saveDg((d) => { d.spent = (d.spent || 0) + it.price; d.own = [...(d.own || []), it.id]; }); wear(); });
+    $("#buyNo").addEventListener("click", () => showShop(tab));
   });
-  $("#toMenuBtn").addEventListener("click", showHome);
+  $("#shopBackBtn").addEventListener("click", () => (shopBack || showHome)());
 }
 
 // ---------- 連續答對（老師要求的遊戲元素）：連續答對 3 題以上，跳出「連續答對 N 題！」 ----------
