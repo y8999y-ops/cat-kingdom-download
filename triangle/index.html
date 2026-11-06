@@ -18,7 +18,13 @@
     --good: #2e7d32;
     --bad: #c62828;
     --line: #e0c9a6;
+    --accent-dk: #c56000;
   }
+  /* 兩種模式用不同的配色，一眼就看得出來（老師要求）：學習模式是青綠色、挑戰模式是原本的橘色 */
+  body.learn {
+    --bg: #e8f5ef; --soft: #4f7a6a; --accent: #00897b; --accent-dk: #00695c; --line: #b4d9c7;
+  }
+  body.learn .lvl:active, body.learn .mode-btn:active { background: #e0f2f1; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
@@ -32,7 +38,7 @@
     padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 18px);   /* 畫面四周留白，看起來不會太靠邊 */
   }
 
-  /* ---------- 上方：小猴子和對話 ---------- */
+  /* ---------- 上方：小龍和對話 ---------- */
   #top { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
   #cat { font-size: 56px; line-height: 1; flex: none; transition: transform .2s; }
   #cat.bounce { animation: bounce .5s; }
@@ -98,6 +104,11 @@
   .ico.heart { color: #e53935; }
   .ico.heart.lost { color: #e3d7cc; }
   .ico.heart.break { animation: heartbreak .6s; }
+  /* 半顆心：灰色的心上面疊一個只露出左半邊的紅心 */
+  .hh { position: relative; display: inline-block; width: 1em; height: 1em; }
+  .hh .ico { position: absolute; left: 0; top: 0; }
+  .ico.heart.halfon { color: #e53935; clip-path: inset(0 50% 0 0); }
+  .hh.break { animation: heartbreak .6s; }
   @keyframes heartbreak { 30% { transform: scale(1.5); } 60% { transform: scale(.7); } }
   /* 挑戰關的時間和分數 */
   #progress { align-items: center; }
@@ -127,7 +138,7 @@
   /* 右側工具列 */
   #tools {
     position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 3;
-    display: flex; flex-direction: column; gap: 8px;
+    display: flex; flex-direction: column; gap: 6px;
   }
   /* 最多 5 個按鈕（左轉、右轉、翻面、直角尺、做記號），桌面最矮約 340px 也放得下 */
   #tools button {
@@ -137,6 +148,8 @@
   }
   #tools button[hidden] { display: none; }
   #tools button span { font-size: 15px; display: block; margin-top: -4px; }
+  #tools.tight button { font-size: 20px; }
+  #tools.tight button span { font-size: 12px; margin-top: -2px; }
   #tools button:disabled { opacity: .35; }
   #tools button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
   #tools button.on { background: #e3f2fd; border-color: #1e88e5; color: #1565c0; box-shadow: 0 3px 0 #90caf9; }
@@ -144,6 +157,14 @@
   #ruler .rl-body { fill: #1e88e5; fill-opacity: .22; stroke: #1565c0; stroke-width: 3; stroke-linejoin: round; cursor: grab; }
   #ruler .rl-arm { stroke: #0d47a1; stroke-width: 4; stroke-linecap: round; pointer-events: none; }
   #ruler .rl-sq { fill: none; stroke: #0d47a1; stroke-width: 3; pointer-events: none; }
+  #ruler .rl-knob circle.k { fill: #1e88e5; stroke: #fff; stroke-width: 4; }
+  #ruler .rl-knob path { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  /* 教做記號：示範點一下的小手指 */
+  #guide { pointer-events: none; }
+  #guide .finger { color: #ff7043; transform-box: fill-box; transform-origin: 40% 0; }
+  #guide .finger .ico { stroke: #fff; stroke-width: 1.2; }
+  #guide .finger.tap { animation: tap .35s ease-in-out; }
+  @keyframes tap { 50% { transform: scale(.82); } }
   /* 學生自己做的記號（短線、弧線）：深青色，和遊戲給的記號分開 */
   .um line, .um path { stroke: #00695c; stroke-width: 4; stroke-linecap: round; fill: none; pointer-events: none; }
   /* 找對應的題目三角形：固定不動，淺灰色、粗框 */
@@ -193,24 +214,26 @@
   /* 學習模式的過關徽章（靜態，不做動畫） */
   .pass-badge { width: 92px; height: 92px; margin: 0 auto 4px; border-radius: 50%; background: #66bb6a; border: 6px solid #c8e6c9; display: grid; place-items: center; }
   .pass-badge svg { width: 58px; height: 58px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-  .pass-tip { background: #f1f8e9; border-radius: 12px; padding: 8px 12px; text-align: left; }
   .stars { font-size: 52px; margin: 6px 0; display: flex; justify-content: center; gap: 6px; }
   /* 圖示：同一種線條風格 */
   .ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.16em; }
   .ico .f { fill: currentColor; stroke: none; }
-  .ico .monkey-fur { fill: #d39a62; }
-  .ico .monkey-line { stroke-width: 1.5; }
-  .ico .monkey-ear { fill: #ffc9a8; stroke: none; }
-  .ico .monkey-cheek { fill: #ff9e8a; stroke: none; opacity: .75; }
-  .ico .monkey-shine { fill: #fff; stroke: none; }
-  .ico .monkey-face { fill: #ffe7cc; stroke: none; }
+  /* 可愛的黃色小龍 */
+  .ico .dg-body { fill: #ffd54f; stroke-width: 1.3; }
+  .ico .dg-belly { fill: #fff3c4; stroke: none; }
+  .ico .dg-horn { fill: #fff3c4; stroke-width: 1.1; }
+  .ico .dg-spike { fill: #ff8f00; stroke: none; }
+  .ico .dg-wing { fill: #ffb74d; stroke-width: 1.1; }
+  .ico .dg-cheek { fill: #ff8a80; stroke: none; opacity: .8; }
+  .ico .dg-shine { fill: #fff; stroke: none; }
+  .ico .dg-line { stroke-width: 1.2; }
   #cat .ico { display: block; color: var(--ink); }
   .ico.star { color: #ffb300; }
   .ico.star.off { color: #e3d7cc; }   /* 灰色星星是全域樣式，成績表才會正確 */
   .howto .ico { color: var(--accent); margin-right: 4px; }
   .btn {
     display: inline-block; margin: 10px 6px 0; padding: 14px 34px; font-size: 29px; font-weight: bold;
-    border-radius: 999px; border: none; background: var(--accent); color: #fff; box-shadow: 0 4px 0 #c56000;
+    border-radius: 999px; border: none; background: var(--accent); color: #fff; box-shadow: 0 4px 0 var(--accent-dk);
   }
   .btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 4px 0 var(--line); }
   .btn:active { transform: translateY(3px); box-shadow: none; }
@@ -244,6 +267,10 @@
   }
   .mode-btn b { display: block; font-size: 28px; margin-bottom: 6px; }
   .mode-btn b .ico { color: var(--accent); }
+  .mode-btn.learn-btn { border-color: #80cbc4; background: #f1faf7; box-shadow: 0 4px 0 #80cbc4; }
+  .mode-btn.learn-btn b .ico { color: #00897b; }
+  .mode-btn.play-btn { border-color: #ffcc80; background: #fff8ee; box-shadow: 0 4px 0 #ffcc80; }
+  .mode-btn.play-btn b .ico { color: #ff8f00; }
   .mode-btn span { display: block; font-size: 18px; color: var(--soft); }
   .mode-btn:active { transform: translateY(2px); box-shadow: none; background: #fff8e1; }
   .panel .mode-tag { margin: 0 0 6px; font-weight: bold; color: var(--soft); }
@@ -259,6 +286,11 @@
   /* 複習卡片 */
   .review { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0; }
   .review.one { grid-template-columns: 1fr; }
+  .review.one b { display: block; font-size: 22px; margin-top: 4px; }
+  .review.two { grid-template-columns: repeat(2, 1fr); max-width: 420px; margin-left: auto; margin-right: auto; }
+  .review.eq { grid-template-columns: 1fr auto 1fr; align-items: center; max-width: 380px; margin-left: auto; margin-right: auto; }
+  .eq-sign { font-size: 40px; color: var(--accent); }
+  .panel p.pass-cap { font-weight: bold; margin: 4px 0; }
   .rv { background: #fff; border: 3px solid var(--line); border-radius: 16px; padding: 6px; }
   .rv b { display: block; font-size: 20px; }
   .rv span { display: block; font-size: 16px; color: var(--soft); }
@@ -274,7 +306,7 @@
     .lvl { padding: 6px 4px; }
     .lvl b { font-size: 19px; }
     .lvl span { font-size: 14px; }
-    /* 手機上選單和提示按鈕縮小，留空間給小猴子的對話 */
+    /* 手機上選單和提示按鈕縮小，留空間給小龍的對話 */
     #app { padding: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 6px); }
     .icon-btn { width: 40px; height: 40px; font-size: 20px; }
     .topbtns div { gap: 4px; }
@@ -305,7 +337,7 @@
     </div>
   </div>
   <div id="board">
-    <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g></svg>
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g><g id="guide"></g></svg>
     <div id="progress" aria-hidden="true"></div>
     <button class="btn" id="roundBtn" hidden>下一輪</button>
     <button class="btn" id="checkBtn" hidden>檢查</button>
@@ -355,8 +387,10 @@ const COLORS = ["#ff8a80", "#ffb74d", "#ffd54f", "#aed581", "#4fc3f7", "#9575cd"
 // ================= 圖示：同一種線條風格（24×24、圓角線條），不用 emoji =================
 // 平板和電腦的 emoji 長得不一樣，所以全部用自己畫的 SVG；.f 是填色的部分
 const ICONS = {
-  // 可愛的小猴子：大耳朵、愛心形的臉、亮晶晶的大眼睛、粉紅臉頰、微笑
-  monkey: `<circle class="monkey-fur monkey-line" cx="3.7" cy="12.3" r="3"/><circle class="monkey-fur monkey-line" cx="20.3" cy="12.3" r="3"/><circle class="monkey-ear" cx="3.9" cy="12.3" r="1.6"/><circle class="monkey-ear" cx="20.1" cy="12.3" r="1.6"/><circle class="monkey-fur monkey-line" cx="12" cy="12.6" r="8.4"/><circle class="monkey-face" cx="9.6" cy="11.6" r="3"/><circle class="monkey-face" cx="14.4" cy="11.6" r="3"/><ellipse class="monkey-face" cx="12" cy="15.6" rx="5.4" ry="3.9"/><circle class="monkey-cheek" cx="7.7" cy="15.2" r="1.15"/><circle class="monkey-cheek" cx="16.3" cy="15.2" r="1.15"/><circle class="f" cx="9.8" cy="11.9" r="1.55"/><circle class="f" cx="14.2" cy="11.9" r="1.55"/><circle class="monkey-shine" cx="10.35" cy="11.35" r=".55"/><circle class="monkey-shine" cx="14.75" cy="11.35" r=".55"/><circle class="f" cx="11.3" cy="14.6" r=".42"/><circle class="f" cx="12.7" cy="14.6" r=".42"/><path class="monkey-line" d="M10.5 16.4c.9.8 2.1.8 3 0M11.2 4.4c.3-1.2 1.6-1.7 2.5-.9"/>`,
+  // 可愛的黃色小龍：小翅膀、兩隻小角、頭頂小刺、大眼睛、粉紅臉頰、微笑（老師要求，不用配合校徽）
+  dragon: `<path class="dg-wing" d="M5.2 11.2L.9 7.6l.6 3.6-1 1.6 2.4.4-.6 2 3.6-1.4zM18.8 11.2l4.3-3.6-.6 3.6 1 1.6-2.4.4.6 2-3.6-1.4z"/><path class="dg-horn" d="M8.4 6.2C7.4 5 7 3.6 7.5 2.2c1 .7 2 2 2.5 3.3zM15.6 6.2c1-1.2 1.4-2.6.9-4-1 .7-2 2-2.5 3.3z"/><path class="dg-spike" d="M10.6 5.4L12 3l1.4 2.4z"/><ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/><ellipse class="dg-belly" cx="12" cy="16" rx="4.6" ry="3.4"/><circle class="f" cx="9.1" cy="11.3" r="1.75"/><circle class="f" cx="14.9" cy="11.3" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.7" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.7" r=".6"/><circle class="dg-cheek" cx="6.9" cy="14.3" r="1.2"/><circle class="dg-cheek" cx="17.1" cy="14.3" r="1.2"/><circle class="f" cx="11" cy="14.9" r=".4"/><circle class="f" cx="13" cy="14.9" r=".4"/><path class="dg-line" d="M10.4 16.9c1 .9 2.2.9 3.2 0"/>`,
+  // 教做記號時，示範點一下的小手指
+  finger: `<path class="f" d="M9 3.5a1.6 1.6 0 0 1 3.2 0V11l.5-.1V9.4a1.5 1.5 0 0 1 3 0v1.8a1.5 1.5 0 0 1 3 .2v1.2a1.4 1.4 0 0 1 2.8.3v3.6c0 3.5-2.6 6-6 6h-1.6c-2.2 0-3.6-.9-4.8-2.6L4.4 15a1.6 1.6 0 0 1 2.5-2L9 15z"/>`,
   bulb: `<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>`,
   menu: `<path d="M4 6h16M4 12h16M4 18h16"/>`,
   rotL: `<path d="M4 4v6h6"/><path d="M5.6 15a7 7 0 1 0 1.6-7.4L4 10"/>`,
@@ -388,15 +422,7 @@ const PAGES = [
   { id: "corr", mode: "corr", title: "第 4 關：找對應" },
   { id: "both2", mode: "both", title: "第 5 關：疊疊看，再分類" },   // 最後一關是全單元的綜合（老師要求和找對應對調）
 ];
-// 學習模式過關畫面：重點整理
-const PASS_TIP = {
-  side: "<b>以邊分類</b>：三條邊都一樣長是<b>正三角形</b>；有兩條邊一樣長是<b>等腰三角形</b>；三條邊都不一樣長是<b>不等邊三角形</b>。",
-  angle: "<b>以角分類</b>：三個角都是銳角是<b>銳角三角形</b>；有一個直角是<b>直角三角形</b>；有一個鈍角是<b>鈍角三角形</b>。",
-  both1: "一個三角形可以<b>同時</b>用邊和角來分類，例如<b>等腰直角三角形</b>。",
-  corr: "全等三角形疊合時，疊在一起的是<b>對應點、對應邊、對應角</b>。<br>對應邊一樣長，對應角一樣大。",
-  both2: "能<b>完全疊合</b>的兩個三角形是<b>全等三角形</b>，它們的分類也一樣。",
-};
-const LIVES = 3;   // 挑戰模式每關 3 顆愛心，答錯一次扣一顆（學習模式沒有愛心）
+const LIVES = 3;   // 挑戰模式每關 3 顆愛心，答錯一次扣半顆（學習模式沒有愛心）
 
 // ================= 小工具 =================
 const $ = (s) => document.querySelector(s);
@@ -480,10 +506,10 @@ function genSpecs(mode, direct) {
     if (Math.random() < 0.5 || !alt.length) {
       const bigger = base.size <= 1.05;   // 大的放大、小的縮小，干擾題才不會太大或太小
       d = { angles: base.angles, size: bigger ? base.size * 1.2 : base.size * 0.8, role: "distractor", key: base.key,
-            reason: `它和其中一組形狀一樣，但是${bigger ? "比較大" : "比較小"}，所以沒有和它全等的三角形。` };
+            reason: `它和其中一組形狀一樣，但是${bigger ? "比較大" : "比較小"}，<br>所以沒有和它全等的三角形。` };
     } else {
       d = { angles: pick(alt), size: base.size, role: "distractor", key: base.key,
-            reason: "它和其中一組大小差不多，但是角的大小不一樣，所以沒有和它全等的三角形。" };
+            reason: "它的角和別的三角形不一樣大，<br>所以沒有和它全等的三角形。" };
     }
     const clash = specs.some((s) => sameAngles(s.angles, d.angles) && Math.abs(s.size - d.size) < 0.05);
     // 同一輪裡，不同形狀之間的角度至少要差 20°，不然學生會以為有三個全等、怎麼疊都疊不起來
@@ -497,7 +523,7 @@ function genSpecs(mode, direct) {
 
 // ================= 遊戲狀態 =================
 let pageIdx = 0, pieces = [], mode = "tutorial", grid = { cols: 1, rows: 1 };
-let mistakes = 0, pageStart = 0, gameStart = 0, results = [], seatNo = "";
+let mistakes = 0, pageStart = 0, results = [];
 let selected = null, playing = false, lastAct = 0, pageDone = false;
 let direct = false, replay = false, corr = null, challenge = false, chal = null;
 // learn：學習模式（老師上課用：沒有愛心、星星，提示不限次數）；false 是挑戰模式；null 是還沒選
@@ -523,7 +549,8 @@ function startPage(i) {
   lastAct = Date.now();
   $("#pageLabel").textContent = PAGES[i].title;
   $("#progress").innerHTML = "";
-  $("#roundBtn").hidden = true;
+  $("#roundBtn").hidden = true; nextAction = null;
+  $("#guide").innerHTML = "";
   $("#checkBtn").hidden = true;
   setTool("ruler", false);
   setTool("mark", false);
@@ -562,7 +589,7 @@ function startPage(i) {
 }
 
 // ================= 第 4 關：分三輪 =================
-const L4_ROUNDS = 3;
+const l4Rounds = () => (learn ? 2 : 3);   // 學習模式少一點（老師要求）
 let l4 = null;
 function startL4Round() {
   selected = null;
@@ -572,28 +599,26 @@ function startL4Round() {
   dealPieces(genSpecs(mode, false));
   renderProgress();
   say(l4.round === 0
-    ? "先找出<b>全等</b>的兩個三角形，疊在一起。<br>疊好後，再把這一組拖到下面正確的格子裡。"
-    : "下一輪：找出<b>全等</b>的兩個三角形，疊在一起，<br>再把這一組拖到下面正確的格子裡。");
+    ? "找出<b>全等</b>的兩個三角形，疊在一起。<br>再把這一組拖到下面的格子裡。"
+    : "下一輪：找出<b>全等</b>的兩個三角形，疊在一起。<br>再把這一組拖到下面的格子裡。");
   playing = true;
   drawHandle();
 }
-// 全部分好了：第 4 關還有下一輪就換下一輪，不然就過關
+// 全部分好了：先說明剩下的干擾題，學生看完自己按「下一輪」或「完成」（老師覺得自動跳太快，來不及看）
 function roundOrFinish() {
-  if (mode === "both" && !direct && l4 && l4.round + 1 < L4_ROUNDS) {
-    l4.round++;   // 進度點等下一輪開始時再更新
-    playing = false;
-    drawHandle();
-    // 先說明剩下的干擾題，學生看完自己按「下一輪」（老師覺得自動跳太快，來不及看）
-    const d = pieces.find((p) => p.distractor && p.state === "free");
-    if (d) {
-      showMarks(d, mode, 600000);
-      flash(d, "pulse", 4300);
-      say("這一輪分好了！還剩下一閃一閃的這一個：<br>" + d.reason, "good");
-    }
-    $("#roundBtn").hidden = false;
-    return;
-  }
-  finishPage();
+  const more = mode === "both" && !direct && l4 && l4.round + 1 < l4Rounds();
+  const d = pieces.find((p) => p.distractor && p.state === "free");
+  if (!d) return more ? (l4.round++, startL4Round()) : finishPage();
+  playing = false;
+  drawHandle();
+  showMarks(d, mode, 600000);
+  flash(d, "pulse", 4300);
+  say("分好了！剩下一閃一閃的這一個：<br>" + d.reason, "good");
+  showNext(more ? "下一輪" : "完成", () => {
+    if (!more) return finishPage();
+    l4.round++;
+    startL4Round();
+  });
 }
 
 // 依照出題結果做出三角形、決定方向、擺到桌面上
@@ -635,7 +660,7 @@ function dealPieces(specs) {
     pieces.forEach((p, k) => {
       const col = slots[k] % cols, row = Math.floor(slots[k] / cols);
       p.nx = ((col + 0.5 + (Math.random() - 0.5) * 0.1) * availW / cols) / W;
-      p.ny = ((row + 0.5 + (Math.random() - 0.5) * 0.1) * H / rows) / H;
+      p.ny = ((row + 0.5 + (Math.random() - 0.5) * 0.1) * layH() / rows) / H;
       fitIn(p, 10, top);
     });
     if (!anyOverlap()) break;
@@ -649,8 +674,8 @@ function dealPieces(specs) {
 // 第 2 步：不等邊直角三角形，一個翻過面，只轉疊不起來，一定要翻面。
 let tutStep = 0;
 const TUT_TEXT = [
-  "練習 1　<b>轉一轉</b><br>選一個三角形，拖橘色圓圈、用兩根手指，或按右邊的「左轉」「右轉」，轉成一樣的方向，再拖過去疊起來。",
-  "練習 2　<b>翻面</b><br>這兩個三角形方向相反，只轉疊不起來。選一個，按右邊的「翻面」，再拖過去疊起來。",
+  "練習 1　<b>轉一轉</b><br>拖<b>橘色圓圈</b>或按「左轉」「右轉」，轉成一樣的方向，再疊上去。",
+  "練習 2　<b>翻面</b><br>只轉疊不起來。按「翻面」，再疊上去。",
 ];
 function startTutorial(step) {
   tutStep = step;
@@ -673,12 +698,15 @@ function startTutorial(step) {
 }
 
 // ================= 版面與畫圖 =================
+// 會出現「下一題」「檢查」按鈕的關卡（找對應、第 5 關），桌面底部留給按鈕，三角形才不會被蓋住
+const ACT_H = 84;
+function layH() { return H - (!challenge && (mode === "corr" || (mode === "both" && !direct)) ? ACT_H : 0); }
 function measure() {
   W = board.clientWidth; H = board.clientHeight;
   const availW = Math.max(100, W - TOOL_W);
   // 三角形盡量放大：最長邊約是格子的 75%（找對應那關只有兩個，可以更大）
   const f = mode === "corr" ? 0.62 : mode === "both" && !challenge ? 0.8 : 0.75;
-  S = f * Math.min(availW / grid.cols, H / grid.rows);
+  S = f * Math.min(availW / grid.cols, layH() / grid.rows);
   S = Math.max(50, Math.min(S, mode === "corr" ? 300 : 230)) * ZOOMS[zoomIdx];   // 放大縮小按鈕
 }
 
@@ -775,6 +803,7 @@ function corrSvg(p) {
   const marks = p.ans.map((m) => ({ ...m, col: CORR_COL[m.kind], cls: "" }));
   if (p.ask) marks.push({ ...p.ask, col: "#00b8d4", cls: "ask" });
   if (p.hint) marks.push({ ...p.hint, col: "#00b8d4", cls: "hintmark" });
+  if (p.guide) marks.push({ ...p.guide, col: "#00b8d4", cls: "ask" });   // 教做記號：一閃一閃的邊或角
   let out = "";
   for (const m of marks) {
     if (m.kind === "side") {
@@ -865,7 +894,7 @@ function fitIn(p, margin, top = margin) {
   if (Math.min(...xs) - margin < 0) dx = margin - Math.min(...xs);
   else if (Math.max(...xs) + margin > right) dx = right - margin - Math.max(...xs);
   if (Math.min(...ys) - top < 0) dy = top - Math.min(...ys);
-  else if (Math.max(...ys) + margin > H) dy = H - margin - Math.max(...ys);
+  else if (Math.max(...ys) + margin > layH()) dy = layH() - margin - Math.max(...ys);
   p.nx += dx / W; p.ny += dy / H;
 }
 
@@ -1063,20 +1092,15 @@ function classify(p, bin) {
     return true;
   }
   if (mode === "side" && key === "iso" && p.cat.side === "equi") {
-    say("正三角形也有兩條邊一樣長。<br>不過這一關，三條邊都一樣長的，請放到「<b>正三角形</b>」。");
+    say("正三角形也有兩條邊一樣長，<br>但三條邊都一樣長的，要放「<b>正三角形</b>」。");
     showMarks(p, "side");
     return false;
   }
   loseHeart();
   bin.classList.remove("no"); void bin.offsetWidth; bin.classList.add("no");
   showMarks(p, mode);
-  say("看看三角形上的記號：" + markLegend(mode) + "<br>" + (direct ? "這個三角形" : "這一組") + explain(p) + "。", "bad");
+  say("放錯了。<br>" + (direct ? "這個三角形" : "這一組") + explain(p) + "。", "bad");
   return false;
-}
-function markLegend(m) {
-  const a = "<span style='color:#1565c0'>藍框</span>是直角、<span style='color:#d32f2f'>紅色</span>是鈍角、<span style='color:#2e7d32'>綠色</span>是銳角";
-  const s = "<span style='color:#6a1b9a'>紫線</span>是一樣長的邊";
-  return m === "angle" ? a + "。" : m === "side" ? s + "。" : a + "；" + s + "。";
 }
 function showMarks(p, kind, ms = 4500) {
   p.marks = kind;
@@ -1092,7 +1116,7 @@ function showMarks(p, kind, ms = 4500) {
 //   2. mark ：D E F 回到旁邊，學生把一組對應邊、一組對應角畫上一樣的記號，按「檢查」（checkCorrMarks()）
 //   3. ask  ：D E F 轉到新的方向（記號跟著走），回答對應點、對應邊、對應角 3 題
 // 限時挑戰關裡的找對應只有第 3 步，而且只問一題。
-const CORR_ROUNDS = 3;
+const corrRounds = () => (learn ? 2 : 3);   // 學習模式少一點（老師要求）
 const CORR_LETTERS = [["A", "B", "C"], ["D", "E", "F"]];
 const CORR_COL = { point: "#d81b60", side: "#1e88e5", angle: "#43a047" };
 const CORR_WORD = { point: "對應點", side: "對應邊", angle: "對應角" };
@@ -1111,7 +1135,7 @@ function startCorrRound() {
   pieces = [0, 1].map((k) => ({
     id: "c" + k, v: t.v.map((q) => [...q]), ang: t.ang, sides: t.sides, size: 1.0, cat: categorize(t.ang),
     distractor: false, reason: "", state: "free", partner: null, marks: null,
-    nx: (wide ? (k + 0.5) * availW / 2 : availW / 2) / W, ny: wide ? 0.5 : (k + 0.5) / 2,
+    nx: (wide ? (k + 0.5) * availW / 2 : availW / 2) / W, ny: (wide ? 0.5 : (k + 0.5) / 2) * layH() / H,
     r: 30 * rand(12), s: k === 1 && Math.random() < 0.5 ? -1 : 1,
     color: colors[k], labels: k === 0 ? CORR_LETTERS[0] : shuffle([...CORR_LETTERS[1]]), ans: [], ask: null, hint: null,
   }));
@@ -1129,16 +1153,18 @@ function startCorrRound() {
   corr.busy = false;
   selected = null;
   $("#checkBtn").hidden = true;
-  setTool("mark", false);
+  $("#roundBtn").hidden = true;
+  $("#guide").innerHTML = "";
+  if (!challenge) setTool("mark", false);
   renderAll();
   updateTools();
   renderProgress();
   if (challenge) { corr.step = "ask"; askCorr(); return; }
   corr.step = "stack";
-  say("第 1 步　<b>疊疊看</b><br>把彩色的三角形轉一轉、翻一翻，疊到灰色的<b>題目</b>三角形上。");
+  say("第 1 步　<b>疊疊看</b><br>把彩色的三角形疊到灰色的<b>題目</b>上。");
 }
 
-// 第 1 步：疊疊看。D E F 完全疊在題目上，就放回旁邊，進入第 2 步
+// 第 1 步：疊疊看。D E F 完全疊在題目上，按「下一步」就放回旁邊，進入第 2 步
 function corrStack(p, quiet) {
   if (!corr || corr.step !== "stack") return;
   const [a, b] = pieces;
@@ -1153,78 +1179,216 @@ function corrStack(p, quiet) {
     updT(b);
     flash(b, "pop", 700);
     catBounce();
-    say("完全疊合了！<br>疊在一起的點、邊、角，就是<b>對應點、對應邊、對應角</b>。", "good");
-    const tok = pageToken;
-    setTimeout(() => {
-      if (tok !== pageToken) return;
-      tween(b, { nx: b.home.nx, ny: b.home.ny }, 500, () => { if (tok === pageToken) startCorrMark(); });
-    }, 1800);
+    say("完全疊合了！<br>疊在一起的點、邊、角，叫做<b>對應點、對應邊、對應角</b>。", "good");
+    showNext("下一步", () => {
+      const tok = pageToken;
+      tween(b, { nx: b.home.nx, ny: b.home.ny }, 500, () => {
+        if (tok !== pageToken) return;
+        b.lock = true;   // 做記號時兩個三角形都不動（老師要求）
+        if (!markTaught) startGuide(); else startCorrMark();
+      });
+    });
     return;
   }
   if (isAligned(b, a, true)) say("方向對了！再移動一點，讓三個角剛好疊在一起。");
-  else if (!quiet) say("再<b>轉一轉</b>或<b>翻面</b>，讓它和題目三角形對齊。");
+  else if (!quiet) say("再<b>轉一轉</b>或<b>翻面</b>，讓它和題目對齊。");
 }
 
-// 第 2 步：做記號
+// ---------- 第 2 步（第一次）：小手指教做記號 ----------
+// 老師設計：小手指在題目的一條邊點 1 下，學生在另一個三角形閃爍的對應邊跟著點 1 下；
+// 第二條邊點 2 下、學生跟著做；第三條邊只閃爍，讓學生自己發現要點 3 下。角也一樣。
+// 做完跳出一張教學圖卡（說明點錯了怎麼辦），只教一次（markTaught，重新整理網頁才會再教）。
+let markTaught = false;
+const GUIDE_WORD = { s: "邊", a: "角" };
+function startGuide() {
+  corr.step = "guide";
+  setTool("mark", true);
+  const s = shuffle([0, 1, 2]), an = shuffle([0, 1, 2]);
+  corr.guide = { steps: [
+    { kind: "s", i: s[0], n: 1, demo: true }, { kind: "s", i: s[1], n: 2, demo: true }, { kind: "s", i: s[2], n: 3, demo: false },
+    { kind: "a", i: an[0], n: 1, demo: true }, { kind: "a", i: an[1], n: 2, demo: true }, { kind: "a", i: an[2], n: 3, demo: false },
+  ], k: -1, turn: false };
+  playing = true;
+  nextGuide();
+}
+function guideStep() { return corr.guide.steps[corr.guide.k]; }
+function setGuideFlash(onA, onB) {
+  const [a, b] = pieces, g = guideStep(), kind = g.kind === "s" ? "side" : "angle";
+  a.guide = onA ? { kind, i: g.i } : null;
+  b.guide = onB ? { kind, i: corr.map[g.i] } : null;
+  redraw(a); redraw(b);
+}
+function nextGuide() {
+  const G = corr.guide;
+  if (corr.step !== "guide") return;
+  G.k++;
+  if (G.k >= G.steps.length) return endGuide();
+  const g = guideStep(), w = GUIDE_WORD[g.kind], tok = pageToken;
+  G.turn = false;
+  if (!g.demo) {
+    setGuideFlash(true, true);
+    say(`最後這一組對應${w}，要畫幾條呢？<br>在兩個三角形一閃一閃的${w}上畫畫看。`);
+    G.turn = true;
+    return;
+  }
+  if (G.k === 3) say("邊畫好了！<br>角也一樣，用<b>弧線</b>做記號。", "good");
+  // 小手指示範：在題目三角形上點 n 下
+  setGuideFlash(true, false);
+  setTimeout(() => {
+    if (tok !== pageToken) return;
+    say(`看小手指：在題目的${w}上點 <b>${g.n}</b> 下，<br>畫 ${g.n} 條${g.kind === "s" ? "短線" : "弧線"}。`);
+    const a = pieces[0], at = guidePoint(a, g.kind, g.i);
+    let n = 0;
+    const tapOnce = () => {
+      if (tok !== pageToken) return;
+      drawFinger(at, true);
+      addMark(a, g.kind, g.i);
+      setGuideFlash(true, false);
+      if (++n < g.n) return setTimeout(tapOnce, 800);
+      setTimeout(() => {
+        if (tok !== pageToken) return;
+        $("#guide").innerHTML = "";
+        setGuideFlash(false, true);
+        say(`換你：在另一個三角形一閃一閃的${w}上，<br>也點 <b>${g.n}</b> 下。`);
+        G.turn = true;
+      }, 900);
+    };
+    drawFinger(at, false);
+    setTimeout(tapOnce, 700);
+  }, G.k === 3 ? 1800 : 300);
+}
+// 學生在教學時點三角形：只接受一閃一閃的那個邊或角
+function guideTap(p, pt) {
+  const G = corr.guide, g = guideStep();
+  if (!G.turn) return;
+  const [a, b] = pieces, h = markHit(p, pt);
+  const want = p === b ? corr.map[g.i] : g.i;
+  const ok = h && h.kind === g.kind && h.i === want && (p === b || !g.demo);
+  if (!ok) { say(`點<b>一閃一閃</b>的那個${GUIDE_WORD[g.kind]}。`); return; }
+  addMark(p, g.kind, want);
+  const arr = (q) => (q.um ? (g.kind === "s" ? q.um.s : q.um.a) : [0, 0, 0]);
+  const ca = arr(a)[g.i], cb = arr(b)[corr.map[g.i]];
+  setGuideFlash(!g.demo, true);
+  if (g.demo) {
+    if (cb === g.n) { G.turn = false; say("對了！兩個三角形畫一樣多條。", "good"); catBounce(); setTimeout(nextGuide, 1300); }
+    else if (cb === 0) say(`點到第 4 下，記號就不見了。<br>再點 <b>${g.n}</b> 下。`);
+    else say(`現在是 ${cb} 條，再點一下。`);
+    return;
+  }
+  // 第三組：兩個三角形都要畫 3 條
+  if (ca === 3 && cb === 3) {
+    G.turn = false;
+    say("對了！這一組畫 <b>3</b> 條。<br>不同組畫不一樣多條，才分得出來。", "good");
+    catBounce();
+    setTimeout(nextGuide, 2400);
+    return;
+  }
+  if (ca && cb && ca === cb) say(`${ca} 條已經用過了。<br>不同組要畫<b>不一樣多條</b>。`);
+  else say(`題目上畫了 ${ca} 條，另一個畫了 ${cb} 條。<br>兩個要畫一樣多條。`);
+}
+function endGuide() {
+  markTaught = true;
+  const [a, b] = pieces;
+  a.guide = b.guide = null;
+  redraw(a); redraw(b);
+  showPanel(`<h2>${ico("mark")} 做記號</h2>
+    <div class="review one">${markDemoSvg()}</div>
+    <p>一組<b>對應邊</b>畫一樣多條<b>短線</b>，<br>一組<b>對應角</b>畫一樣多條<b>弧線</b>。</p>
+    <p class="pass-cap">點錯了？在同一個地方繼續點，<br>點到記號不見，再重新畫。</p>
+    <button class="btn" id="gotItBtn">知道了</button>`, "wide");
+  $("#gotItBtn").addEventListener("click", () => { hidePanel(); playing = true; corrMarksDone(); });
+}
+// 教學圖卡：兩個全等三角形，三組對應邊、三組對應角都畫好記號
+function markDemoSvg() {
+  const keep = S;
+  S = 140;
+  const t = makeTri([50, 60, 70], 1);
+  const p = { v: t.v, um: { s: [1, 2, 3], a: [1, 2, 3] }, size: 1 };
+  const pts = pointsAttr(p), um = userMarksSvg(p);
+  S = keep;
+  const tri = (col) => `<polygon points="${pts}" fill="${col}" stroke="#5d4037" stroke-width="3" stroke-linejoin="round"/>${um}`;
+  return `<svg class="mini-corr" viewBox="-105 -95 450 190"><g>${tri("#eceff1")}</g><g transform="translate(240,0) rotate(150) scale(-1,1)">${tri("#b3e5fc")}</g></svg>`;
+}
+// 小手指：指尖對準要點的地方
+const FINGER_D = ICONS.finger.match(/d="([^"]+)"/)[1];
+function drawFinger(at, tap) {
+  $("#guide").innerHTML = `<g transform="translate(${at[0].toFixed(1)},${at[1].toFixed(1)})"><g class="finger${tap ? " tap" : ""}">` +
+    `<g transform="translate(-32,-6) scale(3)"><path fill="currentColor" stroke="#fff" stroke-width=".8" stroke-linejoin="round" d="${FINGER_D}"/></g></g></g>`;
+}
+// 邊的中點，或角裡面靠近頂點的一點（桌面座標）
+function guidePoint(p, kind, i) {
+  const w = worldVerts(p);
+  if (kind === "s") { const A = w[(i + 1) % 3], B = w[(i + 2) % 3]; return [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]; }
+  const P = w[i], u = norm([w[(i + 1) % 3][0] - P[0], w[(i + 1) % 3][1] - P[1]]), v = norm([w[(i + 2) % 3][0] - P[0], w[(i + 2) % 3][1] - P[1]]);
+  const d = norm([u[0] + v[0], u[1] + v[1]]);
+  return [P[0] + d[0] * 30, P[1] + d[1] * 30];
+}
+
+// ---------- 第 2 步（之後）：自己做記號，三組對應邊、三組對應角都要畫 ----------
 function startCorrMark() {
   corr.step = "mark";
   setTool("mark", true);
   $("#checkBtn").hidden = false;
-  say("第 2 步　<b>做記號</b><br>在兩個三角形上，把一組<b>對應邊</b>畫一樣的短線、一組<b>對應角</b>畫一樣的弧線，再按「檢查」。");
+  say("第 2 步　<b>做記號</b><br>三組對應邊、三組對應角都畫上記號，再按「檢查」。");
   playing = true;
   drawHandle();
 }
-// 檢查記號：有記號的邊、角，另一個三角形上的對應邊、對應角要畫一樣多條；至少一組對應邊、一組對應角
+// 檢查每一組：ok（兩邊一樣多條）、bad（畫在不對應的地方，或條數不同）、miss（還沒畫）
+function markStatus() {
+  const [a, b] = pieces, m = corr.map, inv = [0, 1, 2].map((j) => m.indexOf(j));
+  const ua = a.um || { s: [0, 0, 0], a: [0, 0, 0] }, ub = b.um || { s: [0, 0, 0], a: [0, 0, 0] };
+  const out = [];
+  for (const k of ["s", "a"]) for (let i = 0; i < 3; i++) {
+    const ca = ua[k][i], cb = ub[k][m[i]];
+    let st = "miss";
+    if (ca && ca === cb) st = "ok";
+    else if (ca && cb) st = "bad";
+    else if (ca && ub[k].some((c, j) => c === ca && inv[j] !== i)) st = "bad";
+    else if (cb && ua[k].some((c, j) => c === cb && m[j] !== m[i])) st = "bad";
+    out.push({ k, i, st, n: ca || cb });
+  }
+  return out;
+}
 function checkCorrMarks() {
   if (!corr || corr.step !== "mark" || !playing) return;
   lastAct = Date.now();
-  const [a, b] = pieces, m = corr.map;
-  const ua = a.um || { s: [0, 0, 0], a: [0, 0, 0] }, ub = b.um || { s: [0, 0, 0], a: [0, 0, 0] };
-  // 一邊有記號、另一個三角形的對應位置沒有：
-  //   另一個三角形「別的位置」畫了一樣多條 → 標錯了（扣心）；都還沒畫 → 只是還沒畫完（提醒，不扣心）
-  let sides = 0, angs = 0, bad = false, missing = false;
-  const inv = [0, 1, 2].map((j) => m.indexOf(j));
-  for (const k of ["s", "a"]) {
-    for (let i = 0; i < 3; i++) {
-      const ca = ua[k][i], cb = ub[k][m[i]];
-      if (!ca && !cb) continue;
-      if (ca === cb) { if (k === "s") sides++; else angs++; continue; }
-      if (ca && cb) { bad = true; continue; }
-      if (ca && ub[k].some((c, j) => c === ca && inv[j] !== i)) bad = true;
-      else if (cb && ua[k].some((c, j) => c === cb && m[j] !== m[i])) bad = true;
-      else missing = true;
-    }
-  }
-  if (!bad && missing) {
-    say("有些記號只畫在一個三角形上。<br>在另一個三角形的<b>對應</b>位置，也畫一樣多條。");
-    return;
-  }
-  if (bad) {
+  const st = markStatus();
+  if (st.some((x) => x.st === "bad")) {
     loseHeart();
-    flash(b, "shake", 400);
-    say("有記號的邊和角，要在另一個三角形上找到<b>對應</b>的那一個，畫一樣多條。<br>想一想剛才疊起來時，哪一條會疊在一起？", "bad");
+    flash(pieces[1], "shake", 400);
+    say("有一組記號不對，再看看。", "bad");
     return;
   }
-  if (!sides || !angs) {
-    say(`還要再標${!sides ? "一組<b>對應邊</b>" : ""}${!sides && !angs ? "和" : ""}${!angs ? "一組<b>對應角</b>" : ""}，再按「檢查」。`);
+  if (st.some((x) => x.st === "miss")) {
+    say("還有<b>沒畫</b>的邊或角。<br>三組對應邊、三組對應角都要畫。");
     return;
   }
-  // 標對了：D E F 轉到新的方向（記號跟著走），開始第 3 步
+  // 不同組要畫不一樣多條，才分得出來
+  for (const k of ["s", "a"]) {
+    const ns = st.filter((x) => x.k === k).map((x) => x.n);
+    if (new Set(ns).size < 3) { say(`不同組的${GUIDE_WORD[k]}，要畫<b>不一樣多條</b>：<br>1 條、2 條、3 條。`); return; }
+  }
+  corrMarksDone();
+}
+// 記號都對了：D E F 轉到新的方向（記號跟著走），可以動了，開始第 3 步
+function corrMarksDone() {
+  const b = pieces[1];
   corr.step = "busy";
   $("#checkBtn").hidden = true;
   setTool("mark", false);
   catBounce();
-  say("記號標對了！<br>對應邊一樣長，對應角一樣大。", "good");
+  say("記號都畫對了！<br>對應邊一樣長，對應角一樣大。", "good");
   const tok = pageToken;
   const turnTo = b.r + 30 * (2 + rand(8));
   setTimeout(() => {
     if (tok !== pageToken) return;
+    b.lock = false;
     tween(b, { r: turnTo }, 500, () => {
       if (tok !== pageToken) return;
       corr.step = "ask";
       askCorr();
     });
-  }, 1500);
+  }, 1800);
 }
 $("#checkBtn").addEventListener("click", checkCorrMarks);
 
@@ -1241,7 +1405,7 @@ function renderProgress() {
   if (mode === "both" && !direct && l4) {
     const doneNow = pieces.filter((p) => p.state === "done" && !p.distractor).length;
     let html = "";
-    for (let r = 0; r < L4_ROUNDS; r++) {
+    for (let r = 0; r < l4Rounds(); r++) {
       html += `<span class="grp">`;
       for (let k = 0; k < 2; k++) {
         const done = r < l4.round || (r === l4.round && k < doneNow);
@@ -1255,7 +1419,7 @@ function renderProgress() {
   }
   if (mode !== "corr" || !corr || !corr.qs) { el.innerHTML = ""; return; }
   let html = "";
-  for (let r = 0; r < CORR_ROUNDS; r++) {
+  for (let r = 0; r < corrRounds(); r++) {
     html += `<span class="grp">`;
     for (let k = 0; k < 3; k++) {
       const done = r < corr.round || (r === corr.round && k < corr.q);
@@ -1267,11 +1431,11 @@ function renderProgress() {
   el.innerHTML = html;
 }
 
-const CORR_HOW = { point: "點一下另一個三角形上的<b>點</b>。", side: "點一下另一個三角形上的<b>邊</b>。", angle: "點一下另一個三角形裡的<b>角</b>。" };
+const CORR_HOW = { point: "點另一個三角形上的<b>字母</b>。", side: "點另一個三角形上的<b>邊</b>。", angle: "點另一個三角形裡的<b>角</b>。" };
 const CORR_WRONG_KIND = {
-  point: "這一題要找<b>點</b>：點一下頂點旁邊的字母。",
-  side: "這一題要找<b>邊</b>：點一下三角形的一條邊。",
-  angle: "這一題要找<b>角</b>：點一下三角形裡面虛線圍起來的角。",
+  point: "這一題要找<b>點</b>，請點字母。",
+  side: "這一題要找<b>邊</b>，請點一條邊。",
+  angle: "這一題要找<b>角</b>，請點虛線圍起來的角。",
 };
 
 function askCorr() {
@@ -1282,16 +1446,14 @@ function askCorr() {
   b.angleTap = q.kind === "angle";
   redraw(a); redraw(b);
   renderProgress();
-  // 每組第一題先說明這兩個三角形全等
-  const intro = corr.q === 0 ? "這兩個三角形是<b>全等三角形</b>。<br>" : "";
-  say(`${intro}找出 <b>${corrName(a, q.kind, q.i)}</b> 的<b>${CORR_WORD[q.kind]}</b>，${CORR_HOW[q.kind]}`);
+  say(`找出 <b>${corrName(a, q.kind, q.i)}</b> 的<b>${CORR_WORD[q.kind]}</b>。<br>${CORR_HOW[q.kind]}`);
 }
 
 function answerCorr(p, tap) {
   if (pageDone || corr.busy) return;
   const q = corr.qs[corr.q], [a, b] = pieces;
   lastAct = Date.now();
-  if (p === a) { say("請在<b>另一個三角形</b>（" + b.labels.join("、") + "）上找。"); return; }
+  if (p === a) { say("在<b>另一個三角形</b>上找。"); return; }
   const need = { point: "vtx", side: "side", angle: "ang" }[q.kind];
   if (tap.kind !== need) { say(CORR_WRONG_KIND[q.kind]); return; }
   const want = corr.map[q.i];   // 對應邊就是對應頂點對面的邊
@@ -1308,21 +1470,20 @@ function answerCorr(p, tap) {
     corr.q++;
     corr.busy = true;
     renderProgress();
-    say(`對了！疊合時，${A} 和 <b>${B}</b> 會疊在一起，<br>它們是${CORR_WORD[q.kind]}。`, "good");
-    const tok = pageToken;
-    setTimeout(() => {
-      if (tok !== pageToken) return;
+    say(`對了！疊合時，${A} 和 <b>${B}</b> 會疊在一起，<br>是${CORR_WORD[q.kind]}。`, "good");
+    const more = corr.q < 3, moreRound = corr.round + 1 < corrRounds();
+    showNext(more ? "下一題" : moreRound ? "下一組" : "完成", () => {
       corr.busy = false;
-      if (corr.q < 3) askCorr();
-      else if (corr.round + 1 < CORR_ROUNDS) { corr.round++; startCorrRound(); }
+      if (more) askCorr();
+      else if (moreRound) { corr.round++; startCorrRound(); }
       else finishPage();
-    }, corr.q < 3 ? 1400 : 1000);
+    });
     return;
   }
   loseHeart();
   flash(b, "shake", 400);
   const why = q.kind === "side" ? `${A} 和 ${B} 不一樣長` : q.kind === "angle" ? `${A} 和 ${B} 不一樣大` : `疊合時，${A} 和 ${B} 不會疊在一起`;
-  say(`${why}，不是${CORR_WORD[q.kind]}。<br>再試一次，也可以疊起來比比看。`, "bad");
+  say(`${why}，不是${CORR_WORD[q.kind]}。<br>再試一次。`, "bad");
 }
 
 // ================= 操作：拖曳、旋轉把手、雙指旋轉 =================
@@ -1385,9 +1546,10 @@ svg.addEventListener("pointerdown", (e) => {
   pointers.set(e.pointerId, pt);
   lastAct = Date.now();
   try { svg.setPointerCapture(e.pointerId); } catch (_) {}
-  // 直角尺在最上層：拖它，或點一下換邊
-  if (rulerOn && e.target.closest && e.target.closest("[data-ruler]")) {
-    rdrag = { pid: e.pointerId, dx: ruler.x - pt.x, dy: ruler.y - pt.y, x0: pt.x, y0: pt.y, moved: false };
+  // 直角尺在最上層：拖本體是移動，拖藍色圓圈是轉動
+  if (rulerOn && e.target.closest && e.target.closest("[data-ruler],[data-ruler-knob]")) {
+    const knob = !!e.target.closest("[data-ruler-knob]");
+    rdrag = { pid: e.pointerId, knob, dx: ruler.x - pt.x, dy: ruler.y - pt.y };
     return;
   }
   if (selected && e.target.closest && e.target.closest("[data-handle]")) {
@@ -1399,9 +1561,9 @@ svg.addEventListener("pointerdown", (e) => {
   const p = g && byId(g.dataset.id);
   if (p) {
     // 找對應的題目三角形固定不動：不能選、不能拖，只能點（作答或做記號）
-    select(p.fixed ? null : p);
+    select(p.fixed || p.lock ? null : p);
     layer.appendChild(p.el);
-    if (!p.fixed) p.el.classList.add("dragging");
+    if (!p.fixed && !p.lock) p.el.classList.add("dragging");
     // 找對應：記下點到的是哪個頂點或哪條邊（沒有拖動才算點一下）
     const hit = e.target.closest && e.target.closest("[data-vtx],[data-side],[data-ang]");
     const tap = hit && (hit.dataset.vtx != null ? { kind: "vtx", i: +hit.dataset.vtx }
@@ -1435,24 +1597,23 @@ svg.addEventListener("pointermove", (e) => {
     let d = a - rot.last;
     if (d > 180) d -= 360; if (d < -180) d += 360;
     rot.last = a; rot.total += d; rot.ang = a;
-    // 每 15° 一格，比較容易轉到剛好的方向
-    rot.p.r = Math.round((rot.r0 + rot.total) / 15) * 15;
+    // 每 5° 一格（老師要求從 15° 改成 5°）
+    rot.p.r = Math.round((rot.r0 + rot.total) / 5) * 5;
     updT(rot.p);
     drawHandle();
     return;
   }
   if (rdrag && e.pointerId === rdrag.pid) {
-    if (!rdrag.moved && Math.hypot(pt.x - rdrag.x0, pt.y - rdrag.y0) > 8) rdrag.moved = true;
+    if (rdrag.knob) { turnRulerTo(pt); return; }
     ruler.x = Math.max(0, Math.min(W, pt.x + rdrag.dx));
     ruler.y = Math.max(0, Math.min(H, pt.y + rdrag.dy));
-    ruler.snap = null;
     drawRuler();
     return;
   }
   if (drag && e.pointerId === drag.pid) {
     const p = drag.p;
     if (!drag.moved && Math.hypot(pt.x - drag.x0, pt.y - drag.y0) > 8) { drag.moved = true; drag.tm = performance.now(); }
-    if (p.fixed) return;   // 題目三角形不動
+    if (p.fixed || p.lock) return;   // 題目三角形不動；做記號時兩個都不動
     // 開始拖了才浮起來，0.15 秒內慢慢升上去；只點一下不會動
     const up = drag.moved ? drag.lift * Math.min(1, (performance.now() - drag.tm) / 150) : 0;
     p.nx = (pt.x + drag.dx) / W;
@@ -1475,12 +1636,12 @@ function endPointer(e) {
   pointers.delete(e.pointerId);
   if (gesture) {
     if (pointers.size < 2) {
-      // 放開後吸附到 15° 的倍數
+      // 放開後吸附到 5° 的倍數
       const p = gesture.p;
       gesture = null;
       p.el && p.el.classList.remove("dragging");
       lastAct = Date.now();
-      tween(p, { r: Math.round(p.r / 15) * 15 }, 120, () => { if (p.state === "free") checkDrop(p, true); });
+      tween(p, { r: Math.round(p.r / 5) * 5 }, 120, () => { if (p.state === "free") checkDrop(p, true); });
     }
     return;
   }
@@ -1493,10 +1654,8 @@ function endPointer(e) {
     return;
   }
   if (rdrag && e.pointerId === rdrag.pid) {
-    const moved = rdrag.moved;
     rdrag = null;
     lastAct = Date.now();
-    if (moved) { snapRuler(); drawRuler(); } else rulerTap();
     return;
   }
   if (!drag || e.pointerId !== drag.pid) return;
@@ -1505,6 +1664,7 @@ function endPointer(e) {
   p.el && p.el.classList.remove("dragging");
   for (const b of binsEl.querySelectorAll(".bin")) b.classList.remove("over");
   // 做記號：點一下（沒有拖動）就在邊或角上畫記號
+  if (mode === "corr" && corr && corr.step === "guide") { if (!dragMoved) guideTap(p, localPt(e)); return; }
   if (markOn && !dragMoved && toolAvail("mark") && toggleMark(p, localPt(e))) return;
   if (mode === "corr") {
     if (corr.step === "stack") { if (dragMoved) checkDrop(p, false); }
@@ -1540,10 +1700,10 @@ function turn(deg) {
   const p = selected;
   if (!p) return;
   lastAct = Date.now();
-  tween(p, { r: Math.round(p.r / 15) * 15 + deg }, 180, () => { if (p.state === "free") checkDrop(p, true); });
+  tween(p, { r: Math.round(p.r / 5) * 5 + deg }, 180, () => { if (p.state === "free") checkDrop(p, true); });
 }
-$("#rotL").addEventListener("click", () => turn(-30));
-$("#rotR").addEventListener("click", () => turn(30));
+$("#rotL").addEventListener("click", () => turn(-15));
+$("#rotR").addEventListener("click", () => turn(15));
 $("#flip").addEventListener("click", () => {
   const p = selected;
   if (!p) return;
@@ -1552,11 +1712,14 @@ $("#flip").addEventListener("click", () => {
 });
 
 // ================= 工具：直角尺、做記號 =================
-// 直角尺：和角有關的關卡（以角分類、以邊和角分類、第 5 關）。只給學生比，不說答案（老師要求）。
-// 做記號：第 4 關找對應、第 5 關疊疊看再分類（限時挑戰關沒有）。
+// 學習模式：直角尺在和角有關的關卡（以角分類、以邊和角分類、第 5 關）；做記號在第 4、5 關。
+// 挑戰模式：每一關（含限時挑戰關）都有直角尺和做記號（老師要求）。練習關都沒有。
+// 直角尺只給學生自己量，遊戲不判斷（老師要求）。
 function toolAvail(name) {
+  if (mode === "tutorial") return false;
+  if (learn === false) return true;
   if (name === "ruler") return mode === "angle" || mode === "both";
-  if (name === "mark") return !challenge && (mode === "corr" || (mode === "both" && !direct));
+  if (name === "mark") return mode === "corr" || (mode === "both" && !direct);
   return false;
 }
 function updateToolButtons() {
@@ -1564,6 +1727,15 @@ function updateToolButtons() {
     $(id).hidden = !toolAvail(name);
     $(id).classList.toggle("on", on);
   }
+  fitTools();
+}
+// 桌面比較矮時（例如平板橫放、瀏覽器網址列佔掉高度），工具列的按鈕跟著變矮，才不會撞到上面的按鈕和下面的格子
+function fitTools() {
+  const btns = [...document.querySelectorAll("#tools button")].filter((b) => !b.hidden);
+  const h = board.clientHeight - 8, n = btns.length || 1;
+  const bh = Math.max(36, Math.min(60, Math.floor((h - 6 * (n - 1)) / n)));
+  $("#tools").classList.toggle("tight", bh < 50);
+  for (const b of btns) b.style.height = bh + "px";
 }
 function setTool(name, on) {
   if (name === "ruler") {
@@ -1577,66 +1749,56 @@ $("#rulerBtn").addEventListener("click", () => {
   if (!playing) return;
   lastAct = Date.now();
   setTool("ruler", !rulerOn);
-  if (rulerOn) say("把<b>直角尺</b>拖到三角形的角上比比看：<br>這個角比直角小、剛好是直角，還是比直角大？");
+  if (rulerOn) say("把<b>直角尺</b>移到角上量量看。<br>拖<b>藍色圓圈</b>可以轉直角尺。");
 });
 $("#markBtn").addEventListener("click", () => {
   if (!playing) return;
   lastAct = Date.now();
   setTool("mark", !markOn);
   if (markOn && !(mode === "corr" && corr && corr.step === "mark")) {
-    say("<b>做記號</b>：點一下<b>邊</b>畫短線、點一下<b>角</b>畫弧線，再點會變兩條、三條。<br>一樣長的邊、一樣大的角，畫一樣的記號。");
+    say("點<b>邊</b>畫短線，點<b>角</b>畫弧線。<br>多點幾下會變 2 條、3 條，再點就不見。");
   }
 });
 
 // ---------- 直角尺 ----------
-// 拖到三角形的頂點附近放開，會自動對準頂點和一條邊；點一下直角尺，換對準另一條邊（沒對準時是轉 90°）
-let ruler = { x: 0, y: 0, a: 0, m: -1, snap: null }, rdrag = null;
+// 學生自己移動、自己轉（老師要求：不要自動對準，也可以移動三角形去對直角尺，順便複習量角）。
+// 拖直角尺本體是移動；拖尾端的藍色圓圈是以直角的頂點為中心轉動，每 5° 一格。
+let ruler = { x: 0, y: 0, a: 0, m: -1 }, rdrag = null;
 const rulerEl = $("#ruler");
 function rulerLen() { return Math.max(90, S * 0.7); }
+const RULER_W = 24, KNOB_GAP = 30;
 function placeRuler() {
   // 一開始放在桌面左下角，兩條邊往右、往上
-  ruler = { x: 24, y: H - 24, a: 0, m: -1, snap: null };
+  ruler = { x: 24, y: H - 24, a: 0, m: -1 };
+}
+function rulerPt(a, b) {
+  const rad = ruler.a * Math.PI / 180, u = [Math.cos(rad), Math.sin(rad)], v = [-u[1] * ruler.m, u[0] * ruler.m];
+  return [ruler.x + u[0] * a + v[0] * b, ruler.y + u[1] * a + v[1] * b];
 }
 function drawRuler() {
   if (!rulerOn) { rulerEl.innerHTML = ""; return; }
-  const L = rulerLen(), wd = 24, rad = ruler.a * Math.PI / 180;
-  const u = [Math.cos(rad), Math.sin(rad)], v = [-u[1] * ruler.m, u[0] * ruler.m];
-  const P = (a, b) => `${(ruler.x + u[0] * a + v[0] * b).toFixed(1)},${(ruler.y + u[1] * a + v[1] * b).toFixed(1)}`;
+  const L = rulerLen(), wd = RULER_W;
+  const P = (a, b) => rulerPt(a, b).map((n) => n.toFixed(1)).join(",");
+  const [kx, ky] = rulerPt(L + KNOB_GAP, wd / 2), [ex, ey] = rulerPt(L, wd / 2);
   rulerEl.innerHTML =
     `<polygon class="rl-body" data-ruler="1" points="${P(0, 0)} ${P(L, 0)} ${P(L, wd)} ${P(wd, wd)} ${P(wd, L)} ${P(0, L)}"/>` +
     `<line class="rl-arm" x1="${ruler.x}" y1="${ruler.y}" x2="${P(L, 0).split(",")[0]}" y2="${P(L, 0).split(",")[1]}"/>` +
     `<line class="rl-arm" x1="${ruler.x}" y1="${ruler.y}" x2="${P(0, L).split(",")[0]}" y2="${P(0, L).split(",")[1]}"/>` +
-    `<path class="rl-sq" d="M${P(14, 0)} L${P(14, 14)} L${P(0, 14)}"/>`;
+    `<path class="rl-sq" d="M${P(14, 0)} L${P(14, 14)} L${P(0, 14)}"/>` +
+    `<line x1="${ex.toFixed(1)}" y1="${ey.toFixed(1)}" x2="${kx.toFixed(1)}" y2="${ky.toFixed(1)}" stroke="#1e88e5" stroke-width="3" stroke-dasharray="5 4" pointer-events="none"/>` +
+    `<g class="rl-knob" data-ruler-knob="1" transform="translate(${kx.toFixed(1)},${ky.toFixed(1)})">` +
+    `<circle r="34" fill="#000" fill-opacity="0"/><circle class="k" r="20"/>` +
+    `<g transform="translate(-11,-11) scale(.92)">${ICONS.rotR}</g></g>`;
 }
-// 放開時：最近的頂點在 45px 以內就對準
-function snapRuler() {
-  let best = null;
-  for (const p of pieces) {
-    if (p.state !== "free" && p.state !== "pair") continue;
-    worldVerts(p).forEach((w, i) => {
-      const d = Math.hypot(w[0] - ruler.x, w[1] - ruler.y);
-      if (d < 45 && (!best || d < best.d)) best = { id: p.id, i, d };
-    });
-  }
-  ruler.snap = best ? { id: best.id, i: best.i, k: 0 } : null;
-  if (ruler.snap) alignRuler();
-}
-// 對準：直角的頂點放在三角形的頂點，一條邊貼著三角形的一條邊，另一條邊放在三角形那一側
-function alignRuler() {
-  const p = byId(ruler.snap.id);
-  if (!p || (p.state !== "free" && p.state !== "pair")) { ruler.snap = null; return; }
-  const w = worldVerts(p), i = ruler.snap.i;
-  const [j1, j2] = ruler.snap.k ? [(i + 2) % 3, (i + 1) % 3] : [(i + 1) % 3, (i + 2) % 3];
-  const P = w[i], u = norm([w[j1][0] - P[0], w[j1][1] - P[1]]), d2 = [w[j2][0] - P[0], w[j2][1] - P[1]];
-  ruler.x = P[0]; ruler.y = P[1];
-  ruler.a = Math.atan2(u[1], u[0]) * 180 / Math.PI;
-  ruler.m = -u[1] * d2[0] + u[0] * d2[1] >= 0 ? 1 : -1;
-}
-function rulerTap() {
-  if (ruler.snap) { ruler.snap.k ^= 1; alignRuler(); }
-  else ruler.a += 90;
+// 拖藍色圓圈時：直角尺轉到手指的方向（扣掉圓圈本來偏的一點角度），每 5° 一格
+function turnRulerTo(pt) {
+  const off = Math.atan2(RULER_W / 2 * ruler.m, rulerLen() + KNOB_GAP) * 180 / Math.PI;
+  const a = Math.atan2(pt.y - ruler.y, pt.x - ruler.x) * 180 / Math.PI - off;
+  ruler.a = Math.round(a / 5) * 5;
   drawRuler();
 }
+// 直角尺拉回桌面內（轉方向、放大縮小時）
+function keepRulerIn() { ruler.x = Math.max(0, Math.min(W, ruler.x)); ruler.y = Math.max(0, Math.min(H, ruler.y)); }
 
 // ---------- 做記號 ----------
 // 點一下邊加短線、點一下角加弧線（1 → 2 → 3 → 沒有）。記號存在三角形上（p.um），跟著三角形移動、旋轉
@@ -1655,10 +1817,9 @@ function segDist(P, A, B) {
   const t = Math.max(0, Math.min(1, ((P[0] - A[0]) * ab[0] + (P[1] - A[1]) * ab[1]) / (ab[0] ** 2 + ab[1] ** 2)));
   return Math.hypot(P[0] - A[0] - ab[0] * t, P[1] - A[1] - ab[1] * t);
 }
-function toggleMark(p, pt) {
+// 點到哪裡：點在三角形裡面、靠近頂點 → 角；不然看最近的邊（30px 內）。回傳 { kind: "s" 或 "a", i }
+function markHit(p, pt) {
   const q = localOf(p, pt), P = [q[0] * S, q[1] * S], v = p.v.map(([x, y]) => [x * S, y * S]);
-  if (!p.um) p.um = { s: [0, 0, 0], a: [0, 0, 0] };
-  // 點在三角形裡面、靠近頂點 → 角；不然看最近的邊
   const kA = Math.max(34, lenPx(p) * 0.25);
   let best = null;
   if (insideTri(P, v)) v.forEach((V, i) => { const d = dist(P, V); if (d < kA && (!best || d < best.d)) best = { kind: "a", i, d }; });
@@ -1666,11 +1827,19 @@ function toggleMark(p, pt) {
     const d = segDist(P, v[(s + 1) % 3], v[(s + 2) % 3]);
     if (d < 30 && (!best || d < best.d)) best = { kind: "s", i: s, d };
   }
-  if (!best) return false;
-  const arr = best.kind === "a" ? p.um.a : p.um.s;
-  arr[best.i] = (arr[best.i] + 1) % 4;
+  return best;
+}
+function addMark(p, kind, i) {
+  if (!p.um) p.um = { s: [0, 0, 0], a: [0, 0, 0] };
+  const arr = kind === "a" ? p.um.a : p.um.s;
+  arr[i] = (arr[i] + 1) % 4;
   redraw(p);
   lastAct = Date.now();
+}
+function toggleMark(p, pt) {
+  const h = markHit(p, pt);
+  if (!h) return false;
+  addMark(p, h.kind, h.i);
   return true;
 }
 // 弧線（不畫到頂點的那兩條半徑）
@@ -1709,7 +1878,7 @@ function setZoom(d) {
   measure();
   for (const p of pieces) if (p.state === "free" || p.state === "pair") fitIn(p, mode === "corr" ? 52 : 10, mode === "corr" ? 96 : challenge ? 50 : 10);
   renderAll();
-  if (ruler.snap) alignRuler();
+  keepRulerIn();
   drawRuler();
 }
 $("#zoomIn").addEventListener("click", () => setZoom(1));
@@ -1747,17 +1916,23 @@ function flashHint() {
     const b = pieces[1];
     layer.appendChild(b.el);
     flash(b, "pulse", 4300);
-    say("把一閃一閃的三角形<b>轉一轉、翻一翻</b>，轉成和題目一樣的方向，<br>再拖到題目三角形上。");
+    say("把一閃一閃的三角形<b>轉一轉、翻一翻</b>，<br>再拖到題目上。");
     catBounce();
     return;
   }
+  if (mode === "corr" && corr.step === "guide") {
+    say("跟著做：在<b>一閃一閃</b>的地方點。");
+    return;
+  }
   if (mode === "corr" && corr.step === "mark") {
-    // 讓一組對應邊一閃一閃
-    const [a, b] = pieces, i = rand(3);
-    a.hint = { kind: "side", i }; b.hint = { kind: "side", i: corr.map[i] };
+    // 只閃還沒畫對的那一組（老師說閃已經畫對的地方會干擾）
+    const [a, b] = pieces, st = markStatus();
+    const x = st.find((s) => s.st === "bad") || st.find((s) => s.st === "miss") || st[0];
+    const kind = x.k === "s" ? "side" : "angle";
+    a.hint = { kind, i: x.i }; b.hint = { kind, i: corr.map[x.i] };
     redraw(a); redraw(b);
     setTimeout(() => { a.hint = null; b.hint = null; redraw(a); redraw(b); }, 4300);
-    say("一閃一閃的兩條邊是一組<b>對應邊</b>，<br>可以先在這兩條邊上畫一樣的短線。");
+    say(`一閃一閃的是一組<b>對應${GUIDE_WORD[x.k]}</b>，<br>畫一樣多條。`);
     catBounce();
     return;
   }
@@ -1767,7 +1942,7 @@ function flashHint() {
     b.hint = { kind: q.kind, i: corr.map[q.i] };
     redraw(b);
     setTimeout(() => { b.hint = null; redraw(b); }, 4300);
-    say("答案在<b>一閃一閃</b>的地方。<br>也可以把兩個三角形疊起來比比看。");
+    say("答案在<b>一閃一閃</b>的地方。");
     catBounce();
     return;
   }
@@ -1776,8 +1951,7 @@ function flashHint() {
     if (!p) return;
     layer.appendChild(p.el);
     flash(p, "pulse", 4300);
-    showMarks(p, mode);
-    say("看看一閃一閃的三角形上的記號：" + markLegend(mode) + "<br>它要放哪一格？");
+    say(classifyHint(p, "一閃一閃的三角形"));
     catBounce();
     return;
   }
@@ -1798,13 +1972,29 @@ function flashHint() {
   if (pair) {
     layer.appendChild(pair.el);
     flash(pair, "pulse", 4300);
-    showMarks(pair, mode === "tutorial" ? "both" : mode);
-    say("看看一閃一閃這一組的記號：" + markLegend(mode === "tutorial" ? "both" : mode));
+    say(classifyHint(pair, "一閃一閃這一組"));
     catBounce();
   }
 }
+// 分類題的提示：邊 → 畫出一樣長的邊；角 → 請學生用直角尺量量看（不直接說什麼顏色是什麼角，老師要求）
+function classifyHint(p, who) {
+  const side = mode === "side" || mode === "both", ang = mode === "angle" || mode === "both";
+  if (side) showMarks(p, "side");
+  if (ang && toolAvail("ruler") && !rulerOn) setTool("ruler", true);
+  if (side && ang) return `${who}：哪幾條邊一樣長？<br>再用<b>直角尺</b>量量看它的角。`;
+  if (side) return `${who}：<br>哪幾條邊一樣長？`;
+  return `用<b>直角尺</b>量量看${who}的角，<br>和直角比，是比較小、一樣，還是比較大？`;
+}
 $("#hintBtn").addEventListener("click", giveHint);
-$("#roundBtn").addEventListener("click", () => { if (l4 && mode === "both" && !direct) startL4Round(); });
+// 「下一輪」「下一題」按鈕：說明看完了，學生自己按才繼續（老師說自動跳太快，來不及看）
+let nextAction = null;
+function showNext(label, fn) { const b = $("#roundBtn"); b.textContent = label; b.hidden = false; nextAction = fn; }
+$("#roundBtn").addEventListener("click", () => {
+  const f = nextAction;
+  nextAction = null;
+  $("#roundBtn").hidden = true;
+  if (f) f();
+});
 // 30 秒沒有動作：練習直接閃提示；其他關卡只提醒可以按燈泡看複習小卡（不自動給答案）
 setInterval(() => {
   if (!playing || pageDone || challenge || Date.now() - lastAct < 30000) return;
@@ -1822,51 +2012,56 @@ function say(html, tone) {
 function catBounce() { const c = $("#cat"); c.classList.remove("bounce"); void c.offsetWidth; c.classList.add("bounce"); }
 
 // ================= 關卡結束與畫面 =================
-// 錯 0～1 次 3 顆星、錯 2 次 2 顆星（錯第 3 次愛心就用完了，要複習後重來）
-function starsFor(m) { return m <= 1 ? 3 : m === 2 ? 2 : 1; }
+// 挑戰模式：每錯兩次扣一顆星（老師要求）。錯 0～1 次 3 顆、2～3 次 2 顆、4～5 次 1 顆；錯 6 次愛心用完，要複習再重來
+function starsFor(m) { return Math.max(1, 3 - Math.floor(m / 2)); }
 function starHtml(n) { return [0, 1, 2].map((i) => ico("star", "star" + (i < n ? "" : " off"))).join(""); }
-function fmtTime(ms) { const s = Math.round(ms / 1000); return `${Math.floor(s / 60)} 分 ${s % 60} 秒`; }
+
+// 過關畫面的圖卡：和提示的複習小卡一樣用圖，不放大段文字（老師說學生不會看字）
+function passCard(name, ang, kind, i, rot = 0, flip = false) {
+  const tf = rot || flip ? ` style="transform:rotate(${rot}deg)${flip ? " scaleX(-1)" : ""}"` : "";
+  return `<div class="rv"><div${tf}>${miniTri(ang, kind, COLORS[i])}</div>${name ? `<b>${name}</b>` : ""}</div>`;
+}
+function passPics(id) {
+  if (id === "side") return `<div class="review">${REVIEW.side.map((c, i) => passCard(c[0], c[2], "side", i)).join("")}</div>`;
+  if (id === "angle") return `<div class="review">${REVIEW.angle.map((c, i) => passCard(c[0], c[2], "angle", i + 3)).join("")}</div>`;
+  if (id === "both1") return `<div class="review two">${passCard("等腰直角三角形", [90, 45, 45], "both", 4)}${passCard("不等邊鈍角三角形", [120, 35, 25], "both", 0)}</div>`;
+  if (id === "corr") return `<div class="review one">${corrReviewSvg()}<b>對應點、對應邊、對應角</b></div>`;
+  if (id === "both2") return `<div class="review eq">${passCard("", [90, 30, 60], "none", 9)}<b class="eq-sign">＝</b>${passCard("", [90, 30, 60], "none", 3, 180)}</div><p class="pass-cap">全等三角形</p>`;
+  return "";
+}
 
 function finishPage() {
   if (pageDone) return;
   pageDone = true;
-  const time = Date.now() - pageStart;
   const stars = starsFor(mistakes);
   if (mode !== "tutorial" && !learn) {   // 學習模式不計分、不存紀錄
-    results.push({ title: PAGES[pageIdx].title, stars, mistakes, time });
+    results.push({ title: PAGES[pageIdx].title, stars, mistakes });
     saveBest(PAGES[pageIdx].id, stars);
   }
   catBounce();
-  const d = pieces.find((p) => p.distractor && p.state === "free");
-  let extra = "";
-  if (d) {
-    showMarks(d, mode, 6000);
-    flash(d, "pulse", 2900);
-    say("全部分好了！還剩下一閃一閃的這一個：<br>" + d.reason, "good");
-    extra = `<p>剩下的那個三角形：${d.reason}</p>`;
-  }
-  const last = pageIdx === PAGES.length - 1;
+  const order = levelList(), at = order.indexOf(pageIdx);
+  const nextIdx = at >= 0 && at + 1 < order.length ? order[at + 1] : -1;
+  const last = nextIdx < 0;
+  const name = PAGES[pageIdx].title.split("：")[0];
   const tok = pageToken;
   setTimeout(() => {
     if (tok !== pageToken) return;
     if (mode === "tutorial") {
-      showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>練習完成！</h2>
-        <p>一個三角形經過<b>移動、旋轉、翻面</b>，如果能和另一個<b>完全疊合</b>，這兩個三角形就是<b>全等三角形</b>。</p>
-        <p>下一關：${PAGES[pageIdx + 1].title.split("：")[1]}。</p>
-        <button class="btn" id="nextBtn">開始${PAGES[pageIdx + 1].title.split("：")[0]}</button>`);
+      showPanel(`<div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div><h2>練習完成！</h2>
+        ${passPics("both2")}
+        <button class="btn" id="nextBtn">下一關</button>`);
     } else if (learn) {
-      // 學習模式：過關畫面，不顯示星星
-      const tip = PASS_TIP[PAGES[pageIdx].id];
+      // 學習模式：過關畫面（不顯示星星），用圖卡整理重點
       showPanel(`<div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div>
-        <h2>${PAGES[pageIdx].title.split("：")[0]} 過關！</h2>
-        <p>做得好！</p>${tip ? `<p class="pass-tip">${tip}</p>` : ""}${extra}
-        ${last ? `<p>全部的關卡都完成了！</p>` : ""}
-        ${last ? "" : `<button class="btn" id="nextBtn">下一關</button>`}
-        <button class="btn ghost" id="toMenuBtn">回選單</button>`);
+        <h2>${name} 過關！</h2>
+        ${passPics(PAGES[pageIdx].id)}
+        ${PAGES[pageIdx].id === "corr" ? `<p class="pass-cap">${ico("mark")} 每一種題目都可以用「做記號」幫忙。</p>` : ""}
+        ${last ? `<p>全部的關卡都完成了！</p>` : `<button class="btn" id="nextBtn">下一關</button>`}
+        <button class="btn ghost" id="toMenuBtn">回選單</button>`, "wide");
     } else {
-      showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>${PAGES[pageIdx].title.split("：")[0]} 完成！</h2>
+      showPanel(`<div class="big-cat">${ico("dragon")}</div><h2>${name} 完成！</h2>
         <div class="stars">${starHtml(stars)}</div>
-        <p>錯誤 ${mistakes} 次・用了 ${fmtTime(time)}</p>${extra}
+        <p>錯了 ${mistakes} 次</p>
         <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>
         <button class="btn ghost" id="toMenuBtn">回選單</button>`);
     }
@@ -1876,36 +2071,29 @@ function finishPage() {
     if (nextBtn) nextBtn.addEventListener("click", () => {
       hidePanel();
       if (last) return showFinal();
-      let n = pageIdx + 1;
-      if (replay && PAGES[n].mode === "tutorial") n++;   // 再玩一次就跳過練習
-      startPage(n);
+      startPage(nextIdx);
     });
-  }, d ? 2400 : 500);
+  }, 500);
 }
 
 function showPanel(html, cls) { playing = false; drawHandle(); $("#panel").className = "panel" + (cls ? " " + cls : ""); $("#panel").innerHTML = html; $("#overlay").classList.add("show"); }
 function hidePanel() { $("#overlay").classList.remove("show"); }
 
 function showFinal() {
-  const total = Date.now() - gameStart;
   const allStars = results.reduce((s, r) => s + r.stars, 0);
   const rows = results.map((r) => `<tr><td>${r.title.split("：")[0]}</td><td>${starHtml(r.stars)}</td><td>錯 ${r.mistakes} 次</td></tr>`).join("");
   const max = results.length * 3;
-  const msg = allStars >= max - 1 ? "太厲害了！" : allStars >= max * 0.66 ? "做得很好！" : "完成了！再玩一次會更熟練。";
-  const all = results.length === PAGES.filter((p) => p.mode !== "tutorial").length;
+  const msg = allStars >= max - 1 ? "太厲害了！" : allStars >= max * 0.66 ? "做得很好！" : "再玩一次會更熟練。";
+  const all = results.length === SCORED.length;
   showPanel(`<div class="big-cat">${ico("trophy")}</div><h1>${all ? "全部完成！" : "完成了！"}</h1>
-    ${seatNo ? `<p><b>座號 ${escapeHtml(seatNo)}</b></p>` : ""}
     <table class="result">${rows}</table>
-    <p>總共 ${allStars} 顆星・${fmtTime(total)}</p>
-    <p>${msg}</p>
-    ${challengeUnlocked() ? `<p><b>挑戰關已經解鎖了！</b>回選單就能挑戰。</p>` : ""}
+    <p>一共 ${allStars} 顆星。${msg}</p>
+    ${challengeUnlocked() ? `<p><b>挑戰關打開了！</b>回選單就能挑戰。</p>` : ""}
     <button class="btn" id="againBtn">再玩一次</button>
-    <button class="btn ghost" id="homeBtn">回選單</button>
-    <p class="note">每次的題目都不一樣，可以多挑戰幾次！</p>`);
-  $("#againBtn").addEventListener("click", () => { hidePanel(); results = []; gameStart = Date.now(); replay = true; startPage(0); });
+    <button class="btn ghost" id="homeBtn">回選單</button>`);
+  $("#againBtn").addEventListener("click", () => { hidePanel(); results = []; replay = true; startPage(levelList()[0]); });
   $("#homeBtn").addEventListener("click", showHome);
 }
-function escapeHtml(s) { return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
 // 首頁：先選「學習模式」或「挑戰模式」，再選關卡（玩完會接著下一關）
 function clearBoard() {
@@ -1914,68 +2102,72 @@ function clearBoard() {
   layer.innerHTML = ""; binsEl.innerHTML = ""; pieces = []; selected = null;
   $("#pageLabel").textContent = "";
   $("#progress").innerHTML = "";
-  $("#roundBtn").hidden = true;
+  $("#roundBtn").hidden = true; nextAction = null;
+  $("#guide").innerHTML = "";
   $("#checkBtn").hidden = true;
   $("#hearts").innerHTML = "";
   setTool("ruler", false); setTool("mark", false);
   updateToolButtons();
 }
+function setTheme() {
+  document.body.classList.toggle("learn", learn === true);
+  document.body.classList.toggle("play", learn === false);
+}
 function showModePick() {
   clearBoard();
   learn = null;
-  say("先選要<b>學習</b>還是<b>挑戰</b>。");
-  showPanel(`<h1 id="homeTitle">${ico("monkey")} 疊疊看！三角形分類</h1>
+  setTheme();
+  say("先選<b>學習模式</b>或<b>挑戰模式</b>。");
+  showPanel(`<h1 id="homeTitle">${ico("dragon")} 疊疊看！三角形分類</h1>
     <div class="modes">
-      <button class="mode-btn" id="learnBtn"><b>${ico("book")} 學習模式</b><span>上課一起學<br>沒有愛心和星星，提示不限次數</span></button>
-      <button class="mode-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己練習<br>有愛心、星星和挑戰關</span></button>
+      <button class="mode-btn learn-btn" id="learnBtn"><b>${ico("book")} 學習模式</b><span>上課一起學<br>提示可以一直用</span></button>
+      <button class="mode-btn play-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己挑戰<br>有愛心、星星和挑戰關</span></button>
     </div>`, "wide");
   $("#homeTitle").addEventListener("click", onTitleTap);
   $("#learnBtn").addEventListener("click", () => { learn = true; showHome(); });
   $("#playBtn").addEventListener("click", () => { learn = false; showHome(); });
 }
+// 挑戰模式不放「練習：轉一轉、翻一翻」（老師要求）
+function levelList() { return PAGES.map((pg, i) => i).filter((i) => learn || PAGES[i].mode !== "tutorial"); }
 function showHome() {
   if (learn === null) return showModePick();
   clearBoard();
+  setTheme();
   say("選一關開始。");
   const best = loadBest();
-  const levels = PAGES.map((pg, i) => {
-    const [num, name] = pg.title.split("：");
-    const stars = learn || pg.mode === "tutorial" ? "" : `<i class="lvl-stars">${starHtml(best[pg.id] || 0)}</i>`;
+  const levels = levelList().map((i) => {
+    const pg = PAGES[i], [num, name] = pg.title.split("：");
+    const stars = learn ? "" : `<i class="lvl-stars">${starHtml(best[pg.id] || 0)}</i>`;
     return `<button class="lvl" data-i="${i}"><b>${num}</b><span>${name}</span>${stars}</button>`;
   }).join("");
   // 挑戰關：只在挑戰模式；第 1～5 關都拿到 3 顆星才打開；不會從「下一關」接過去
   const open = challengeUnlocked();
   const chalNote = !open ? "第 1～5 關都拿到 3 顆星，就能挑戰"
-    : best.challenge != null ? `最佳成績 ${best.challenge} 分` : "可以挑戰了！";
+    : best.challenge != null ? `最佳成績：答對 ${best.challenge} 題` : "可以挑戰了！";
   const chalBtn = learn ? "" : `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 60 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
-  showPanel(`<h1 id="homeTitle">${ico("monkey")} 疊疊看！三角形分類</h1>
-    <p class="mode-tag">${learn ? ico("book") + " 學習模式" : ico("star") + " 挑戰模式"}　<button class="linkbtn" id="modeBtn">換模式</button></p>
-    ${learn ? "" : `<div class="seat">座號：<input id="seatInput" inputmode="numeric" maxlength="4" value="${escapeHtml(seatNo)}">
-      <button class="btn ghost small" id="scoreBtn">${ico("trophy")} 看成績</button></div>`}
+  showPanel(`<h1 id="homeTitle">${ico("dragon")} 疊疊看！三角形分類</h1>
+    <p class="mode-tag">${learn ? ico("book") + " 學習模式" : ico("star") + " 挑戰模式"}　<button class="linkbtn" id="modeBtn">換模式</button>
+      ${learn ? "" : `<button class="btn ghost small" id="scoreBtn">${ico("trophy")} 看成績</button>`}</p>
     <p class="pick">選一關：</p>
     <div class="levels">${levels}${chalBtn}</div>
     ${learn ? "" : `<p class="note"><button class="linkbtn" id="clearBtn">清除這台平板的紀錄</button></p>`}`, "wide");
   $("#homeTitle").addEventListener("click", onTitleTap);
   $("#modeBtn").addEventListener("click", showModePick);
-  const seat = () => { const s = $("#seatInput"); if (s) seatNo = s.value.trim(); };
   const go = (i) => {
-    seat();
     replay = false;
     hidePanel();
     results = [];
-    gameStart = Date.now();
     startPage(i);
   };
   for (const b of document.querySelectorAll(".lvl[data-i]")) b.addEventListener("click", () => go(+b.dataset.i));
   if (learn) return;
-  $("#scoreBtn").addEventListener("click", () => { seat(); showScores(); });
+  $("#scoreBtn").addEventListener("click", showScores);
   $("#chalBtn").addEventListener("click", () => {
     if (!challengeUnlocked()) {   // 還沒解鎖：搖一下，提醒看下面那行字
       const b = $("#chalBtn"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge");
       return;
     }
-    seat();
     hidePanel();
     startChallenge();
   });
@@ -1988,28 +2180,34 @@ function showHome() {
   });
 }
 
-// ================= 愛心：挑戰模式每關 3 顆，答錯扣一顆 =================
+// ================= 愛心：挑戰模式每關 3 顆，答錯一次扣半顆 =================
+// 老師要求「每錯兩題扣一顆星」：每錯一次扣半顆心，剩幾顆心就是幾顆星；6 次（3 顆心）用完要複習再重來。
 // 學習模式沒有愛心；限時挑戰關也沒有愛心（答錯一次就結束）
 function renderHearts(justLost) {
   const el = $("#hearts");
   if (learn || challenge || mode === "tutorial") { el.innerHTML = ""; return; }
-  const left = Math.max(0, LIVES - mistakes);
-  el.innerHTML = Array.from({ length: LIVES }, (_, i) =>
-    ico("heart", "heart" + (i < left ? "" : " lost") + (justLost && i === left ? " break" : ""))).join("");
+  const left = Math.max(0, LIVES * 2 - mistakes);   // 還剩幾個半顆
+  el.innerHTML = Array.from({ length: LIVES }, (_, i) => {
+    const h = Math.max(0, Math.min(2, left - i * 2));
+    const cls = h === 2 ? "heart" : "heart lost";
+    const brk = justLost && i === Math.floor(left / 2) ? " break" : "";
+    if (h === 1) return `<span class="hh${brk}">${ico("heart", "heart lost")}${ico("heart", "heart halfon")}</span>`;
+    return ico("heart", cls + brk);
+  }).join("");
 }
 function loseHeart() {
   mistakes++;
   if (learn) return;   // 學習模式：只記次數，不扣愛心
   const tok = pageToken;
   if (challenge) {
-    // 限時挑戰關：答錯一次就結束（老師要求）。停一下讓學生看到答錯的說明
+    // 限時挑戰關：答錯一次就結束（老師要求），馬上跳出結束畫面（老師覺得原本停 1.2 秒太慢）
     playing = false;
     drawHandle();
-    setTimeout(() => { if (tok === pageToken) endChallenge("wrong"); }, 1200);
+    setTimeout(() => { if (tok === pageToken) endChallenge("wrong"); }, 250);
     return;
   }
   renderHearts(true);
-  if (mistakes < LIVES) return;
+  if (mistakes < LIVES * 2) return;
   // 愛心用完：先停一下（0.7 秒），讓學生看到答錯的說明，再去複習
   playing = false;
   drawHandle();
@@ -2093,9 +2291,12 @@ function saveBest(key, val) {
   } catch (_) { return false; }
 }
 function clearBest() { try { localStorage.removeItem(BEST_KEY); } catch (_) {} }
-function challengeUnlocked() { const b = loadBest(); return !!b.teacher || SCORED.every((p) => b[p.id] === 3); }
+// 老師解鎖只在這次打開網頁時有效；以前版本存在平板上的 teacher 記號，載入時清掉，挑戰關才會重新上鎖
+let teacherOpen = false;
+try { const b = loadBest(); if (b.teacher) { delete b.teacher; localStorage.setItem(BEST_KEY, JSON.stringify(b)); } } catch (_) {}
+function challengeUnlocked() { const b = loadBest(); return teacherOpen || SCORED.every((p) => b[p.id] === 3); }
 
-// 老師解鎖：在首頁連點標題 5 下（3 秒內），輸入老師密碼，就能直接打開挑戰關（存在這台平板上，清除紀錄會一起清掉）
+// 老師解鎖：在首頁連點標題 5 下（3 秒內），輸入老師密碼，就能直接打開挑戰關（重新整理網頁後會再鎖起來）
 const TEACHER_CODE = "1207";
 let titleTaps = [];
 function onTitleTap() {
@@ -2112,7 +2313,7 @@ function onTitleTap() {
     <button class="btn ghost" id="codeCancel">取消</button>`);
   $("#codeBtn").addEventListener("click", () => {
     if ($("#codeInput").value.trim() !== TEACHER_CODE) { $("#codeMsg").textContent = "密碼不對，再試一次。"; return; }
-    try { const b = loadBest(); b.teacher = true; localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch (_) {}
+    teacherOpen = true;   // 只到重新整理網頁前有效（以前存在平板上，老師試過以後挑戰關就一直是打開的）
     learn = false;   // 挑戰關在挑戰模式裡
     showHome();
     say("挑戰關已經打開了。");
@@ -2160,7 +2361,7 @@ function renderChalBar() {
   $("#progress").innerHTML =
     `<span class="chal-time${left <= 10 ? " hurry" : ""}">${ico("clock")} ${left} 秒</span>` +
     `<span class="chal-bar"><i style="width:${(100 * ms / (CHAL_SEC * 1000)).toFixed(1)}%"></i></span>` +
-    `<span class="chal-score">${chal.score} 分</span>`;
+    `<span class="chal-score">答對 ${chal.score} 題</span>`;
 }
 
 function nextChalTask() {
@@ -2172,7 +2373,6 @@ function nextChalTask() {
   mode = type;
   direct = type === "side" || type === "angle" || type === "both";
   if (!toolAvail("ruler")) setTool("ruler", false);   // 直角尺只在和角有關的題目
-  else if (ruler.snap) { ruler.snap = null; drawRuler(); }
   updateToolButtons();
   buildBins();
   measure();
@@ -2278,9 +2478,8 @@ function endChallenge(reason) {
   const before = loadBest().challenge;
   const isNew = saveBest("challenge", total);
   showPanel(`<div class="big-cat">${ico("clock")}</div><h2>${reason === "time" ? "時間到！" : "答錯了，挑戰結束！"}</h2>
-    <p>答對 ${chal.score} 題</p>
-    <p class="big-score">${total} 分</p>
-    <p>${isNew ? (before == null ? "這是你的第一個成績！" : "新紀錄！") : `最佳成績：${before} 分`}</p>
+    <p class="big-score">答對 ${total} 題</p>
+    <p>${isNew ? (before == null ? "這是你的第一個成績！" : "新紀錄！") : `最佳成績：答對 ${before} 題`}</p>
     <button class="btn" id="chalAgainBtn">再挑戰一次</button>
     <button class="btn ghost" id="toMenuBtn">回選單</button>`);
   $("#chalAgainBtn").addEventListener("click", () => { hidePanel(); startChallenge(); });
@@ -2295,9 +2494,8 @@ function showScores() {
     return `<tr><td>${num}</td><td>${name}</td><td>${best[p.id] ? starHtml(best[p.id]) : "還沒玩"}</td></tr>`;
   }).join("");
   const got = SCORED.reduce((s, p) => s + (best[p.id] || 0), 0);
-  const chal = best.challenge != null ? `${best.challenge} 分` : challengeUnlocked() ? "還沒挑戰" : "還沒解鎖";
+  const chal = best.challenge != null ? `答對 ${best.challenge} 題` : challengeUnlocked() ? "還沒挑戰" : "還沒解鎖";
   showPanel(`<div class="big-cat">${ico("trophy")}</div><h2>我的成績</h2>
-    ${seatNo ? `<p><b>座號 ${escapeHtml(seatNo)}</b></p>` : ""}
     <table class="result">${rows}</table>
     <p>一共 ${got} 顆星（最多 ${SCORED.length * 3} 顆）・挑戰關最佳成績：${chal}</p>
     <p class="note">這是這台平板上每一關最好的成績。</p>
@@ -2308,7 +2506,7 @@ function showScores() {
 // 遊戲中按選單按鈕：先確認，避免學生不小心按到
 $("#menuBtn").addEventListener("click", () => {
   if (!playing || pageDone) return;   // 關卡完成時，完成畫面本身就有「回選單」
-  showPanel(`<div class="big-cat">${ico("monkey")}</div><h2>要回到選關畫面嗎？</h2>
+  showPanel(`<div class="big-cat">${ico("dragon")}</div><h2>要回到選關畫面嗎？</h2>
     <p>這一關還沒做完的部分不會保留。</p>
     <button class="btn" id="keepBtn">繼續玩</button>
     <button class="btn ghost" id="leaveBtn">回選單</button>`);
@@ -2319,6 +2517,7 @@ $("#menuBtn").addEventListener("click", () => {
 // ================= 其他 =================
 new ResizeObserver(() => onResize()).observe(board);
 function onResize() {
+  fitTools();
   if (!pieces.length || (W === board.clientWidth && H === board.clientHeight)) return;
   W = board.clientWidth; H = board.clientHeight;
   // 平板轉方向：如果「出題時的三角形個數」最適合的排法（幾欄幾列）不一樣了，就重新排列，
@@ -2331,8 +2530,7 @@ function onResize() {
   if (mode === "corr" && pieces[1]) pieces[1].home = { nx: pieces[1].nx, ny: pieces[1].ny };
   renderAll();
   // 直角尺跟著對準的頂點走；沒對準就拉回桌面內
-  if (ruler.snap) alignRuler();
-  ruler.x = Math.max(0, Math.min(W, ruler.x)); ruler.y = Math.max(0, Math.min(H, ruler.y));
+  keepRulerIn();
   drawRuler();
 }
 // n 個三角形，選格子最大的排法
@@ -2340,7 +2538,7 @@ function bestGrid(n) {
   const availW = Math.max(100, W - TOOL_W);
   let best = { c: 1, r: 1, cell: 0 };
   for (let c = 1; c <= Math.max(1, n); c++) {
-    const r = Math.ceil(n / c), cell = Math.min(availW / c, H / r);
+    const r = Math.ceil(n / c), cell = Math.min(availW / c, layH() / r);
     if (cell > best.cell) best = { c, r, cell };
   }
   return best;
@@ -2354,7 +2552,7 @@ function relayout(act, best) {
   const top = mode === "corr" ? 96 : challenge ? 50 : mode === "both" && !direct ? 40 : 10;
   act.forEach((p, k) => {
     p.nx = ((k % best.c) + 0.5) * availW / best.c / W;
-    p.ny = (Math.floor(k / best.c) + 0.5) / best.r;
+    p.ny = (Math.floor(k / best.c) + 0.5) / best.r * layH() / H;
     fitIn(p, side, top);
   });
 }
@@ -2363,7 +2561,7 @@ document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("dblclick", (e) => e.preventDefault());
 
 // 放上圖示
-$("#cat").innerHTML = ico("monkey");
+$("#cat").innerHTML = ico("dragon");
 $("#menuBtn").innerHTML = ico("menu");
 $("#hintBtn").innerHTML = ico("bulb");
 $("#rotL").innerHTML = ico("rotL") + "<span>左轉</span>";
