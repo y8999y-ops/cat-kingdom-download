@@ -40,16 +40,16 @@
 
   /* ---------- 上方：小龍和對話 ---------- */
   #top { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
-  #cat { font-size: 56px; line-height: 1; flex: none; transition: transform .2s; }
+  #cat { font-size: 76px; line-height: 1; flex: none; transition: transform .2s; }
   #cat.bounce { animation: bounce .5s; }
   #say {
-    flex: 1; background: var(--card); border: 3px solid var(--line); border-radius: 18px;
+    flex: 1 1 auto; max-width: 640px; margin-right: auto; background: var(--card); border: 3px solid var(--line); border-radius: 18px;   /* 老師說太長，寬度縮小 */
     padding: 3px 14px; font-size: clamp(20px, 2.7vw, 26px); line-height: 1.28; height: 132px;   /* 老師要對話框小一點，空間留給按鈕 */
     display: flex; align-items: center; position: relative; overflow: hidden;
   }
   @media (max-width: 600px) {
     #say { font-size: 16px; height: 158px; padding: 4px 10px; line-height: 1.28; }
-    #cat { font-size: 36px; }
+    #cat { font-size: 44px; }
   }
   #say::before {
     content: ""; position: absolute; left: -12px; top: 50%; margin-top: -9px;
@@ -57,6 +57,17 @@
   }
   #say.good { border-color: #81c784; background: #f1f8e9; }
   #say.bad { border-color: #ef9a9a; background: #fff3f3; }
+  /* 「下一步」「下一題」「完成」「檢查」都放在對話框右下角（老師要求：像常見的遊戲，類似的按鈕統一位置） */
+  #sayText { flex: 1; min-width: 0; }
+  #sayAct { flex: none; align-self: flex-end; margin: 0 -6px 6px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .btn.act { margin: 0; padding: 10px 22px; font-size: 24px; white-space: nowrap; }
+  .btn.act[hidden] { display: none; }
+  .btn.act::after { content: ""; display: inline-block; margin-left: 8px; border: 8px solid transparent; border-left: 11px solid currentColor; border-right: 0; vertical-align: -1px; }
+  #checkBtn.act::after { display: none; }
+  /* 跳過教學：桌面右下角（左下角是直角尺放的地方） */
+  .skip { position: absolute; right: 6px; bottom: 6px; z-index: 4; background: var(--card); border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 18px; color: var(--soft); }
+  .skip[hidden] { display: none; }
+  @media (max-width: 600px) { .btn.act { padding: 6px 12px; font-size: 17px; } #sayAct { margin: 0 -4px 4px 6px; } }
   .topbtns { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
   #pageLabel { font-size: 21px; font-weight: bold; color: var(--soft); white-space: nowrap; }
   @media (max-width: 600px) {
@@ -67,10 +78,16 @@
   }
   .topbtns div { display: flex; gap: 6px; }
   .icon-btn {
-    width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--line); background: var(--card);
-    font-size: 28px; display: grid; place-items: center; padding: 0;
+    width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--line); background: var(--card);   /* 老師要圖示大一點 */
+    font-size: 33px; display: grid; place-items: center; padding: 0;
   }
   .icon-btn:active { transform: translateY(2px); background: #fff8e1; }
+  /* 平板直放：右上角四顆按鈕排成 2×2，對話框才夠寬（圖示放大以後，一排太佔位置） */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .topbtns > div:last-child { display: grid; grid-template-columns: repeat(2, auto); }
+    .icon-btn { width: 56px; height: 56px; font-size: 29px; }
+    #pageLabel { font-size: 16px; white-space: normal; max-width: 118px; text-align: right; line-height: 1.2; }
+  }
 
   /* ---------- 中間：三角形桌面 ---------- */
   #board { flex: 1; position: relative; z-index: 2; min-height: 0; }
@@ -118,8 +135,6 @@
   #progress .chal-bar i { display: block; height: 100%; background: var(--accent); transition: width .2s linear; }
   /* 找對應的進度點：3 組 × 3 題 */
   /* 第 4 關一輪結束，看完說明再按「下一輪」 */
-  #roundBtn { position: absolute; left: 0; right: 0; bottom: 12px; width: fit-content; margin: 0 auto; z-index: 4; }
-  #roundBtn[hidden] { display: none; }
   #progress { position: absolute; left: 12px; top: 8px; z-index: 3; display: flex; gap: 16px; pointer-events: none; }
   #progress .grp { display: flex; gap: 6px; }
   #progress .dot { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--line); background: var(--card); }
@@ -171,13 +186,13 @@
   #guide .ripple { fill: none; stroke: var(--accent); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: ripple .6s ease-out forwards; }
   @keyframes ripple { from { transform: scale(.6); opacity: .9; } to { transform: scale(3); opacity: 0; } }
   @keyframes tap { 50% { transform: scale(.82); } }
+  #guide .finger.wait { animation: bob 1s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(8px); } }
   /* 學生自己做的記號（短線、弧線）：深青色，和遊戲給的記號分開 */
   .um line, .um path { stroke: #00695c; stroke-width: 4; stroke-linecap: round; fill: none; pointer-events: none; }
   /* 找對應的題目三角形：固定不動，淺灰色、粗框 */
   .piece.fixed polygon.body { fill: #eceff1; stroke: #455a64; stroke-width: 6; fill-opacity: 1; }
   .piece .fixed-tag { font-size: 18px; font-weight: bold; fill: #607d8b; pointer-events: none; }
-  #checkBtn { position: absolute; left: 0; right: 0; bottom: 12px; width: fit-content; margin: 0 auto; z-index: 4; }
-  #checkBtn[hidden] { display: none; }
 
   /* ---------- 下方：分類籃 ---------- */
   #bins { display: grid; gap: 10px; padding: 10px 0 0; position: relative; z-index: 1; }
@@ -233,6 +248,9 @@
   .ico .dg-cheek { fill: #ff8a80; stroke: none; opacity: .8; }
   .ico .dg-shine { fill: #fff; stroke: none; }
   .ico .dg-line { stroke-width: 1.2; }
+  .ico .dg-glass { fill: none; stroke: #4e342e; stroke-width: .9; }
+  .ico .dg-band { fill: none; stroke: #e53935; stroke-width: 1.8; stroke-linecap: round; }
+  .ico .dg-bstar { fill: #ffeb3b; stroke: #e65100; stroke-width: .5; stroke-linejoin: round; }
   #cat .ico { display: block; color: var(--ink); }
   .ico.star { color: #ffb300; }
   .ico.star.off { color: #e3d7cc; }   /* 灰色星星是全域樣式，成績表才會正確 */
@@ -251,6 +269,9 @@
   }
   table.result { margin: 10px auto; border-collapse: collapse; font-size: 23px; }
   table.result td, table.result th { padding: 6px 12px; border-bottom: 2px solid var(--line); }
+  .panel h3 { margin: 14px 0 4px; font-size: 26px; }
+  ul.chal-list { list-style: none; padding: 0; margin: 4px auto 8px; display: inline-block; text-align: left; font-size: 22px; line-height: 1.7; }
+  ul.chal-list li::before { content: "•"; color: var(--accent); margin-right: 10px; }
   .note { font-size: 18px !important; color: var(--soft); }
   /* 首頁選關 */
   .panel.wide { max-width: 720px; }
@@ -332,7 +353,7 @@
 <div id="app">
   <div id="top">
     <div id="cat"></div>
-    <div id="say"></div>
+    <div id="say"><span id="sayText"></span><div id="sayAct"><button class="btn act" id="roundBtn" hidden>下一輪</button><button class="btn act" id="checkBtn" hidden>檢查</button></div></div>
     <div class="topbtns">
       <div id="pageLabel"></div>
       <div id="hearts" aria-label="愛心"></div>
@@ -347,8 +368,7 @@
   <div id="board">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g><g id="guide"></g></svg>
     <div id="progress" aria-hidden="true"></div>
-    <button class="btn" id="roundBtn" hidden>下一輪</button>
-    <button class="btn" id="checkBtn" hidden>檢查</button>
+    <button class="skip" id="skipBtn" hidden>跳過教學</button>
     <div id="tools">
       <button id="rotL" aria-label="向左轉" disabled></button>
       <button id="rotR" aria-label="向右轉" disabled></button>
@@ -420,6 +440,10 @@ const ICONS = {
   book: `<path d="M3 5.5c3-1.3 6-1.3 9 .5v14c-3-1.8-6-1.8-9-.5zM21 5.5c-3-1.3-6-1.3-9 .5v14c3-1.8 6-1.8 9-.5z"/>`,
 };
 function ico(name, cls = "") { return `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`; }
+// 兩種模式的小龍有一點不一樣（老師要求）：學習模式戴眼鏡（認真學），挑戰模式綁頭帶（加油挑戰）
+ICONS.dragonL = ICONS.dragon + `<g class="dg-glass"><circle cx="9.1" cy="11.3" r="2.8"/><circle cx="14.9" cy="11.3" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>`;
+ICONS.dragonP = ICONS.dragon + `<path class="dg-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="dg-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>`;
+function dragonIco() { return ico(learn === true ? "dragonL" : learn === false ? "dragonP" : "dragon"); }
 
 // direct：直接把三角形拖進格子，不用先配對全等；id 用來記錄每關的最佳星星
 const PAGES = [
@@ -559,6 +583,7 @@ function startPage(i) {
   $("#progress").innerHTML = "";
   $("#roundBtn").hidden = true; nextAction = null;
   $("#guide").innerHTML = "";
+  hideSkip();
   $("#checkBtn").hidden = true;
   setTool("ruler", false);
   setTool("mark", false);
@@ -706,8 +731,8 @@ function startTutorial(step) {
 }
 
 // ================= 版面與畫圖 =================
-// 會出現「下一題」「檢查」按鈕的關卡（找對應、第 5 關），桌面底部留給按鈕，三角形才不會被蓋住
-const ACT_H = 84;
+// 以前會出現「下一題」「檢查」按鈕的關卡，桌面底部留給按鈕；按鈕移到對話框以後不用了（ACT_H = 0），保留 layH() 方便以後調整
+const ACT_H = 0;   // 按鈕移到對話框以後，桌面底部不用再留空間（以前 84px）
 function layH() { return H - (!challenge && (mode === "corr" || (mode === "both" && !direct) || (learn && mode === "angle")) ? ACT_H : 0); }
 function measure() {
   W = board.clientWidth; H = board.clientHeight;
@@ -809,8 +834,8 @@ function corrSvg(p) {
   const v = p.v.map(([x, y]) => [x * S, y * S]);
   const k = Math.max(26, lenPx(p) * 0.15);
   const marks = p.ans.map((m) => ({ ...m, col: CORR_COL[m.kind], cls: "" }));
-  if (p.ask) marks.push({ ...p.ask, col: "#00b8d4", cls: "ask" });
-  if (p.hint) marks.push({ ...p.hint, col: "#00b8d4", cls: "hintmark" });
+  if (p.ask) marks.push({ ...p.ask, col: "#ab47bc", cls: "ask" });   // 題目用紫色閃，和提示的青色分開（老師要求）
+  for (const h of [].concat(p.hint || [])) marks.push({ ...h, col: "#00b8d4", cls: "hintmark" });   // 提示可以是好幾個地方
   if (p.guide) marks.push({ ...p.guide, col: "#00b8d4", cls: "ask" });   // 教做記號：一閃一閃的邊或角
   let out = "";
   for (const m of marks) {
@@ -1109,8 +1134,13 @@ function classify(p, bin) {
   }
   loseHeart();
   bin.classList.remove("no"); void bin.offsetWidth; bin.classList.add("no");
-  showMarks(p, mode, 600000);   // 記號一直留著，學生才看得到
-  say("放錯了。<br>看看三角形上的記號，再想一想。", "bad");   // 不直接說答案（老師要求）
+  // 不直接說答案（老師要求）：邊放錯 → 畫出一樣長的邊（一直留著）；角放錯 → 請學生用直角尺量量看（不畫角的顏色）
+  const [bs, ba] = key.includes("-") ? key.split("-") : mode === "side" ? [key, null] : [null, key];
+  const wrongSide = bs !== null && bs !== p.cat.side, wrongAngle = ba !== null && ba !== p.cat.angle;
+  if (wrongSide) showMarks(p, "side", 600000);
+  if (wrongAngle && toolAvail("ruler") && !rulerOn) setTool("ruler", true);
+  say("放錯了。<br>" + (wrongSide && wrongAngle ? "看看哪幾條邊一樣長，再用<b>直角尺</b>量量看它的角。"
+    : wrongSide ? "看看三角形上的記號：哪幾條邊一樣長？" : "用<b>直角尺</b>量量看它的角，再想一想。"), "bad");
   return false;
 }
 function showMarks(p, kind, ms = 4500) {
@@ -1200,7 +1230,8 @@ function corrStack(p, quiet) {
       tween(b, { nx: b.home.nx, ny: b.home.ny }, 500, () => {
         if (tok !== pageToken) return;
         b.lock = true;   // 做記號時兩個三角形都不動（老師要求）
-        if (corr.round === 0) startGuide(); else startCorrMark();   // 每次玩第 4 關，第一組都會教（老師要求）
+        // 學習模式：第一組先用小手指教（每次玩都教）；挑戰模式不用教學（老師要求）
+        if (corr.round === 0 && learn) startGuide(); else startCorrMark();
       });
     });
     return;
@@ -1224,6 +1255,7 @@ function startGuide() {
     { kind: "a", i: an[0], n: 1, demo: true }, { kind: "a", i: an[1], n: 2, demo: true }, { kind: "a", i: an[2], n: 3, demo: false },
   ], k: -1, turn: false };
   playing = true;
+  showSkip(skipGuide);
   nextGuide();
 }
 function guideStep() { return corr.guide.steps[corr.guide.k]; }
@@ -1249,30 +1281,32 @@ function nextGuide() {
     return;
   }
   if (G.k === 3) say("邊畫好了！<br>角也一樣，用<b>弧線</b>做記號。", "good");
-  // 小手指示範：在題目三角形上點 n 下
+  // 小手指示範：在題目三角形上點 n 下（老師說太快：出現後停 1.8 秒才點，每下間隔 1.6 秒）
   setGuideFlash(true, false);
+  const live = () => tok === pageToken && corr.step === "guide";
   setTimeout(() => {
-    if (tok !== pageToken) return;
+    if (!live()) return;
     say(`看小手指：在題目的${w}上點 <b>${g.n}</b> 下，<br>畫 ${g.n} 條${g.kind === "s" ? "短線" : "弧線"}。`);
-    const a = pieces[0], at = guidePoint(a, g.kind, g.i);
+    const [a, b] = pieces, at = guidePoint(a, g.kind, g.i);
     let n = 0;
     const tapOnce = () => {
-      if (tok !== pageToken || corr.step !== "guide") return;
+      if (!live()) return;
       drawFinger(at, true);
       addMark(a, g.kind, g.i);
       setGuideFlash(true, false);
-      if (++n < g.n) return setTimeout(() => { if (tok === pageToken) drawFinger(at, false); }, 500), setTimeout(tapOnce, 1200);
+      if (++n < g.n) { setTimeout(() => { if (live()) drawFinger(at, false); }, 600); setTimeout(tapOnce, 1600); return; }
+      // 示範完：小手指移到另一個三角形要點的地方，停在那裡等學生點（老師說手指出現一下就消失，還沒看完）
       setTimeout(() => {
-        if (tok !== pageToken) return;
-        $("#guide").innerHTML = "";
+        if (!live()) return;
         setGuideFlash(false, true);
+        drawFinger(guidePoint(b, g.kind, corr.map[g.i]), false, true);
         say(`換你：在另一個三角形一閃一閃的${w}上，<br>也點 <b>${g.n}</b> 下。`);
         G.turn = true;
-      }, 1400);
+      }, 1600);
     };
     drawFinger(at, false);
-    setTimeout(tapOnce, 1300);
-  }, G.k === 3 ? 2200 : 600);
+    setTimeout(tapOnce, 1800);
+  }, G.k === 3 ? 2600 : 900);
 }
 // 學生在教學時點三角形：只接受一閃一閃的那個邊或角
 function guideTap(p, pt) {
@@ -1283,6 +1317,7 @@ function guideTap(p, pt) {
   const ok = h && h.kind === g.kind && h.i === want && (p === b || !g.demo);
   if (!ok) { say(`點<b>一閃一閃</b>的那個${GUIDE_WORD[g.kind]}。`); return; }
   addMark(p, g.kind, want);
+  $("#guide").innerHTML = "";   // 學生點了，小手指才離開
   const arr = (q) => (q.um ? (g.kind === "s" ? q.um.s : q.um.a) : [0, 0, 0]);
   const ca = arr(a)[g.i], cb = arr(b)[corr.map[g.i]];
   setGuideFlash(!g.demo, true);
@@ -1303,7 +1338,16 @@ function guideTap(p, pt) {
   if (ca && cb && ca === cb) say(`${ca} 條已經用過了。<br>不同組要畫<b>不一樣多條</b>。`);
   else say(`題目上畫了 ${ca} 條，另一個畫了 ${cb} 條。<br>兩個要畫一樣多條。`);
 }
+// 跳過教學：清掉閃爍和小手指，直接自己做記號
+function skipGuide() {
+  corr.step = "busy";
+  $("#guide").innerHTML = "";
+  for (const p of pieces) p.guide = null;
+  renderAll();
+  startCorrMark();
+}
 function endGuide() {
+  hideSkip();
   const [a, b] = pieces;
   a.guide = b.guide = null;
   redraw(a); redraw(b);
@@ -1326,10 +1370,10 @@ function markDemoSvg() {
   return `<svg class="mini-corr" viewBox="-105 -95 450 190"><g>${tri("#eceff1")}</g><g transform="translate(240,0) rotate(150) scale(-1,1)">${tri("#b3e5fc")}</g></svg>`;
 }
 // 小手指：白色手套、深咖啡色線條（和其他圖示同一種線條），指尖對準要點的地方；點下去時指尖有一圈波紋
-function drawFinger(at, tap) {
+function drawFinger(at, tap, wait) {   // wait：停在那裡上下輕輕動，等學生點
   $("#guide").innerHTML = `<g transform="translate(${at[0].toFixed(1)},${at[1].toFixed(1)})">` +
     (tap ? `<circle class="ripple" r="10"/>` : "") +
-    `<g class="finger${tap ? " tap" : ""}"><g transform="translate(-24,-6) scale(3)">${ICONS.finger}</g></g></g>`;
+    `<g class="finger${tap ? " tap" : ""}${wait ? " wait" : ""}"><g transform="translate(-24,-6) scale(3)">${ICONS.finger}</g></g></g>`;
 }
 // 邊的中點，或角裡面靠近頂點的一點（桌面座標）
 function guidePoint(p, kind, i) {
@@ -1375,7 +1419,12 @@ function checkCorrMarks() {
   if (st.some((x) => x.st === "bad")) {
     loseHeart();
     flash(pieces[1], "shake", 400);
-    say("有一組記號不對，再看看。", "bad");
+    // 畫錯的那幾組在兩個三角形上一閃一閃（留到下次按「檢查」），並說有幾組錯（老師說以前全錯也只說一組）
+    const bad = st.filter((x) => x.st === "bad"), [a, b] = pieces, kd = (x) => (x.k === "s" ? "side" : "angle");
+    a.hint = bad.map((x) => ({ kind: kd(x), i: x.i }));
+    b.hint = bad.map((x) => ({ kind: kd(x), i: corr.map[x.i] }));
+    redraw(a); redraw(b);
+    say(`${bad.length === 6 ? "記號<b>都不對</b>" : `有 <b>${bad.length}</b> 組記號不對`}，<br>看看一閃一閃的地方，再改一改。`, "bad");
     return;
   }
   if (st.some((x) => x.st === "miss")) {
@@ -1857,7 +1906,10 @@ function startRulerDemo() {
   setTool("ruler", true);
   say("先學怎麼用<b>直角尺</b>。<br>直角尺的角是<b>直角</b>，可以用來量角。");
   const go = (k) => {
+    if (over) return;
     if (k >= steps.length) {
+      over = true;
+      hideSkip();
       placeRuler();
       drawRuler();
       playing = true;
@@ -1870,6 +1922,8 @@ function startRulerDemo() {
     flash(p, "pulse", 2800);
     moveRuler(rulerTarget(p, i), 1200, () => { say(text); showNext(k === steps.length - 1 ? "換我試試" : "下一步", () => go(k + 1)); });
   };
+  let over = false;
+  showSkip(() => go(steps.length));
   showNext("下一步", () => go(0));
 }
 
@@ -2061,7 +2115,12 @@ function classifyHint(p, who) {
 $("#hintBtn").addEventListener("click", giveHint);
 // 「下一輪」「下一題」按鈕：說明看完了，學生自己按才繼續（老師說自動跳太快，來不及看）
 let nextAction = null;
-function showNext(label, fn) { const b = $("#roundBtn"); b.textContent = label; b.hidden = false; nextAction = fn; }
+// 「跳過教學」按鈕（桌面右下角）：直角尺教學、做記號教學時出現（老師要求）
+let skipAction = null;
+function showSkip(fn) { $("#skipBtn").hidden = false; skipAction = fn; }
+function hideSkip() { $("#skipBtn").hidden = true; skipAction = null; }
+$("#skipBtn").addEventListener("click", () => { const f = skipAction; hideSkip(); $("#roundBtn").hidden = true; nextAction = null; if (f) f(); });
+function showNext(label, fn) { const b = $("#roundBtn"); b.textContent = label; b.hidden = false; nextAction = fn; fitSay(); }
 $("#roundBtn").addEventListener("click", () => {
   const f = nextAction;
   nextAction = null;
@@ -2078,9 +2137,16 @@ setInterval(() => {
 
 // ================= 對話 =================
 function say(html, tone) {
-  const el = $("#say");
-  el.innerHTML = `<span>${html}</span>`;
-  el.className = tone || "";
+  $("#sayText").innerHTML = html;   // 對話框右下角的按鈕（#sayAct）不會被蓋掉
+  $("#say").className = tone || "";
+  fitSay();
+}
+// 字太多放不下時（例如右下角有按鈕），字稍微縮小，不會被切掉
+function fitSay() {
+  const box = $("#say"), t = $("#sayText");
+  t.style.fontSize = "";
+  let px = parseFloat(getComputedStyle(t).fontSize);
+  while (box.scrollHeight > box.clientHeight + 1 && px > 14) { px -= 1; t.style.fontSize = px + "px"; }
 }
 function catBounce() { const c = $("#cat"); c.classList.remove("bounce"); void c.offsetWidth; c.classList.add("bounce"); }
 
@@ -2147,7 +2213,7 @@ function finishPage(fast) {
         ${last ? `<p>全部的關卡都完成了！</p>` : `<button class="btn" id="nextBtn">下一關</button>`}
         <button class="btn ghost" id="toMenuBtn">回選單</button>`, "wide");
     } else {
-      showPanel(`<div class="big-cat">${ico("dragon")}</div><h2>${name} 完成！</h2>
+      showPanel(`<div class="big-cat">${dragonIco()}</div><h2>${name} 完成！</h2>
         <div class="stars">${starHtml(stars)}</div>
         <p>錯了 ${mistakes} 次</p>
         <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>
@@ -2192,6 +2258,7 @@ function clearBoard() {
   $("#progress").innerHTML = "";
   $("#roundBtn").hidden = true; nextAction = null;
   $("#guide").innerHTML = "";
+  hideSkip();
   $("#checkBtn").hidden = true;
   $("#hearts").innerHTML = "";
   setTool("ruler", false); setTool("mark", false);
@@ -2200,13 +2267,14 @@ function clearBoard() {
 function setTheme() {
   document.body.classList.toggle("learn", learn === true);
   document.body.classList.toggle("play", learn === false);
+  $("#cat").innerHTML = dragonIco();
 }
 function showModePick() {
   clearBoard();
   learn = null;
   setTheme();
   say("先選<b>學習模式</b>或<b>挑戰模式</b>。");
-  showPanel(`<h1 id="homeTitle">${ico("dragon")} 疊疊看！三角形分類</h1>
+  showPanel(`<h1 id="homeTitle">${dragonIco()} 疊疊看！三角形分類</h1>
     <div class="modes">
       <button class="mode-btn learn-btn" id="learnBtn"><b>${ico("book")} 學習模式</b><span>上課一起學<br>提示可以一直用</span></button>
       <button class="mode-btn play-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己挑戰<br>有愛心、星星和挑戰關</span></button>
@@ -2231,10 +2299,10 @@ function showHome() {
   // 挑戰關：只在挑戰模式；第 1～5 關都拿到 3 顆星才打開；不會從「下一關」接過去
   const open = challengeUnlocked();
   const chalNote = !open ? "第 1～5 關都拿到 3 顆星，就能挑戰"
-    : best.challenge != null ? `最佳成績：答對 ${best.challenge} 題` : "可以挑戰了！";
+    : best.challenge != null ? "答錯一題就結束（紀錄在「看成績」）" : "可以挑戰了！";
   const chalBtn = learn ? "" : `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 60 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
-  showPanel(`<h1 id="homeTitle">${ico("dragon")} 疊疊看！三角形分類</h1>
+  showPanel(`<h1 id="homeTitle">${dragonIco()} 疊疊看！三角形分類</h1>
     <p class="mode-tag">${learn ? ico("book") + " 學習模式" : ico("star") + " 挑戰模式"}　<button class="linkbtn" id="modeBtn">換模式</button>
       ${learn ? "" : `<button class="btn ghost small" id="scoreBtn">${ico("trophy")} 看成績</button>`}</p>
     <p class="pick">選一關：</p>
@@ -2256,7 +2324,8 @@ function showHome() {
       const b = $("#chalBtn"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge");
       return;
     }
-    showChalMenu();
+    hidePanel();
+    startChallenge();
   });
   // 清除紀錄要按兩次，避免不小心按到
   $("#clearBtn").addEventListener("click", (e) => {
@@ -2577,36 +2646,20 @@ function endChallenge(reason) {
   $("#toMenuBtn").addEventListener("click", showHome);
 }
 
-// 挑戰關的入口：開始挑戰，或看挑戰紀錄（老師要求挑戰紀錄放在挑戰關裡面）
-function showChalMenu() {
-  showPanel(`<div class="big-cat">${ico("clock")}</div><h2>挑戰關：限時 60 秒</h2>
-    <p>各種題目一題接一題，<br>答錯一題就結束。</p>
-    <button class="btn" id="chalGoBtn">開始挑戰</button>
-    <button class="btn ghost" id="chalRecBtn">${ico("trophy")} 挑戰紀錄</button>
-    <p class="note"><button class="linkbtn" id="toMenuBtn">回選單</button></p>`);
-  $("#chalGoBtn").addEventListener("click", () => { hidePanel(); startChallenge(); });
-  $("#chalRecBtn").addEventListener("click", showChalRecord);
-  $("#toMenuBtn").addEventListener("click", showHome);
-}
-function showChalRecord() {
-  const b = loadBest(), hist = b.chalHist || [];
-  showPanel(`<div class="big-cat">${ico("trophy")}</div><h2>挑戰紀錄</h2>
-    ${b.challenge != null ? `<p>最佳紀錄</p><p class="big-score">答對 ${b.challenge} 題</p>` : "<p>還沒有挑戰過。</p>"}
-    ${hist.length ? `<p>最近幾次：${hist.map((n) => `答對 ${n} 題`).join("、")}</p>` : ""}
-    <button class="btn" id="chalBackBtn">返回</button>`);
-  $("#chalBackBtn").addEventListener("click", showChalMenu);
-}
-
-// 看成績：挑戰模式首頁的「看成績」（這台平板上每一關最好的星星；挑戰關的紀錄在挑戰關裡面看）
+// 看成績：挑戰模式首頁的「看成績」。上面是每一關最好的星星，下面是挑戰關的紀錄（老師要求挑戰成績放在這裡，一行一行往下列）
 function showScores() {
-  const best = loadBest();
+  const best = loadBest(), hist = best.chalHist || [];
   const rows = SCORED.map((p) => {
     const [num, name] = p.title.split("：");
     return `<tr><td>${num}</td><td>${name}</td><td>${best[p.id] ? starHtml(best[p.id]) : "還沒玩"}</td></tr>`;
   }).join("");
+  const chal = best.challenge == null ? `<p>${challengeUnlocked() ? "還沒挑戰過。" : "還沒打開。"}</p>`
+    : `<p><b>最佳紀錄：答對 ${best.challenge} 題</b></p>${hist.length ? `<p class="note">最近幾次（新的在上面）：</p><ul class="chal-list">${hist.map((n) => `<li>答對 ${n} 題</li>`).join("")}</ul>` : ""}`;
   showPanel(`<div class="big-cat">${ico("trophy")}</div><h2>我的成績</h2>
     <table class="result">${rows}</table>
-    <p class="note">這是這台平板上每一關最好的成績。</p>
+    <h3>${ico("clock")} 挑戰關</h3>
+    ${chal}
+    <p class="note">這是這台平板上的紀錄。</p>
     <button class="btn" id="toMenuBtn">回選單</button>`, "wide");
   $("#toMenuBtn").addEventListener("click", showHome);
 }
@@ -2614,7 +2667,7 @@ function showScores() {
 // 遊戲中按選單按鈕：先確認，避免學生不小心按到
 $("#menuBtn").addEventListener("click", () => {
   if (!playing || pageDone) return;   // 關卡完成時，完成畫面本身就有「回選單」
-  showPanel(`<div class="big-cat">${ico("dragon")}</div><h2>要回到選關畫面嗎？</h2>
+  showPanel(`<div class="big-cat">${dragonIco()}</div><h2>要回到選關畫面嗎？</h2>
     <p>這一關還沒做完的部分不會保留。</p>
     <button class="btn" id="keepBtn">繼續玩</button>
     <button class="btn ghost" id="leaveBtn">回選單</button>`);
@@ -2669,7 +2722,7 @@ document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("dblclick", (e) => e.preventDefault());
 
 // 放上圖示
-$("#cat").innerHTML = ico("dragon");
+$("#cat").innerHTML = dragonIco();
 $("#menuBtn").innerHTML = ico("menu");
 $("#hintBtn").innerHTML = ico("bulb");
 $("#rotL").innerHTML = ico("rotL") + "<span>左轉</span>";
