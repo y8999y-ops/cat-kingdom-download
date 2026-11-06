@@ -1228,7 +1228,9 @@ function startGuide() {
 }
 function guideStep() { return corr.guide.steps[corr.guide.k]; }
 function setGuideFlash(onA, onB) {
-  const [a, b] = pieces, g = guideStep(), kind = g.kind === "s" ? "side" : "angle";
+  const [a, b] = pieces, g = guideStep();
+  if (!g) return;   // 教學已經結束（例如換關）就不用再閃
+  const kind = g.kind === "s" ? "side" : "angle";
   a.guide = onA ? { kind, i: g.i } : null;
   b.guide = onB ? { kind, i: corr.map[g.i] } : null;
   redraw(a); redraw(b);
@@ -1255,7 +1257,7 @@ function nextGuide() {
     const a = pieces[0], at = guidePoint(a, g.kind, g.i);
     let n = 0;
     const tapOnce = () => {
-      if (tok !== pageToken) return;
+      if (tok !== pageToken || corr.step !== "guide") return;
       drawFinger(at, true);
       addMark(a, g.kind, g.i);
       setGuideFlash(true, false);
