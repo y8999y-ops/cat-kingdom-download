@@ -63,7 +63,8 @@
   #say.bad { border-color: #ef9a9a; background: #fff3f3; }
   #say.think { border-color: #ffcc80; background: #fffaf0; }   /* 再想一想：溫和的黃色，不用紅色（老師要求不否定學生） */
   /* 「下一步」「下一題」「完成」「檢查」都放在對話框右下角（老師要求：像常見的遊戲，類似的按鈕統一位置） */
-  #sayText { flex: 1; min-width: 0; }
+  #sayText { flex: 1; min-width: 0; text-wrap: pretty; }   /* 避免最後一行只剩一兩個字（老師說分行有點奇怪） */
+  .panel .best-line { font-size: 26px; margin: 6px 0; }
   #sayAct { flex: none; align-self: flex-end; margin: 0 -6px 6px 10px; display: flex; flex-direction: column; gap: 6px; }
   .btn.act { margin: 0; padding: 10px 22px; font-size: 24px; white-space: nowrap; }
   .btn.act[hidden] { display: none; }
@@ -249,20 +250,36 @@
   /* 圖示：同一種線條風格 */
   .ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.16em; }
   .ico .f { fill: currentColor; stroke: none; }
-  /* 可愛的黃色小龍 */
-  .ico .dg-body { fill: #ffd54f; stroke-width: 1.3; }
-  .ico .dg-belly { fill: #fff3c4; stroke: none; }
-  .ico .dg-horn { fill: #ffa726; stroke-width: 1.1; }   /* 短短彎彎的橘色小角，才不會像耳朵 */
-  .ico .dg-spike { fill: #ff8f00; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }   /* 頭頂一排小刺：最像龍的地方 */
-  .ico .dg-wing { fill: #ffb74d; stroke-width: 1; }   /* 圓圓的耳鰭（以前是尖翅膀，老師說像蝙蝠） */
+  /* 可愛的小龍（顏色用 --dg、--dg2，可以變裝） */
+  .ico .dg-body { fill: var(--dg, #ffd54f); stroke-width: 1.3; }
+  .ico .dg-belly { fill: var(--dg2, #fff3c4); stroke: none; }
+  .ico .dg-spike { fill: #ff8f00; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }   /* 頭頂一排小刺、尾巴尖尖：最像龍的地方 */
+  .ico .dg-tail-o { fill: none; stroke: #4e342e; stroke-width: 3.4; stroke-linecap: round; }
+  .ico .dg-tail { fill: none; stroke: var(--dg, #ffd54f); stroke-width: 1.8; stroke-linecap: round; }
   .ico .dg-cheek { fill: #ff8a80; stroke: none; opacity: .8; }
   .ico .dg-shine { fill: #fff; stroke: none; }
   .ico .dg-line { stroke-width: 1.2; }
-  .ico .dg-tooth { fill: #fff; stroke: none; }
-  .ico .dg-scale { fill: none; stroke: #e6a700; stroke-width: .8; stroke-linecap: round; }
-  .ico .dg-glass { fill: none; stroke: #4e342e; stroke-width: .9; }
-  .ico .dg-band { fill: none; stroke: #e53935; stroke-width: 1.8; stroke-linecap: round; }
-  .ico .dg-bstar { fill: #ffeb3b; stroke: #e65100; stroke-width: .5; stroke-linejoin: round; }
+  .ico .dg-scale { fill: none; stroke: rgba(0, 0, 0, .18); stroke-width: .8; stroke-linecap: round; }
+  /* 表情：平常會眨眼；開心（眼睛彎彎、張嘴笑）；想一想（嘴巴圓圓、冒汗） */
+  .ico .dg-eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+  .ico .dg-eyes-h { fill: none; stroke-width: 1.3; display: none; }
+  .ico .dg-m-h { fill: #e57373; stroke-width: 1; display: none; }
+  .ico .dg-m-o { fill: #4e342e; stroke: none; display: none; }
+  .ico .dg-sweat { fill: #81d4fa; stroke: #0277bd; stroke-width: .5; display: none; }
+  .mood-happy .dg-eyes, .mood-happy .dg-m-n, .mood-think .dg-m-n { display: none; }
+  .mood-happy .dg-eyes-h, .mood-happy .dg-m-h, .mood-think .dg-m-o, .mood-think .dg-sweat { display: inline; }
+  /* 配件 */
+  .ico .acc-glass { fill: none; stroke: #4e342e; stroke-width: .9; }
+  .ico .acc-band { fill: none; stroke: #e53935; stroke-width: 1.8; stroke-linecap: round; }
+  .ico .acc-bstar { fill: #ffeb3b; stroke: #e65100; stroke-width: .5; stroke-linejoin: round; }
+  .ico .acc-bow { fill: #f06292; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
+  .ico .acc-scarf { fill: #e53935; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
+  .ico .acc-hat { fill: #4fc3f7; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
+  .ico .acc-hat2 { fill: none; stroke: #fff; stroke-width: .8; }
+  .ico .acc-pom { fill: #ffeb3b; stroke: #4e342e; stroke-width: .5; }
+  .ico .acc-crown { fill: #ffca28; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
+  .ico .acc-gem { fill: #e53935; stroke: none; }
   #cat .ico { display: block; color: var(--ink); }
   .ico.star { color: #ffb300; }
   .ico.star.off { color: #e3d7cc; }   /* 灰色星星是全域樣式，成績表才會正確 */
@@ -288,7 +305,10 @@
   /* 首頁選關 */
   .panel.wide { max-width: 720px; }
   .panel .pick { margin: 14px 0 4px; font-weight: bold; }
-  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  /* 選關按鈕：一排 3 個，最後一排不滿時置中（挑戰模式只有 5 關，以前右下角會空一格，老師覺得奇怪） */
+  .levels { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .levels .lvl { flex: 0 0 calc((100% - 20px) / 3); }
+  .levels .lvl.chal { flex-basis: 100%; }
   .lvl {
     border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 8px 6px; color: var(--ink);
     box-shadow: 0 3px 0 var(--line); line-height: 1.3;
@@ -297,7 +317,7 @@
   .lvl span { display: block; font-size: 16px; color: var(--soft); }
   .lvl:active { transform: translateY(2px); box-shadow: none; background: #fff8e1; }
   .lvl-stars { display: block; font-size: 16px; line-height: 1; margin-top: 3px; font-style: normal; }
-  .lvl.chal { grid-column: 1 / -1; background: #fff3e0; border-color: var(--accent); }
+  .lvl.chal { background: #fff3e0; border-color: var(--accent); }
   /* 首頁選模式 */
   .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0 6px; }
   .mode-btn {
@@ -339,7 +359,8 @@
   .mini-corr { width: 100%; max-width: 440px; height: auto; margin: 0 auto; display: block; }
   .panel .big-score { font-size: 60px; font-weight: bold; color: var(--accent); margin: 0; line-height: 1.1; }
   @media (max-width: 600px) {
-    .levels { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .levels { gap: 8px; }
+    .levels .lvl { flex-basis: calc((100% - 8px) / 2); }
     .panel.wide { padding: 16px 14px; }
     .panel.wide h1 { font-size: 26px; }
     .panel.wide .howto { font-size: 17px; line-height: 1.6; }
@@ -386,6 +407,60 @@
   @keyframes sad { 20%, 60% { transform: translateX(-5px) rotate(-6deg); } 40%, 80% { transform: translateX(5px) rotate(6deg); } }
   .big-cat.happy .ico { animation: hop .8s ease-out .2s 3; }
   @media (prefers-reduced-motion: reduce) { #cat .ico, .confetti i, .big-cat.happy .ico { animation: none; } }
+  /* ---------- 小龍變裝 ---------- */
+  .shop-top { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .shop-top .big-cat { font-size: 96px; }
+  .shop-top p { margin: 0; }
+  .shop-tabs { display: flex; justify-content: center; gap: 8px; margin: 6px 0 10px; }
+  .shop-tabs .tab { border: 3px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 22px; font-size: 20px; color: var(--soft); }
+  .shop-tabs .tab.on { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .shop-item { border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 4px; color: var(--ink); box-shadow: 0 3px 0 var(--line); }
+  .shop-item > .ico.dragon { font-size: 64px; display: block; margin: 0 auto; }
+  .shop-item span .ico { font-size: 1em; }
+  .shop-item b { display: block; font-size: 18px; }
+  .shop-item span { display: block; font-size: 16px; color: var(--soft); }
+  .shop-item.on { border-color: var(--accent); background: #fff8fb; }
+  .shop-item.poor { opacity: .55; }
+  .shop-item.nudge { animation: binno .4s; }
+  /* 過關畫面：開心的小龍和打勾並排 */
+  .pass-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .pass-row .big-cat { font-size: 84px; }
+  .pass-row .pass-badge { margin: 0; }
+  /* 連續答對 */
+  #combo { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); z-index: 6; pointer-events: none; opacity: 0;
+    background: #fff; border: 3px solid #ffb300; border-radius: 999px; padding: 6px 18px; font-size: 22px; color: var(--ink); white-space: nowrap; }
+  #combo.show { animation: comboPop 1.8s ease-out 1; }
+  @keyframes comboPop { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 25% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
+  /* 星星飛進儲存罐 */
+  .fly-star { position: fixed; z-index: 30; pointer-events: none; line-height: 1; }
+  .jar-box { display: inline-block; }
+  .jar-box.gulp { animation: gulp .35s ease-out; }
+  @keyframes gulp { 40% { transform: scale(1.18) rotate(-6deg); } }
+  /* ---------- 筆電這種又寬又矮的螢幕（老師用 Acer 觸控筆電）：格子放在桌面右邊，桌面才夠高 ---------- */
+  @media (min-width: 1000px) and (max-height: 780px) and (min-aspect-ratio: 3/2) {
+    #app { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 32%); grid-template-rows: auto minmax(0, 1fr); column-gap: 14px; }
+    #top { grid-column: 1 / -1; }
+    #board { grid-column: 1; grid-row: 2; }
+    #bins { grid-column: 2; grid-row: 2; align-content: center; padding: 0 0 6px; }
+    #app.nobins #board { grid-column: 1 / -1; }
+    #say { height: 112px; font-size: clamp(19px, 1.8vw, 24px); }
+    #cat { font-size: 84px; }
+    .bin { min-height: 96px; }
+    #bins.both .bin { min-height: 78px; }
+    #bins.both .bin b { font-size: 17px; }
+    .bin b { font-size: 21px; }
+    .bin small { font-size: 15px; }
+    .grid-head { font-size: 18px; }
+    /* 首頁也排緊一點，矮螢幕才不用捲動 */
+    .panel { padding: 12px 22px; }
+    .panel h1 { font-size: 30px; margin: 0 0 2px; }
+    .panel .pick { margin: 6px 0 2px; }
+    .jar-row { margin: 2px auto; }
+    .jar-row .jar { width: 38px; height: 44px; }
+    .lvl { padding: 5px 6px; }
+    .levels { gap: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -405,6 +480,7 @@
   <div id="board">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g><g id="guide"></g></svg>
     <div id="progress" aria-hidden="true"></div>
+    <div id="combo" aria-live="polite"></div>
     <div id="zoomBox"><button class="icon-btn" id="zoomOut" aria-label="縮小"></button><button class="icon-btn" id="zoomIn" aria-label="放大"></button></div>
     <div id="tools">
       <button id="rotL" aria-label="向左轉" disabled></button>
@@ -452,8 +528,6 @@ const COLORS = ["#ff8a80", "#ffb74d", "#ffd54f", "#aed581", "#4fc3f7", "#9575cd"
 // ================= 圖示：同一種線條風格（24×24、圓角線條），不用 emoji =================
 // 平板和電腦的 emoji 長得不一樣，所以全部用自己畫的 SVG；.f 是填色的部分
 const ICONS = {
-  // 可愛的黃色小龍：兩隻長長的小角、頭頂小刺、大鼻子、大眼睛、粉紅臉頰、微笑（老師要求，不用配合校徽；拿掉尖翅膀，老師說像蝙蝠）
-  dragon: `<path class="dg-horn" d="M7.4 7.4C6.3 5.9 6.4 3.9 7.8 2.8c.2 1.3.9 2.3 2.1 3.1zM16.6 7.4c1.1-1.5 1-3.5-.4-4.6-.2 1.3-.9 2.3-2.1 3.1z"/><path class="dg-spike" d="M9.3 6.1l.9-2.9 1.1 2.1 .7-3 .7 3 1.1-2.1.9 2.9z"/><ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/><ellipse class="dg-belly" cx="12" cy="16.1" rx="5.2" ry="3.5"/><ellipse class="f" cx="10.7" cy="15.2" rx=".45" ry=".35"/><ellipse class="f" cx="13.3" cy="15.2" rx=".45" ry=".35"/><circle class="f" cx="9.1" cy="11" r="1.75"/><circle class="f" cx="14.9" cy="11" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.4" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.4" r=".6"/><circle class="dg-cheek" cx="6.6" cy="13.8" r="1.1"/><circle class="dg-cheek" cx="17.4" cy="13.8" r="1.1"/><path class="dg-line" d="M10.5 17.6c1 .8 2 .8 3 0"/><path class="dg-scale" d="M10.6 7.6c.5.5.9.5 1.4 0 .5.5.9.5 1.4 0"/>`,
   // 教做記號時，示範點一下的小手指
   finger: `<path class="hand-sh" transform="translate(.7,.9)" d="M6 14V4a2 2 0 0 1 4 0v5a2 2 0 0 1 4 0v1a2 2 0 0 1 4 0v1a2 2 0 0 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L6 15z"/><path class="hand" d="M6 14V4a2 2 0 0 1 4 0v5a2 2 0 0 1 4 0v1a2 2 0 0 1 4 0v1a2 2 0 0 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L6 15z"/><path class="knuckle" d="M10 9v3M14 10v2.5M18 11v3"/>`,
   bulb: `<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>`,
@@ -477,10 +551,49 @@ const ICONS = {
   book: `<path d="M3 5.5c3-1.3 6-1.3 9 .5v14c-3-1.8-6-1.8-9-.5zM21 5.5c-3-1.3-6-1.3-9 .5v14c3-1.8 6-1.8 9-.5z"/>`,
 };
 function ico(name, cls = "") { return `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`; }
-// 兩種模式的小龍有一點不一樣（老師要求）：學習模式戴眼鏡（認真學），挑戰模式綁頭帶（加油挑戰）
-ICONS.dragonL = ICONS.dragon + `<g class="dg-glass"><circle cx="9.1" cy="11" r="2.8"/><circle cx="14.9" cy="11" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>`;
-ICONS.dragonP = ICONS.dragon + `<path class="dg-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="dg-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>`;
-function dragonIco() { return ico(learn === true ? "dragonL" : learn === false ? "dragonP" : "dragon"); }
+// ================= 小龍：顏色、配件、表情（老師要求：不要牛角、會眨眼、有不同表情、可以用星星變裝） =================
+// 頭頂一排小刺、後面一條捲捲的小尾巴（最像龍的地方），沒有角和翅膀（以前像牛角、像蝙蝠）。
+// 表情：平常（會眨眼）、開心（答對：眼睛彎彎、張嘴笑）、想一想（答錯：嘴巴圓圓、冒一滴汗）。
+const DG_COLORS = [
+  { id: "yellow", name: "黃色", c: "#ffd54f", c2: "#fff3c4", price: 0 },
+  { id: "green", name: "綠色", c: "#aed581", c2: "#f1f8e9", price: 5 },
+  { id: "blue", name: "藍色", c: "#81d4fa", c2: "#e1f5fe", price: 5 },
+  { id: "pink", name: "粉紅色", c: "#f8bbd0", c2: "#fff0f5", price: 5 },
+  { id: "purple", name: "紫色", c: "#ce93d8", c2: "#f3e5f5", price: 8 },
+  { id: "orange", name: "橘色", c: "#ffb74d", c2: "#fff3e0", price: 8 },
+];
+const DG_ACCS = [
+  { id: "none", name: "不戴", price: 0, svg: "" },
+  { id: "glasses", name: "眼鏡", price: 0, svg: `<g class="acc-glass"><circle cx="9.1" cy="11" r="2.8"/><circle cx="14.9" cy="11" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>` },
+  { id: "band", name: "頭帶", price: 0, svg: `<path class="acc-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="acc-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>` },
+  { id: "bow", name: "蝴蝶結", price: 6, svg: `<path class="acc-bow" d="M16 5.6l-2.8-1.9v3.8zM16 5.6l2.8-1.9v3.8z"/><circle class="acc-bow" cx="16" cy="5.6" r=".9"/>` },
+  { id: "scarf", name: "圍巾", price: 6, svg: `<path class="acc-scarf" d="M5.4 17.4c4.2 2.5 9 2.5 13.2 0l.5 1.8c-4.4 2.7-9.8 2.7-14.2 0zM15.4 19.3l1.1 3.4 1.8-.7-.9-3.4z"/>` },
+  { id: "hat", name: "派對帽", price: 8, svg: `<path class="acc-hat" d="M12 .4L8.8 6.6h6.4z"/><path class="acc-hat2" d="M10.2 3.9h3.6M9.4 5.4h5.2"/><circle class="acc-pom" cx="12" cy=".7" r=".9"/>` },
+  { id: "crown", name: "皇冠", price: 12, svg: `<path class="acc-crown" d="M8.4 6.8l.5-3.6 1.8 1.8 1.3-2.7 1.3 2.7 1.8-1.8.5 3.6z"/><circle class="acc-gem" cx="12" cy="5.4" r=".7"/>` },
+];
+function dragonSvg(colorId, accId, mood) {
+  const col = DG_COLORS.find((c) => c.id === colorId) || DG_COLORS[0];
+  const acc = DG_ACCS.find((a) => a.id === accId) || DG_ACCS[0];
+  return `<svg class="ico dragon${mood ? " mood-" + mood : ""}" viewBox="0 0 24 24" aria-hidden="true" style="--dg:${col.c};--dg2:${col.c2}">` +
+    `<path class="dg-tail-o" d="M17.2 17.6c2.8 1.2 5 .1 5.6-2.4"/><path class="dg-tail" d="M17.2 17.6c2.8 1.2 5 .1 5.6-2.4"/><path class="dg-spike" d="M22 15.6l1.6-2.6-2.8.9z"/>` +
+    `<path class="dg-spike" d="M8.6 6.7l.9-3.6 1.6 2.4.9-3.8.9 3.8 1.6-2.4.9 3.6z"/>` +
+    `<ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/><ellipse class="dg-belly" cx="12" cy="16.1" rx="5.2" ry="3.5"/>` +
+    `<ellipse class="f" cx="10.7" cy="15.2" rx=".45" ry=".35"/><ellipse class="f" cx="13.3" cy="15.2" rx=".45" ry=".35"/>` +
+    `<g class="dg-eyes"><circle class="f" cx="9.1" cy="11" r="1.75"/><circle class="f" cx="14.9" cy="11" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.4" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.4" r=".6"/></g>` +
+    `<path class="dg-eyes-h" d="M7.5 11.6c.9-1.6 2.3-1.6 3.2 0M13.3 11.6c.9-1.6 2.3-1.6 3.2 0"/>` +
+    `<circle class="dg-cheek" cx="6.6" cy="13.8" r="1.1"/><circle class="dg-cheek" cx="17.4" cy="13.8" r="1.1"/>` +
+    `<path class="dg-line dg-m-n" d="M10.5 17.6c1 .8 2 .8 3 0"/><path class="dg-m-h" d="M10.1 17.1c.5 1.9 3.3 1.9 3.8 0z"/><circle class="dg-m-o" cx="12" cy="17.9" r=".75"/>` +
+    `<path class="dg-sweat" d="M19.2 6.4c.7 1 1.1 1.7 1.1 2.2a1.1 1.1 0 0 1-2.2 0c0-.5.4-1.2 1.1-2.2z"/>` +
+    `<path class="dg-scale" d="M10.6 7.8c.5.5.9.5 1.4 0 .5.5.9.5 1.4 0"/>` + acc.svg + `</svg>`;
+}
+// 這台平板的小龍造型（挑戰模式用星星買）。沒選配件時：學習模式戴眼鏡、挑戰模式綁頭帶
+function dgState() { const b = loadBest(); return { color: (b.dg && b.dg.color) || "yellow", acc: b.dg ? b.dg.acc : null, own: b.own || [] }; }
+function dragonIco(mood) {
+  const s = dgState();
+  const acc = s.acc != null ? s.acc : learn === true ? "glasses" : learn === false ? "band" : "none";
+  return dragonSvg(s.color, acc, mood);
+}
+ICONS.dragon = dragonSvg("yellow", "none").replace(/^<svg[^>]*>|<\/svg>$/g, "");
 
 // direct：直接把三角形拖進格子，不用先配對全等；id 用來記錄每關的最佳星星
 const PAGES = [
@@ -610,6 +723,7 @@ function startPage(i) {
   direct = !!PAGES[i].direct;
   challenge = false;
   mistakes = 0;
+  combo = 0;
   hintsLeft = HINT_FLASHES;
   nudged = false;
   pageDone = false;
@@ -995,6 +1109,7 @@ function binsFor(m) {
 function buildBins() {
   binsEl.innerHTML = "";
   binsEl.className = "";
+  $("#app").classList.toggle("nobins", mode === "tutorial" || mode === "corr" || mode === "pick");   // 沒有格子的關卡，桌面用全部寬度
   if (mode === "tutorial") return;
   if (mode === "both") {
     binsEl.className = "both";
@@ -1155,6 +1270,7 @@ function classify(p, bin) {
     bin.classList.remove("ok"); void bin.offsetWidth; bin.classList.add("ok");
     if (challenge) { renderAll(); chalRight("答對了！" + explain(p) + "。"); return true; }
     addMini(bin, p);
+    goodStreak();
     say("答對了！" + (direct ? "這個三角形" : "這一組") + explain(p) + "。", "good");
     catBounce();
     renderAll();
@@ -1178,7 +1294,7 @@ function classify(p, bin) {
   if (wrongAngle && toolAvail("ruler") && !rulerOn) setTool("ruler", true);
   // 不說「放錯了」（老師要求不否定學生），請他再想一想、再操作。不等邊三角形沒有一樣長的邊，就請他比比看三條邊
   const eqSides = p.cat.side !== "sca";
-  const sideTip = eqSides ? "看看三角形上的記號，哪幾條邊一樣長？" : "比比看三條邊，有沒有一樣長的邊？";
+  const sideTip = eqSides ? "看看三角形上的記號，有幾條邊一樣長？" : "比比看三條邊，有沒有一樣長的邊？";
   say("再想一想：<br>" + (wrongSide && wrongAngle ? sideTip + "再用<b>直角尺</b>量量看它的角。"
     : wrongSide ? sideTip : "用<b>直角尺</b>量量看它的角。"), "think");
   return false;
@@ -1320,33 +1436,58 @@ function nextGuide() {
     G.turn = true;
     return;
   }
-  if (G.k === 3) say("邊畫好了！<br>角也一樣，用<b>弧線</b>做記號。", "good");
-  // 小手指示範：在題目三角形上點 n 下（老師說太快：出現後停 1.8 秒才點，每下間隔 1.6 秒）
+  // 邊教完換角：先停下來，學生按「下一步」再繼續（老師說邊換角那邊很卡、太快）
+  if (G.k === 3) { $("#guide").innerHTML = ""; say("邊都畫好了！<br>接下來是<b>角</b>，用<b>弧線</b>做記號。", "good"); showNext("下一步", () => demoGuide(g, w, tok)); return; }
+  demoGuide(g, w, tok);
+}
+// 小手指示範（老師說太快）：先說明，2.2 秒後才開始點，每下間隔 1.8 秒；
+// 點完以後，小手指在兩個三角形的對應位置之間來回兩次，讓學生看出是哪一組，最後停在要學生點的地方
+function demoGuide(g, w, tok) {
+  const G = corr.guide, live = () => tok === pageToken && corr.step === "guide";
+  const [a, b] = pieces, at = guidePoint(a, g.kind, g.i), bt = guidePoint(b, g.kind, corr.map[g.i]);
   setGuideFlash(true, false);
-  const live = () => tok === pageToken && corr.step === "guide";
-  setTimeout(() => {
+  say(`看小手指：在題目的${w}上點 <b>${g.n}</b> 下，<br>畫 ${g.n} 條${g.kind === "s" ? "短線" : "弧線"}。`);
+  drawFinger(at, false);
+  let n = 0;
+  const tapOnce = () => {
     if (!live()) return;
-    say(`看小手指：在題目的${w}上點 <b>${g.n}</b> 下，<br>畫 ${g.n} 條${g.kind === "s" ? "短線" : "弧線"}。`);
-    const [a, b] = pieces, at = guidePoint(a, g.kind, g.i);
-    let n = 0;
-    const tapOnce = () => {
+    drawFinger(at, true);
+    addMark(a, g.kind, g.i);
+    setGuideFlash(true, false);
+    if (++n < g.n) { setTimeout(() => { if (live()) drawFinger(at, false); }, 700); setTimeout(tapOnce, 1800); return; }
+    setTimeout(() => {
       if (!live()) return;
-      drawFinger(at, true);
-      addMark(a, g.kind, g.i);
-      setGuideFlash(true, false);
-      if (++n < g.n) { setTimeout(() => { if (live()) drawFinger(at, false); }, 600); setTimeout(tapOnce, 1600); return; }
-      // 示範完：小手指移到另一個三角形要點的地方，停在那裡等學生點（老師說手指出現一下就消失，還沒看完）
-      setTimeout(() => {
+      setGuideFlash(true, true);
+      say(`這兩個一閃一閃的${w}是一組<b>對應${w}</b>，<br>要畫一樣多條。`);
+      const path = [bt, at, bt];   // 來回兩次：A→B→A→B
+      let k = 0, from = at;
+      const step = () => {
         if (!live()) return;
-        setGuideFlash(false, true);
-        drawFinger(guidePoint(b, g.kind, corr.map[g.i]), false, true);
-        say(`換你：在另一個三角形一閃一閃的${w}上，<br>也點 <b>${g.n}</b> 下。`);
-        G.turn = true;
-      }, 1600);
-    };
-    drawFinger(at, false);
-    setTimeout(tapOnce, 1800);
-  }, G.k === 3 ? 2600 : 900);
+        if (k >= path.length) {
+          setGuideFlash(false, true);
+          drawFinger(bt, false, true);
+          say(`換你：在另一個三角形一閃一閃的${w}上，<br>也點 <b>${g.n}</b> 下。`);
+          G.turn = true;
+          return;
+        }
+        const to = path[k++];
+        moveFinger(from, to, 900, () => { from = to; setTimeout(step, 500); });
+      };
+      setTimeout(step, 800);
+    }, 1500);
+  };
+  setTimeout(tapOnce, 2200);
+}
+// 小手指從一個地方慢慢移到另一個地方
+function moveFinger(from, to, ms, done) {
+  const t0 = performance.now(), tok = pageToken;
+  const f = (t) => {
+    if (tok !== pageToken) return;
+    const k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+    drawFinger([from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e], false);
+    if (k < 1) requestAnimationFrame(f); else done && done();
+  };
+  requestAnimationFrame(f);
 }
 // 學生在教學時點三角形：只接受一閃一閃的那個邊或角
 function guideTap(p, pt) {
@@ -1421,7 +1562,7 @@ function guidePoint(p, kind, i) {
   if (kind === "s") { const A = w[(i + 1) % 3], B = w[(i + 2) % 3]; return [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]; }
   const P = w[i], u = norm([w[(i + 1) % 3][0] - P[0], w[(i + 1) % 3][1] - P[1]]), v = norm([w[(i + 2) % 3][0] - P[0], w[(i + 2) % 3][1] - P[1]]);
   const d = norm([u[0] + v[0], u[1] + v[1]]);
-  return [P[0] + d[0] * 30, P[1] + d[1] * 30];
+  return [P[0] + d[0] * 24, P[1] + d[1] * 24];
 }
 
 // ---------- 第 2 步（之後）：自己做記號，三組對應邊、三組對應角都要畫 ----------
@@ -1488,8 +1629,8 @@ function corrMarksDone() {
   say("記號都畫對了！<br>對應邊一樣長，對應角一樣大。", "good");
   const tok = pageToken;
   const go = () => { if (tok === pageToken) { corr.step = "ask"; askCorr(); } };
-  if (corr.still) { setTimeout(go, 2600); return; }   // 最後一組：三角形不動
-  setTimeout(() => { if (tok === pageToken) tween(b, { r: b.r + 30 * (2 + rand(8)) }, 900, go); }, 2600);   // 記號畫對了，先看一下再轉方向、出題
+  if (corr.still) { setTimeout(go, 1500); return; }   // 最後一組：三角形不動
+  setTimeout(() => { if (tok === pageToken) tween(b, { r: b.r + 30 * (2 + rand(8)) }, 900, go); }, 1200);   // 記號畫對了，看一下就轉方向、出題（老師說 2.6 秒太久）
 }
 $("#checkBtn").addEventListener("click", checkCorrMarks);
 
@@ -1572,6 +1713,7 @@ function answerCorr(p, tap) {
     corr.q++;
     corr.busy = true;
     renderProgress();
+    goodStreak();
     say(`對了！疊合時，${A} 和 <b>${B}</b> 會疊在一起，<br>是${CORR_WORD[q.kind]}。`, "good");
     const more = corr.q < 3, moreRound = corr.round + 1 < corrRounds();
     showNext(more ? "下一題" : moreRound ? "下一組" : "完成", () => {
@@ -1988,14 +2130,18 @@ function segDist(P, A, B) {
 // 點到哪裡：點在三角形裡面、靠近頂點 → 角；不然看最近的邊（30px 內）。回傳 { kind: "s" 或 "a", i }
 function markHit(p, pt) {
   const q = localOf(p, pt), P = [q[0] * S, q[1] * S], v = p.v.map(([x, y]) => [x * S, y * S]);
-  const kA = Math.max(34, lenPx(p) * 0.25);
-  let best = null;
-  if (insideTri(P, v)) v.forEach((V, i) => { const d = dist(P, V); if (d < kA && (!best || d < best.d)) best = { kind: "a", i, d }; });
-  if (!best) for (let s = 0; s < 3; s++) {
+  // 先看是不是點在邊上（20px 內）：老師說想點邊常常點到角，所以邊優先；角只算三角形裡面、靠近頂點、又離邊有一段距離的地方
+  let side = null;
+  for (let s = 0; s < 3; s++) {
     const d = segDist(P, v[(s + 1) % 3], v[(s + 2) % 3]);
-    if (d < 30 && (!best || d < best.d)) best = { kind: "s", i: s, d };
+    if (d < 30 && (!side || d < side.d)) side = { kind: "s", i: s, d };
   }
-  return best;
+  const kA = Math.max(30, lenPx(p) * 0.22);
+  let ang = null;
+  if (insideTri(P, v)) v.forEach((V, i) => { const d = dist(P, V); if (d < kA && (!ang || d < ang.d)) ang = { kind: "a", i, d }; });
+  if (ang && ang.d < kA * 0.85) return ang;   // 很靠近頂點：角（尖角離邊很近，也要點得到）
+  if (side && (side.d < 12 || !ang)) return side;
+  return ang || side;
 }
 function addMark(p, kind, i) {
   if (!p.um) p.um = { s: [0, 0, 0], a: [0, 0, 0] };
@@ -2149,8 +2295,8 @@ function classifyHint(p, who) {
   const side = mode === "side" || mode === "both", ang = mode === "angle" || mode === "both";
   if (side) showMarks(p, "side", 600000);   // 提示的記號留著，不要閃完就消失（老師要求）
   if (ang && toolAvail("ruler") && !rulerOn) setTool("ruler", true);
-  if (side && ang) return `${who}：哪幾條邊一樣長？<br>再用<b>直角尺</b>量量看它的角。`;
-  if (side) return `${who}：<br>哪幾條邊一樣長？`;
+  if (side && ang) return `${who}：有幾條邊一樣長？<br>再用<b>直角尺</b>量量看它的角。`;
+  if (side) return `${who}：<br>有幾條邊一樣長？`;
   return `用<b>直角尺</b>量量看${who}的角，<br>和直角比，是比較小、一樣，還是比較大？`;
 }
 $("#hintBtn").addEventListener("click", giveHint);
@@ -2170,7 +2316,18 @@ $("#roundBtn").addEventListener("click", () => {
 });
 // 30 秒沒有動作：練習直接閃提示；其他關卡只提醒可以按燈泡看複習小卡（不自動給答案）
 setInterval(() => {
-  if (!playing || pageDone || challenge || Date.now() - lastAct < 30000) return;
+  if (!playing || pageDone || challenge) return;
+  const idle = Date.now() - lastAct;
+  // 做記號（教學、自己畫）：15 秒沒動作，直接告訴學生怎麼點（老師說一直停在「需要幫忙嗎」，看了燈泡也不會）
+  if (mode === "corr" && corr && (corr.step === "guide" || corr.step === "mark") && idle > 15000) {
+    lastAct = Date.now();
+    if (corr.step === "guide" && corr.guide && corr.guide.turn) {
+      const g = guideStep(), w = GUIDE_WORD[g.kind];
+      say(`在<b>一閃一閃</b>的${w}上點 <b>${g.n}</b> 下，<br>每點一下，多一條${g.kind === "s" ? "短線" : "弧線"}。`);
+    } else say("點一下<b>邊</b>，會畫一條<b>短線</b>；點一下<b>角</b>，會畫一條<b>弧線</b>。<br>多點幾下，會變 2 條、3 條。");
+    return;
+  }
+  if (idle < 30000) return;
   lastAct = Date.now();
   if (mode === "tutorial") flashHint();
   else if (!nudged) { nudged = true; say("需要幫忙嗎？<br>按右上角的燈泡，可以看複習小卡。"); }
@@ -2189,8 +2346,18 @@ function fitSay() {
   let px = parseFloat(getComputedStyle(t).fontSize);
   while (box.scrollHeight > box.clientHeight + 1 && px > 14) { px -= 1; t.style.fontSize = px + "px"; }
 }
-function catBounce() { const c = $("#cat"); c.classList.remove("bounce", "sad"); void c.offsetWidth; c.classList.add("bounce"); }
-function catSad() { const c = $("#cat"); c.classList.remove("bounce", "sad"); void c.offsetWidth; c.classList.add("sad"); }
+// 小龍的表情：答對開心（跳一下），答錯想一想（搖一搖）；過一下回到平常
+let moodTimer = 0;
+function catMood(cls, anim, ms) {
+  const c = $("#cat"), s = c.querySelector("svg");
+  c.classList.remove("bounce", "sad"); void c.offsetWidth; c.classList.add(anim);
+  if (!s) return;
+  s.classList.remove("mood-happy", "mood-think"); s.classList.add(cls);
+  clearTimeout(moodTimer);
+  moodTimer = setTimeout(() => s.classList.remove(cls), ms);
+}
+function catBounce() { catMood("mood-happy", "bounce", 1800); }
+function catSad() { catMood("mood-think", "sad", 2400); }
 
 // ================= 關卡結束與畫面 =================
 // 挑戰模式：每錯兩次扣一顆星（老師要求）。錯 0～1 次 3 顆、2～3 次 2 顆、4～5 次 1 顆；錯 6 次愛心用完，要複習再重來
@@ -2245,12 +2412,12 @@ function finishPage(fast) {
   setTimeout(() => {
     if (tok !== pageToken) return;
     if (mode === "tutorial") {
-      showPanel(`${confetti()}<div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div><h2>練習完成！</h2>
+      showPanel(`${confetti()}<div class="pass-row"><div class="big-cat happy">${dragonIco("happy")}</div><div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div></div><h2>練習完成！</h2>
         ${passPics("tutorial")}
         <button class="btn" id="nextBtn">下一關</button>`, "wide");
     } else if (learn) {
       // 學習模式：過關畫面（不顯示星星），用圖卡整理重點
-      showPanel(`${confetti()}<div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div>
+      showPanel(`${confetti()}<div class="pass-row"><div class="big-cat happy">${dragonIco("happy")}</div><div class="pass-badge"><svg viewBox="0 0 24 24">${ICONS.check}</svg></div></div>
         <h2>${name} 過關！</h2>
         ${passPics(PAGES[pageIdx].id)}
         ${PAGES[pageIdx].id === "corr" ? `<p class="pass-cap">${ico("mark")} 找對應時，可以先做記號再找。</p>` : ""}
@@ -2259,13 +2426,14 @@ function finishPage(fast) {
     } else {
       // 挑戰模式：星星一顆一顆跳出來，再存進儲存罐
       const after = jarStars(), opened = jarBefore < JAR_GOAL && after >= JAR_GOAL;
-      showPanel(`${confetti()}<div class="big-cat happy">${dragonIco()}</div><h2>${name} 完成！</h2>
+      showPanel(`${confetti()}<div class="big-cat happy">${dragonIco("happy")}</div><h2>${name} 完成！</h2>
         <div class="stars pop">${starHtml(stars)}</div>
-        <div class="jar-row small">${jarSvg(after)}<div><b>儲存罐 +${stars} 顆</b><span>${Math.min(after, JAR_GOAL)} / ${JAR_GOAL} 顆</span></div></div>
+        <div class="jar-row small" id="passJar"><span class="jar-box">${jarSvg(jarBefore)}</span><div><b>存進儲存罐</b><span id="jarCount">${jarText(jarBefore)}</span></div></div>
         ${opened ? `<p class="pass-cap">${ico("clock")} 儲存罐存滿了，挑戰關打開了！</p>` : ""}
         <button class="btn" id="nextBtn">${last ? "看成績" : "下一關"}</button>
         <button class="btn ghost" id="toMenuBtn">回選單</button>`);
     }
+    if (!learn && mode !== "tutorial") flyStarsToJar(jarBefore, stars);   // 星星一顆一顆飛進儲存罐
     const toMenu = $("#toMenuBtn");
     if (toMenu) toMenu.addEventListener("click", showHome);
     const nextBtn = $("#nextBtn");
@@ -2277,6 +2445,36 @@ function finishPage(fast) {
   }, fast ? 0 : 1200);   // 按「完成」後馬上出來；最後一個答對時，先看一下「答對了」再出來
 }
 
+// 過關畫面的動畫：拿到的星星一顆一顆飛進儲存罐，罐子裡的星星跟著變多（老師要求）
+function flyStarsToJar(before, n) {
+  const tok = pageToken, jar = $("#passJar .jar-box"), cnt = $("#jarCount");
+  const stars = [...document.querySelectorAll(".stars.pop .ico.star:not(.off)")].slice(0, n);
+  if (!jar || !cnt) return;
+  stars.forEach((s, i) => {
+    setTimeout(() => {
+      if (tok !== pageToken || !document.body.contains(jar)) return;
+      const a = s.getBoundingClientRect(), b = jar.getBoundingClientRect();
+      const fly = document.createElement("div");
+      fly.className = "fly-star";
+      fly.innerHTML = ico("star", "star");
+      fly.style.left = a.left + "px"; fly.style.top = a.top + "px"; fly.style.fontSize = a.height + "px";
+      document.body.appendChild(fly);
+      const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
+      const anim = fly.animate([
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
+        { transform: `translate(${dx * .5}px,${dy * .5 - 60}px) scale(1.15)`, opacity: 1, offset: .5 },
+        { transform: `translate(${dx}px,${dy}px) scale(.35)`, opacity: .9 },
+      ], { duration: 750, easing: "ease-in-out" });
+      anim.onfinish = () => {
+        fly.remove();
+        const now = before + i + 1;
+        jar.innerHTML = jarSvg(now);
+        jar.classList.remove("gulp"); void jar.offsetWidth; jar.classList.add("gulp");
+        cnt.textContent = jarText(now);
+      };
+    }, 1100 + i * 650);   // 星星先彈出來，再一顆一顆飛
+  });
+}
 // 過關動畫：彩色的小三角形和星星從上面飄下來（老師要求加過關動畫；沒有音效）
 function confetti() {
   const cols = ["#ff8a80", "#ffd54f", "#81c784", "#4fc3f7", "#ce93d8", "#ffb74d"];
@@ -2336,7 +2534,7 @@ function showModePick() {
   showPanel(`<h1 id="homeTitle">${dragonIco()} 疊疊看！三角形分類</h1>
     <div class="modes">
       <button class="mode-btn learn-btn" id="learnBtn"><b>${ico("book")} 學習模式</b><span>上課一起學<br>提示可以一直用</span></button>
-      <button class="mode-btn play-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己挑戰<br>有愛心、星星和挑戰關</span></button>
+      <button class="mode-btn play-btn" id="playBtn"><b>${ico("star")} 挑戰模式</b><span>自己挑戰<br>收集星星、挑戰關、小龍變裝</span></button>
     </div>`, "wide");
   $("#homeTitle").addEventListener("click", onTitleTap);
   $("#learnBtn").addEventListener("click", () => { learn = true; showHome(); });
@@ -2357,12 +2555,12 @@ function showHome() {
   }).join("");
   // 挑戰關：只在挑戰模式；星星儲存罐存滿 15 顆才打開（老師要求）；不會從「下一關」接過去
   const open = challengeUnlocked();
-  const chalNote = !open ? `星星儲存罐存滿 ${JAR_GOAL} 顆就能挑戰` : "答錯一題就結束";
+  const chalNote = (!open ? `星星儲存罐存滿 ${JAR_GOAL} 顆就能挑戰` : "答錯一題就結束") + "・答對一題得 1 顆星";
   const chalBtn = learn ? "" : `<button class="lvl chal${open ? "" : " locked"}" id="chalBtn"><b>${ico(open ? "clock" : "lock")} 挑戰關：限時 60 秒</b><span>${chalNote}</span></button>`;
   // 每一關的內容都寫在選關按鈕上，首頁就不再另外列說明，平板橫放才不用捲動
   showPanel(`<h1 id="homeTitle">${dragonIco()} 疊疊看！三角形分類</h1>
     <p class="mode-tag">${learn ? ico("book") + " 學習模式" : ico("star") + " 挑戰模式"}　<button class="linkbtn" id="modeBtn">換模式</button>
-      ${learn ? "" : `<button class="btn ghost small" id="scoreBtn">${ico("trophy")} 看成績</button>`}</p>
+      ${learn ? "" : `<button class="btn ghost small" id="scoreBtn">${ico("trophy")} 看成績</button><button class="btn ghost small" id="shopBtn">${ico("star")} 小龍變裝</button>`}</p>
     ${learn ? "" : jarHtml()}
     <p class="pick">選一關：</p>
     <div class="levels">${levels}${chalBtn}</div>
@@ -2378,6 +2576,7 @@ function showHome() {
   for (const b of document.querySelectorAll(".lvl[data-i]")) b.addEventListener("click", () => go(+b.dataset.i));
   if (learn) return;
   $("#scoreBtn").addEventListener("click", showScores);
+  $("#shopBtn").addEventListener("click", () => showShop("color"));
   $("#chalBtn").addEventListener("click", () => {
     if (!challengeUnlocked()) {   // 還沒解鎖：搖一下，提醒看下面那行字
       const b = $("#chalBtn"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge");
@@ -2408,6 +2607,7 @@ function renderHearts(justLost) {
     ico("star", "star" + (i < left ? "" : " off") + (lostNow && i === left ? " break" : ""))).join("");
 }
 function loseHeart() {
+  combo = 0;   // 連續答對中斷
   catSad();   // 小龍搖一搖
   mistakes++;
   if (learn) return;   // 學習模式：只記次數，不扣星星
@@ -2529,11 +2729,57 @@ function jarSvg(n) {
     `<rect x="14" y="4" width="32" height="9" rx="3" fill="#bcaaa4" stroke="#5d4037" stroke-width="3"/>` +
     `<path d="M18 28v22" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg>`;
 }
+// 儲存罐的字：還沒滿顯示「8 / 15 顆」，滿了以後顯示一共存了幾顆
+function jarText(n) { return n < JAR_GOAL ? `${n} / ${JAR_GOAL} 顆，存滿就能挑戰` : `一共 ${n} 顆，挑戰關打開了`; }
 function jarHtml() {
   const n = jarStars();
-  return `<div class="jar-row">${jarSvg(n)}<div><b>星星儲存罐</b><span>${Math.min(n, JAR_GOAL)} / ${JAR_GOAL} 顆${n >= JAR_GOAL ? "，挑戰關打開了！" : "，存滿就能挑戰"}</span></div></div>`;
+  return `<div class="jar-row">${jarSvg(n)}<div><b>星星儲存罐</b><span>${jarText(n)}・可用星星 ${walletStars()} 顆</span></div></div>`;
 }
 function challengeUnlocked() { return teacherOpen || jarStars() >= JAR_GOAL; }
+// ---------- 可用星星和小龍變裝（老師要求：累積的星星可以買小龍的配件、換顏色） ----------
+// 儲存罐（jar）只會增加，用來打開挑戰關；買東西花掉的記在 spent，可用星星 = 儲存罐 − 花掉的，所以花星星不會讓挑戰關又鎖起來
+function walletStars() { return Math.max(0, jarStars() - (loadBest().spent || 0)); }
+function saveDg(fn) { try { const b = loadBest(); fn(b); localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch (_) {} }
+function showShop(tab) {
+  const s = dgState(), wallet = walletStars();
+  const owned = (id, price) => price === 0 || s.own.includes(id);
+  const items = tab === "color" ? DG_COLORS : DG_ACCS;
+  const cur = tab === "color" ? s.color : (s.acc != null ? s.acc : "band");
+  const cells = items.map((it) => {
+    const has = owned(it.id, it.price), on = it.id === cur;
+    const pv = tab === "color" ? dragonSvg(it.id, s.acc != null ? s.acc : "band") : dragonSvg(s.color, it.id);
+    const tag = on ? "使用中" : has ? "換上" : `${ico("star", "star")} ${it.price}`;
+    return `<button class="shop-item${on ? " on" : ""}${!has && it.price > wallet ? " poor" : ""}" data-id="${it.id}">${pv}<b>${it.name}</b><span>${tag}</span></button>`;
+  }).join("");
+  showPanel(`<h2>小龍變裝</h2>
+    <div class="shop-top"><div class="big-cat">${dragonIco("happy")}</div><p>可用星星：${ico("star", "star")} <b>${wallet}</b> 顆</p></div>
+    <div class="shop-tabs"><button class="tab${tab === "color" ? " on" : ""}" data-tab="color">顏色</button><button class="tab${tab === "acc" ? " on" : ""}" data-tab="acc">配件</button></div>
+    <div class="shop-grid">${cells}</div>
+    <p class="note" id="shopMsg">挑戰模式過關、挑戰關答對，都可以得到星星。</p>
+    <button class="btn" id="toMenuBtn">回選單</button>`, "wide");
+  for (const b of document.querySelectorAll(".shop-tabs .tab")) b.addEventListener("click", () => showShop(b.dataset.tab));
+  for (const b of document.querySelectorAll(".shop-item")) b.addEventListener("click", () => {
+    const it = items.find((x) => x.id === b.dataset.id);
+    if (!owned(it.id, it.price)) {
+      if (walletStars() < it.price) { $("#shopMsg").textContent = `還差 ${it.price - walletStars()} 顆星，多玩幾關再來！`; b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); return; }
+      saveDg((d) => { d.spent = (d.spent || 0) + it.price; d.own = [...(d.own || []), it.id]; });
+    }
+    saveDg((d) => { d.dg = { color: tab === "color" ? it.id : (d.dg && d.dg.color) || "yellow", acc: tab === "acc" ? it.id : d.dg ? d.dg.acc : null }; });
+    $("#cat").innerHTML = dragonIco();
+    showShop(tab);
+  });
+  $("#toMenuBtn").addEventListener("click", showHome);
+}
+
+// ---------- 連續答對（老師要求的遊戲元素）：連續答對 3 題以上，跳出「連續答對 N 題！」 ----------
+let combo = 0;
+function goodStreak() {
+  combo++;
+  if (combo < 3) return;
+  const el = $("#combo");
+  el.innerHTML = `${ico("star", "star")} 連續答對 <b>${combo}</b> 題！`;
+  el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+}
 
 // 老師解鎖：在首頁連點標題 5 下（3 秒內），輸入老師密碼，就能直接打開挑戰關（重新整理網頁後會再鎖起來）
 const TEACHER_CODE = "1207";
@@ -2579,6 +2825,7 @@ function startChallenge() {
   challenge = true;
   pageIdx = -1;
   mistakes = 0;
+  combo = 0;
   pageDone = false;
   selected = null;
   lastAct = Date.now();
@@ -2700,6 +2947,8 @@ function pickDrop(p, quiet) {
 }
 
 function chalRight(msg) {
+  addJar(1);   // 挑戰關答對一題得 1 顆星（老師要求）
+  goodStreak();
   chal.score++;
   chal.busy = true;
   renderChalBar();
@@ -2723,8 +2972,9 @@ function endChallenge(reason) {
     b.chalHist = [total, ...(b.chalHist || [])].slice(0, 5);
     localStorage.setItem(BEST_KEY, JSON.stringify(b));
   } catch (_) {}
-  showPanel(`<div class="big-cat">${ico("clock")}</div><h2>${reason === "time" ? "時間到！" : "答錯了，挑戰結束！"}</h2>
+  showPanel(`<div class="big-cat">${ico("clock")}</div><h2>${reason === "time" ? "時間到！" : "挑戰結束！"}</h2>
     <p class="big-score">答對 ${total} 題</p>
+    ${total ? `<p>${ico("star", "star")} 得到 <b>${total}</b> 顆星，存進儲存罐！</p>` : ""}
     <p>${isNew ? (before == null ? "這是你的第一個成績！" : "新紀錄！") : `最佳紀錄：答對 ${before} 題`}</p>
     <button class="btn" id="chalAgainBtn">再挑戰一次</button>
     <button class="btn ghost" id="toMenuBtn">回選單</button>`);
@@ -2752,13 +3002,11 @@ function showScores() {
 function showChalRecord() {
   const best = loadBest(), hist = best.chalHist || [];
   const body = best.challenge == null ? `<p>${challengeUnlocked() ? "還沒挑戰過。" : "挑戰關還沒打開。"}</p>`
-    : `<p class="big-score">最佳：答對 ${best.challenge} 題</p>${hist.length ? `<p class="note">最近幾次（新的在上面）：</p><ul class="chal-list">${hist.map((n) => `<li>答對 ${n} 題</li>`).join("")}</ul>` : ""}`;
+    : `<p class="best-line">最佳紀錄：<b>答對 ${best.challenge} 題</b></p>${hist.length ? `<p class="note">最近幾次（新的在上面）：</p><ul class="chal-list">${hist.map((n) => `<li>答對 ${n} 題</li>`).join("")}</ul>` : ""}`;
   showPanel(`<div class="big-cat">${ico("clock")}</div><h2>挑戰關紀錄</h2>
     ${body}
-    <button class="btn ghost" id="backScoreBtn">回我的成績</button>
-    <button class="btn" id="toMenuBtn">回選單</button>`);
+    <button class="btn" id="backScoreBtn">回我的成績</button>`);
   $("#backScoreBtn").addEventListener("click", showScores);
-  $("#toMenuBtn").addEventListener("click", showHome);
 }
 
 // 遊戲中按選單按鈕：先確認，避免學生不小心按到
