@@ -292,6 +292,14 @@
   .ico .dg-tongue { fill: #ef5350; stroke: #4e342e; stroke-width: .5; }
   .ico .dg-fang { fill: #fff; stroke: #4e342e; stroke-width: .4; }
   .ico .dg-sclera { fill: #fff; stroke: none; }
+  .ico .dg-pat { fill: rgba(0, 0, 0, .45); stroke: none; }
+  .ico .dg-pat circle { fill: rgba(0, 0, 0, .45); stroke: none; }
+  .ico .dg-pat-line { fill: none; stroke: rgba(0, 0, 0, .45); stroke-width: 1.2; stroke-linecap: round; }
+  .ico .acc-bandana { fill: #e53935; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
+  .ico .acc-dot { fill: #fff; stroke: none; }
+  .ico .acc-pole { fill: none; stroke: #6d4c41; stroke-width: .9; stroke-linecap: round; }
+  .ico .acc-pennant { fill: #29b6f6; stroke: #4e342e; stroke-width: .6; stroke-linejoin: round; }
+  .ico .acc-setsq { fill: rgba(144, 202, 249, .75); stroke: #1565c0; stroke-width: .7; stroke-linejoin: round; fill-rule: evenodd; }
   .ico .dg-brow { fill: none; stroke: #4e342e; stroke-width: 1.2; stroke-linecap: round; }
   .ico .dg-brow-thin { fill: none; stroke: #4e342e; stroke-width: .8; stroke-linecap: round; }
   .ico .dg-eye-dragon { fill: #ffeb3b; stroke: #4e342e; stroke-width: .6; }
@@ -384,6 +392,8 @@
     .panel h2 { font-size: 28px; margin: 0 0 4px; }
     .shop-top .big-cat { font-size: 64px; }
     .shop-item > .ico.dragon { font-size: 48px; }
+    .shop-grid { grid-template-columns: repeat(auto-fill, 92px); }
+    .shop-item { width: 92px; height: 104px; }
     .shop-tabs { margin: 2px 0 6px; }
     .levels .lvl { flex-basis: calc((100% - 8px) / 2); }
     .panel.wide { padding: 16px 14px; }
@@ -439,8 +449,11 @@
   .shop-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 6px 0 10px; }
   .shop-tabs .tab { border: 3px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 16px; font-size: 19px; color: var(--soft); }
   .shop-tabs .tab.on { border-color: var(--accent); background: var(--accent); color: #fff; }
-  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
-  .shop-item { border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 4px; color: var(--ink); box-shadow: 0 3px 0 var(--line); }
+  /* 每一格固定大小，換頁時才不會忽大忽小（老師反映） */
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, 104px); justify-content: center; gap: 8px; }
+  .shop-item { width: 104px; height: 124px; border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 4px; color: var(--ink); box-shadow: 0 3px 0 var(--line); overflow: hidden; }
+  .shop-item b { white-space: nowrap; font-size: 16px !important; }
+  .panel.wide.shop { max-width: 920px; }   /* 一排可以放 8 格，配件也不用捲動 */
   .shop-item > .ico.dragon { font-size: 64px; display: block; margin: 0 auto; }
   .shop-item span .ico { font-size: 1em; }
   .shop-item b { display: block; font-size: 18px; }
@@ -486,6 +499,8 @@
     .panel h2 { font-size: 28px; margin: 0 0 4px; }
     .shop-top .big-cat { font-size: 64px; }
     .shop-item > .ico.dragon { font-size: 48px; }
+    .shop-grid { grid-template-columns: repeat(auto-fill, 92px); }
+    .shop-item { width: 92px; height: 104px; }
     .shop-tabs { margin: 2px 0 6px; }
   }
 </style>
@@ -627,9 +642,20 @@ const DG_PARTS = {
     { id: "angry", name: "生氣眉", price: 15, svg: `<path class="dg-brow" d="M7.4 7.6l3.4 1M16.6 7.6l-3.4 1"/>` },
     { id: "worried", name: "擔心眉", price: 15, svg: `<path class="dg-brow-thin" d="M7.4 8.8l3.2-1M16.6 8.8l-3.2-1"/>` },
   ] },
+  pat: { name: "紋路", items: [
+    { id: "nopat", name: "沒有紋路", price: 0, svg: "" },
+    { id: "tripat", name: "三角形紋路", price: 15, svg: `<path class="dg-pat" d="M5 11.6l1.5-2.6 1.5 2.6zM16.2 8.4l1.5-2.6 1.5 2.6zM17.2 13l1.5-2.6 1.5 2.6zM7.2 7.8l1.2-2.1 1.2 2.1zM4.6 15.2l1.2-2.1 1.2 2.1z"/>` },
+    { id: "polka", name: "點點", price: 10, svg: `<g class="dg-pat"><circle cx="6.4" cy="10.4" r=".8"/><circle cx="17.4" cy="8.6" r=".8"/><circle cx="18.6" cy="12.6" r=".8"/><circle cx="7.8" cy="7.4" r=".6"/><circle cx="5.4" cy="14.2" r=".6"/></g>` },
+    { id: "stripes", name: "條紋", price: 10, svg: `<path class="dg-pat-line" d="M6.6 8.6c1 .3 1.8 1 2.2 2M17.4 8.6c-1 .3-1.8 1-2.2 2M5.2 12.4c.9 0 1.7.4 2.3 1.1M18.8 12.4c-.9 0-1.7.4-2.3 1.1"/>` },
+    { id: "starpat", name: "星星紋", price: 20, svg: `<path class="dg-pat" d="M6.4 9.2l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM17.6 8.2l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM18.4 13l.3.7.8.1-.6.5.2.8-.7-.4-.7.4.2-.8-.6-.5.8-.1z"/>` },
+  ] },
   acc: { name: "配件", items: [
     { id: "none", name: "不戴", price: 0, svg: "" },
     { id: "glasses", name: "眼鏡", price: 0, svg: `<g class="acc-glass"><circle cx="9.1" cy="11" r="2.8"/><circle cx="14.9" cy="11" r="2.8"/><path d="M11.9 11.1h.2M6.3 10.8l-1.4-.6M17.7 10.8l1.4-.6"/></g>` },
+    { id: "triglass", name: "三角形眼鏡", price: 15, svg: `<path class="acc-glass" d="M6.2 9.3h5.8l-2.9 4.6zM12 9.3h5.8l-2.9 4.6zM5.6 9.6l-.8-.4M18.4 9.6l.8-.4"/>` },
+    { id: "bandana", name: "三角領巾", price: 15, svg: `<path class="acc-bandana" d="M6.2 17.8h11.6L12 23z"/><circle class="acc-dot" cx="10.4" cy="19" r=".45"/><circle class="acc-dot" cx="13.6" cy="19" r=".45"/><circle class="acc-dot" cx="12" cy="21" r=".45"/>` },
+    { id: "pennant", name: "三角旗", price: 20, svg: `<path class="acc-pole" d="M20.4 3.4v10.4"/><path class="acc-pennant" d="M20.4 3.6l3.4 1.7-3.4 1.7z"/>` },
+    { id: "setsquare", name: "三角板", price: 25, svg: `<path class="acc-setsq" d="M.6 22.6V13.4l7.4 9.2zM2.2 20.6v-3l2.4 3z"/>` },
     { id: "band", name: "頭帶", price: 0, svg: `<path class="acc-band" d="M5.2 8.6c4.3-1.9 9.3-1.9 13.6 0M18.6 8.5l2.4-1.6M18.6 8.5l2.7.4"/><path class="acc-bstar" d="M12 5.6l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>` },
     { id: "flower", name: "小花", price: 15, svg: `<g class="acc-flower"><circle cx="17" cy="6.2" r="1.2"/><circle cx="18.6" cy="7.2" r="1.2"/><circle cx="18.2" cy="8.9" r="1.2"/><circle cx="16.4" cy="9.1" r="1.2"/><circle cx="15.7" cy="7.5" r="1.2"/></g><circle class="acc-pom" cx="17.2" cy="7.8" r=".9"/>` },
     { id: "bow", name: "蝴蝶結", price: 15, svg: `<path class="acc-bow" d="M16 5.6l-2.8-1.9v3.8zM16 5.6l2.8-1.9v3.8z"/><circle class="acc-bow" cx="16" cy="5.6" r=".9"/>` },
@@ -646,7 +672,7 @@ function hornSvg(col) {
   const one = (m) => `<g transform="${m}"><path class="dg-hn-o" d="M8.4 7.4C7.6 5.8 7.4 4 8 2.2M7.9 4.6L6.2 3.4M7.8 3.4l1.3-1.1"/><path class="dg-hn-i" style="stroke:${col}" d="M8.4 7.4C7.6 5.8 7.4 4 8 2.2M7.9 4.6L6.2 3.4M7.8 3.4l1.3-1.1"/></g>`;
   return one("") + one("translate(24,0) scale(-1,1)");
 }
-const DG_DEFAULT = { color: "yellow", horn: "antler", whisk: "long", eyes: "round", brow: "nobrow", acc: "none" };
+const DG_DEFAULT = { color: "yellow", horn: "antler", whisk: "long", eyes: "round", brow: "nobrow", pat: "nopat", acc: "none" };
 function dgPick(kind, id) { const list = DG_PARTS[kind].items; return list.find((x) => x.id === id) || list[0]; }
 function dragonSvg(look, mood) {
   const L = { ...DG_DEFAULT, ...look };
@@ -656,6 +682,7 @@ function dragonSvg(look, mood) {
     dgPick("horn", L.horn).svg +
     `<path class="dg-spike" d="M10.2 6.2l.9-2.6.9 1.8.9-1.8.9 2.6z"/>` +
     `<ellipse class="dg-body" cx="12" cy="12.8" rx="7.6" ry="7.2"/>` + (col.shine ? `<path d="M7.4 9.2c.6-1.6 1.8-2.6 3.2-3" stroke="#fff" stroke-width=".9" opacity=".8"/>` : "") +
+    `<clipPath id="dgBody"><ellipse cx="12" cy="12.8" rx="7.2" ry="6.8"/></clipPath><g clip-path="url(#dgBody)">${dgPick("pat", L.pat).svg}</g>` +   // 身上的紋路
     `<ellipse class="dg-belly" cx="12" cy="16.1" rx="5.2" ry="3.5"/>` +
     `<ellipse class="f" cx="10.7" cy="15.2" rx=".45" ry=".35"/><ellipse class="f" cx="13.3" cy="15.2" rx=".45" ry=".35"/>` +
     dgPick("whisk", L.whisk).svg +
@@ -2238,10 +2265,15 @@ function markHit(p, pt) {
   if (side && (side.d < 12 || !ang)) return side;
   return ang || side;
 }
+// 直角的記號值（和 1～3 條弧線分開）
+const RIGHT_MARK = 9;
+function isRightAt(p, i) { return !!p.ang && Math.abs(p.ang[i] - 90) < 0.5; }
 function addMark(p, kind, i) {
   if (!p.um) p.um = { s: [0, 0, 0], a: [0, 0, 0] };
   const arr = kind === "a" ? p.um.a : p.um.s;
-  arr[i] = (arr[i] + 1) % 4;
+  // 直角：點一下就畫直角記號（小方框），再點一下拿掉（老師要求）。記成 RIGHT_MARK，和 1～3 條弧線都不一樣
+  if (kind === "a" && isRightAt(p, i)) arr[i] = arr[i] ? 0 : RIGHT_MARK;
+  else arr[i] = (arr[i] + 1) % 4;
   redraw(p);
   lastAct = Date.now();
 }
@@ -2271,7 +2303,14 @@ function userMarksSvg(p) {
       out += `<line x1="${c[0] - nr[0] * 10}" y1="${c[1] - nr[1] * 10}" x2="${c[0] + nr[0] * 10}" y2="${c[1] + nr[1] * 10}"/>`;
     }
   }
-  for (let i = 0; i < 3; i++) for (let j = 0; j < p.um.a[i]; j++) out += `<path d="${arcLine(v, i, 22 + j * 7)}"/>`;
+  for (let i = 0; i < 3; i++) {
+    if (p.um.a[i] === RIGHT_MARK) {   // 直角記號：小方框
+      const P = v[i], u = norm([v[(i + 1) % 3][0] - P[0], v[(i + 1) % 3][1] - P[1]]), w = norm([v[(i + 2) % 3][0] - P[0], v[(i + 2) % 3][1] - P[1]]), k = 18;
+      out += `<path d="M${P[0] + u[0] * k},${P[1] + u[1] * k} L${P[0] + (u[0] + w[0]) * k},${P[1] + (u[1] + w[1]) * k} L${P[0] + w[0] * k},${P[1] + w[1] * k}"/>`;
+      continue;
+    }
+    for (let j = 0; j < p.um.a[i]; j++) out += `<path d="${arcLine(v, i, 22 + j * 7)}"/>`;
+  }
   return `<g class="um">${out}</g>`;
 }
 
@@ -2419,7 +2458,7 @@ setInterval(() => {
     if (corr.step === "guide" && corr.guide && corr.guide.turn) {
       const g = guideStep(), w = GUIDE_WORD[g.kind];
       say(`在<b>一閃一閃</b>的${w}上點 <b>${g.n}</b> 下，<br>每點一下，多一條${g.kind === "s" ? "短線" : "弧線"}。`);
-    } else say("點一下<b>邊</b>，會畫一條<b>短線</b>；點一下<b>角</b>，會畫一條<b>弧線</b>。<br>多點幾下，會變 2 條、3 條。");
+    } else say("點一下<b>邊</b>，會畫一條<b>短線</b>；點一下<b>角</b>，會畫一條<b>弧線</b>。<br>多點幾下，會變 2 條、3 條；<b>直角</b>會畫直角記號。");
     return;
   }
   if (idle < 30000) return;
@@ -2855,7 +2894,7 @@ function showShop(tab, back) {
     <div class="shop-tabs">${tabs}</div>
     <div class="shop-grid">${cells}</div>
     <p class="note" id="shopMsg">挑戰模式過關、挑戰關答對，都可以得到星星。</p>
-    <button class="btn" id="shopBackBtn">返回</button>`, "wide");
+    <button class="btn" id="shopBackBtn">返回</button>`, "wide shop");
   for (const b of document.querySelectorAll(".shop-tabs .tab")) b.addEventListener("click", () => showShop(b.dataset.tab));
   for (const b of document.querySelectorAll(".shop-item")) b.addEventListener("click", () => {
     const it = part.items.find((x) => x.id === b.dataset.id);
