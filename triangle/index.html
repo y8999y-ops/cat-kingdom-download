@@ -255,9 +255,11 @@
   .ico .dg-nose { fill: #4e342e; stroke: none; }
   .ico .dg-ear { fill: var(--dg, #8bc34a); stroke-width: .7; }
   .ico .dg-ear-in { fill: none; stroke: var(--dgf, #5a8a2a); stroke-width: 1.1; stroke-linecap: round; }
-  .ico .dg-tuft { fill: #ffd54f; stroke-width: .6; }
   .ico .dg-fin { fill: var(--dgf, #5a8a2a); stroke: #4e342e; stroke-width: .6; stroke-linejoin: round; }
   .ico .dg-wh-y { fill: none; stroke: #fbc02d; stroke-width: 1; stroke-linecap: round; }
+  .ico .dg-hn-s { fill: #b9825a; stroke-width: .6; }
+  .ico .dg-bolt { fill: #fdd835; stroke-width: .6; }
+  .ico .dg-must { fill: #4e342e; stroke: none; }
   .ico .dg-finrib { fill: none; stroke: #4e342e; stroke-width: .45; stroke-linecap: round; }
   .ico .dg-flame { fill: #ff7043; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
   .ico .dg-bushy { fill: #ffd54f; stroke: #4e342e; stroke-width: .55; stroke-linejoin: round; }
@@ -630,6 +632,9 @@ const DG_PARTS = {
     { id: "spiral", name: "捲捲角", price: 15, svg: `<path class="dg-hn" d="M8 7.2C6.4 6 6 3.9 7.4 2.8c1.2-.9 2.6.2 2 1.4-.4.8-1.4.6-1.3-.1"/><path class="dg-hn" d="M16 7.2c1.6-1.2 2-3.3.6-4.4-1.2-.9-2.6.2-2 1.4.4.8 1.4.6 1.3-.1"/>` },
     { id: "goldhorn", name: "金色龍角", price: 30, svg: hornSvg("#ff9800") },
     { id: "crystal", name: "水晶角", price: 35, svg: `<path class="dg-crys" d="M8.6 6.9L6.8 1.6l3.3 4.2zM15.4 6.9l1.8-5.3-3.3 4.2z"/><path d="M7.6 3.4l.8 2.2M16.4 3.4l-.8 2.2" stroke="#fff" stroke-width=".5"/>` },
+    // 第 26 次：每一種至少六樣（老師要求）
+    { id: "shorthorn", name: "小短角", price: 10, svg: mirror(`<path class="dg-hn-s" d="M8.9 7.2L7.8 4.2c-.2-.7.6-1.1 1.1-.6l1.7 2.8z"/>`) },
+    { id: "bolt", name: "閃電角", price: 25, svg: mirror(`<path class="dg-bolt" d="M9 7.1L7.3 4.7l1.3-.2-1.9-3.1 3.2 2.9-1.3.3 1.9 2.1z"/>`) },
   ] },
   // 第 24 次：老師說旁邊的龍鰭不錯，也可以讓學生變裝
   fin: { name: "龍鰭", items: [
@@ -646,6 +651,9 @@ const DG_PARTS = {
     { id: "curly", name: "捲捲鬚", price: 15, svg: `<path class="dg-wh" d="M8.4 15.6c-2.8-.2-4.4 1.4-4.2 3.2.1 1.2 1.6 1.4 1.9.4.2-.7-.6-1-.9-.5M15.6 15.6c2.8-.2 4.4 1.4 4.2 3.2-.1 1.2-1.6 1.4-1.9.4-.2-.7.6-1 .9-.5"/>` },
     { id: "beard", name: "大鬍子", price: 20, svg: `<path class="dg-beard" d="M9.4 19.4c.6 2.4 1.6 3.6 2.6 3.6s2-1.2 2.6-3.6c-1.7.6-3.5.6-5.2 0z"/><path class="dg-wh" d="M8.4 15.4c-2.6-.4-4.6.6-6.2 2.8M15.6 15.4c2.6-.4 4.6.6 6.2 2.8"/>` },
     { id: "nowhisk", name: "不要鬍鬚", price: 0, svg: "" },
+    { id: "shortwh", name: "短龍鬚", price: 10, svg: mirror(`<path class="dg-wh-y" d="M10.3 16.7c-.9.5-1.9.6-2.7.2-.7-.3-1.3.3-1 .9.3.5 1 .4 1-.1"/>`) },
+    { id: "wavywh", name: "波浪鬚", price: 15, svg: mirror(`<path class="dg-wh-y" d="M10.3 16.8c-.8.6-1.5-.3-2.3.2s-1.5-.3-2.3.2-1.5-.3-2.3.2"/>`) },
+    { id: "mustache", name: "八字鬍", price: 20, svg: mirror(`<path class="dg-must" d="M12 16.9c-.6-.7-2-1-3.1-.5-.8.4-1.6.3-2.1-.3.1 1.5 1.6 2.2 3 1.8.9-.2 1.7-.6 2.2-1z"/>`) },
   ] },
   eyes: { name: "眼睛", items: [
     { id: "round", name: "圓眼睛", price: 0, svg: `<circle class="f" cx="9.1" cy="11" r="1.75"/><circle class="f" cx="14.9" cy="11" r="1.75"/><circle class="dg-shine" cx="9.7" cy="10.4" r=".6"/><circle class="dg-shine" cx="15.5" cy="10.4" r=".6"/>` },
@@ -668,10 +676,12 @@ const DG_PARTS = {
   ] },
   pat: { name: "紋路", items: [
     { id: "nopat", name: "沒有紋路", price: 0, svg: "" },
-    { id: "tripat", name: "三角形紋路", price: 15, svg: `<path class="dg-pat" d="M5 11.6l1.5-2.6 1.5 2.6zM16.2 8.4l1.5-2.6 1.5 2.6zM17.2 13l1.5-2.6 1.5 2.6zM7.2 7.8l1.2-2.1 1.2 2.1zM4.6 15.2l1.2-2.1 1.2 2.1z"/>` },
-    { id: "polka", name: "點點", price: 10, svg: `<g class="dg-pat"><circle cx="6.4" cy="10.4" r=".8"/><circle cx="17.4" cy="8.6" r=".8"/><circle cx="18.6" cy="12.6" r=".8"/><circle cx="7.8" cy="7.4" r=".6"/><circle cx="5.4" cy="14.2" r=".6"/></g>` },
-    { id: "stripes", name: "條紋", price: 10, svg: `<path class="dg-pat-line" d="M6.6 8.6c1 .3 1.8 1 2.2 2M17.4 8.6c-1 .3-1.8 1-2.2 2M5.2 12.4c.9 0 1.7.4 2.3 1.1M18.8 12.4c-.9 0-1.7.4-2.3 1.1"/>` },
-    { id: "starpat", name: "星星紋", price: 20, svg: `<path class="dg-pat" d="M6.4 9.2l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM17.6 8.2l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM18.4 13l.3.7.8.1-.6.5.2.8-.7-.4-.7.4.2-.8-.6-.5.8-.1z"/>` },
+    { id: "tripat", name: "三角形紋路", price: 15, svg: `<path class="dg-pat" d="M9.6 8l.8-1.4.8 1.4zM12.8 8l.8-1.4.8 1.4zM11.2 6.9l.8-1.4.8 1.4zM5.2 17.4l.9-1.6.9 1.6zM17 17.4l.9-1.6.9 1.6z"/>` },   // 第 26 次臉形改了，紋路移到額頭和下巴兩側
+    { id: "polka", name: "點點", price: 10, svg: `<g class="dg-pat"><circle cx="10.2" cy="7.5" r=".65"/><circle cx="13.8" cy="7.5" r=".65"/><circle cx="12" cy="6.5" r=".65"/><circle cx="5.8" cy="16.4" r=".7"/><circle cx="18.2" cy="16.4" r=".7"/><circle cx="7" cy="17.9" r=".55"/><circle cx="17" cy="17.9" r=".55"/></g>` },
+    { id: "stripes", name: "條紋", price: 10, svg: `<path class="dg-pat-line" d="M10.4 6.3v1.7M12 5.9v2.2M13.6 6.3v1.7M4.9 16c.8.1 1.5.5 2 1.1M19.1 16c-.8.1-1.5.5-2 1.1"/>` },
+    { id: "scales", name: "龍鱗", price: 15, svg: `<path class="dg-pat-line" d="M9.6 7.6c.4.5 1.1.5 1.5 0M11.25 7.6c.4.5 1.1.5 1.5 0M12.9 7.6c.4.5 1.1.5 1.5 0M10.4 6.5c.4.5 1.1.5 1.5 0M12.1 6.5c.4.5 1.1.5 1.5 0M5.4 15.6c.4.5 1.1.5 1.5 0M17.1 15.6c.4.5 1.1.5 1.5 0M6 17c.4.5 1.1.5 1.5 0M16.5 17c.4.5 1.1.5 1.5 0"/>` },
+    { id: "heartpat", name: "愛心紋", price: 20, svg: `<path class="dg-pat" d="M5.9 17.6s-1.2-.7-1.2-1.4c0-.5.6-.8 1-.4l.2.2.2-.2c.4-.4 1-.1 1 .4 0 .7-1.2 1.4-1.2 1.4zM18.1 17.6s-1.2-.7-1.2-1.4c0-.5.6-.8 1-.4l.2.2.2-.2c.4-.4 1-.1 1 .4 0 .7-1.2 1.4-1.2 1.4zM12 8s-1-.6-1-1.2c0-.4.5-.7.85-.35l.15.15.15-.15c.35-.35.85-.05.85.35 0 .6-1 1.2-1 1.2z"/>` },
+    { id: "starpat", name: "星星紋", price: 20, svg: `<path class="dg-pat" d="M12 5.9l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM5.9 15.6l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1zM18.1 15.6l.4.9 1 .1-.7.7.2 1-.9-.5-.9.5.2-1-.7-.7 1-.1z"/>` },
   ] },
   acc: { name: "配件", items: [
     { id: "none", name: "不戴", price: 0, svg: "" },
@@ -709,21 +719,20 @@ function dgShade(hex, k) {
 }
 // 第 25 次（老師的第二張參考圖）：只要頭（長身體像毛毛蟲，拿掉）；線條變細；頭頂的三個三角形改成一撮黃色的毛；
 // 加葉子形的耳朵；頭的形狀下面寬一點；預設龍鬚是黃色捲捲的、鰭是深綠色波浪的。
-const DG_HEAD = "M12 5.2C7.5 5.2 4.7 8.5 4.7 12.9c0 4.6 3.1 7.5 7.3 7.5s7.3-2.9 7.3-7.5C19.3 8.5 16.5 5.2 12 5.2z";
+// 第 26 次：老師說臉不要橢圓、要有點弧度：額頭窄一點、兩頰往外鼓、下巴寬圓
+const DG_HEAD = "M12 5.4C8.6 5.4 6.6 7.6 6.2 10.4c-.2 1.3-1.6 2.4-1.6 4.4 0 3.3 3 5.6 7.4 5.6s7.4-2.3 7.4-5.6c0-2-1.4-3.1-1.6-4.4C17.4 7.6 15.4 5.4 12 5.4z";
 function dragonSvg(look, mood) {
   const L = { ...DG_DEFAULT, ...look };
   const col = dgPick("color", L.color);
   return `<svg class="ico dragon${mood ? " mood-" + mood : ""}" viewBox="0 0 24 24" aria-hidden="true" style="--dg:${col.c};--dg2:${col.c2};--dgs:${col.sp || "#ff8f00"};--dgf:${dgShade(col.c, .28)}">` +
-    `<g transform="translate(0,1.6)">${dgPick("fin", L.fin).svg}</g>` +   // 兩邊的鰭（可以變裝），在臉頰旁邊
+    `<g transform="translate(12,1.6) scale(.88,1) translate(-12,0)">${dgPick("fin", L.fin).svg}</g>` +   // 兩邊的鰭（可以變裝），在臉頰旁邊
     dgPick("horn", L.horn).svg +
     mirror(`<path class="dg-ear" d="M7.2 8.4C5.2 8.6 3.1 7.4 2.4 5c2.3-.4 4.6.4 5.8 2.2z"/><path class="dg-ear-in" d="M6.6 7.7C5.4 7.6 4.2 6.9 3.6 5.8"/>`) +   // 葉子形的耳朵
     `<path class="dg-body" d="${DG_HEAD}"/>` +
     `<clipPath id="dgBody"><path d="${DG_HEAD}"/></clipPath><g clip-path="url(#dgBody)">${dgPick("pat", L.pat).svg}</g>` +   // 身上的紋路
-    `<path class="dg-tuft" d="M9.9 6.6c-.9-.2-1.2-1.3-.4-1.8-.2-1 .9-1.6 1.6-1 .4-.9 1.8-.9 2.1 0 .8-.5 1.8.2 1.5 1.1.8.5.5 1.6-.4 1.7-1.4.5-3 .5-4.4 0z"/>` +   // 頭頂一撮黃色的毛
     `<ellipse class="dg-belly" cx="12" cy="17.4" rx="4.3" ry="2.7"/>` +   // 嘴巴附近淺一點
     `<ellipse class="dg-nose" cx="10.8" cy="15.9" rx=".5" ry=".4"/><ellipse class="dg-nose" cx="13.2" cy="15.9" rx=".5" ry=".4"/>` +
     dgPick("whisk", L.whisk).svg +
-    (col.dark ? `<circle class="dg-sclera" cx="9.1" cy="10.6" r="2.4"/><circle class="dg-sclera" cx="14.9" cy="10.6" r="2.4"/>` : "") +   // 深色的小龍：眼睛加白底才看得到
     `<g transform="translate(0,-.4)"><g class="dg-eyes">${dgPick("eyes", L.eyes).svg}</g>` + dgPick("brow", L.brow).svg +
     `<path class="dg-eyes-h" d="M7.5 11.6c.9-1.6 2.3-1.6 3.2 0M13.3 11.6c.9-1.6 2.3-1.6 3.2 0"/></g>` +
     `<circle class="dg-cheek" cx="6.4" cy="13.6" r="1.1"/><circle class="dg-cheek" cx="17.6" cy="13.6" r="1.1"/>` +
