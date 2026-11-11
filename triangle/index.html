@@ -250,16 +250,14 @@
   .ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.16em; }
   .ico .f { fill: currentColor; stroke: none; }
   /* 可愛的小龍（顏色用 --dg、--dg2，可以變裝） */
-  .ico .dg-body { fill: var(--dg, #ffd54f); stroke-width: 1.3; }
+  .ico .dg-body { fill: var(--dg, #8bc34a); stroke-width: .8; }   /* 第 25 次：老師說頭的線條太粗 */
   .ico .dg-belly { fill: var(--dg2, #fff3c4); stroke: none; }
   .ico .dg-nose { fill: #4e342e; stroke: none; }
-  .ico .dg-trunk-o { fill: none; stroke: #4e342e; stroke-width: 4.4; stroke-linecap: round; }
-  .ico .dg-trunk { fill: none; stroke: var(--dg, #8bc34a); stroke-width: 3.1; stroke-linecap: round; }
-  .ico .dg-bellyline { fill: none; stroke: var(--dg2, #fff59d); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
-  .ico .dg-bellyseg { fill: none; stroke: rgba(78, 52, 46, .45); stroke-width: 1.3; stroke-linecap: butt; stroke-dasharray: .2 1; }   /* 肚子一節一節 */
-  .ico .dg-arm-o { fill: none; stroke: #4e342e; stroke-width: 2; stroke-linecap: round; }
-  .ico .dg-arm { fill: none; stroke: var(--dg, #8bc34a); stroke-width: 1; stroke-linecap: round; }
-  .ico .dg-claw { fill: none; stroke: #4e342e; stroke-width: .45; stroke-linecap: round; }
+  .ico .dg-ear { fill: var(--dg, #8bc34a); stroke-width: .7; }
+  .ico .dg-ear-in { fill: none; stroke: var(--dgf, #5a8a2a); stroke-width: 1.1; stroke-linecap: round; }
+  .ico .dg-tuft { fill: #ffd54f; stroke-width: .6; }
+  .ico .dg-fin { fill: var(--dgf, #5a8a2a); stroke: #4e342e; stroke-width: .6; stroke-linejoin: round; }
+  .ico .dg-wh-y { fill: none; stroke: #fbc02d; stroke-width: 1; stroke-linecap: round; }
   .ico .dg-finrib { fill: none; stroke: #4e342e; stroke-width: .45; stroke-linecap: round; }
   .ico .dg-flame { fill: #ff7043; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
   .ico .dg-bushy { fill: #ffd54f; stroke: #4e342e; stroke-width: .55; stroke-linejoin: round; }
@@ -291,8 +289,8 @@
   .ico .acc-crown { fill: #ffca28; stroke: #4e342e; stroke-width: .7; stroke-linejoin: round; }
   .ico .acc-gem { fill: #e53935; stroke: none; }
   /* 龍角、龍鬚、眼睛、嘴巴的各種樣子 */
-  .ico .dg-hn-o { fill: none; stroke: #4e342e; stroke-width: 2.4; stroke-linecap: round; }
-  .ico .dg-hn-i { fill: none; stroke-width: 1.1; stroke-linecap: round; }
+  .ico .dg-hn-o { fill: none; stroke: #4e342e; stroke-width: 1.9; stroke-linecap: round; }
+  .ico .dg-hn-i { fill: none; stroke-width: 1.2; stroke-linecap: round; }
   .ico .dg-hn { fill: none; stroke: #ff8f00; stroke-width: 1.4; stroke-linecap: round; }
   .ico .dg-crys { fill: #80deea; stroke: #006064; stroke-width: .7; stroke-linejoin: round; }
   .ico .dg-wh { fill: none; stroke: #4e342e; stroke-width: .75; stroke-linecap: round; }
@@ -615,7 +613,7 @@ function ico(name, cls = "") { return `<svg class="ico ${cls}" viewBox="0 0 24 2
 const DG_PARTS = {
   color: { name: "顏色", items: [
     // 第 23 次：小朋友說黃色圓圓的像蜜蜂，預設改成綠色（黃色還是免費）。sp 是頭頂、鰭、尾巴小刺的顏色
-    { id: "green", name: "綠色", price: 0, c: "#8bc34a", c2: "#fff59d", sp: "#ffca28" },   // 參考圖：綠身體、黃肚子、黃刺
+    { id: "green", name: "綠色", price: 0, c: "#8bc34a", c2: "#dcedc8", sp: "#ffca28" },
     { id: "yellow", name: "黃色", price: 0, c: "#ffd54f", c2: "#fff3c4", sp: "#e53935" },
     { id: "orange", name: "橘色", price: 15, c: "#ffb74d", c2: "#fff3e0", sp: "#c62828" },
     { id: "blue", name: "藍色", price: 20, c: "#81d4fa", c2: "#e1f5fe", sp: "#ffb300" },
@@ -628,13 +626,14 @@ const DG_PARTS = {
     { id: "black", name: "黑色", price: 35, c: "#455060", c2: "#cfd8dc", sp: "#ef5350", dark: true },
   ] },
   horn: { name: "龍角", items: [
-    { id: "antler", name: "龍角", price: 0, svg: hornSvg("#ffe082") },
+    { id: "antler", name: "龍角", price: 0, svg: hornSvg("#b9825a") },   // 參考圖：咖啡色的鹿角
     { id: "spiral", name: "捲捲角", price: 15, svg: `<path class="dg-hn" d="M8 7.2C6.4 6 6 3.9 7.4 2.8c1.2-.9 2.6.2 2 1.4-.4.8-1.4.6-1.3-.1"/><path class="dg-hn" d="M16 7.2c1.6-1.2 2-3.3.6-4.4-1.2-.9-2.6.2-2 1.4.4.8 1.4.6 1.3-.1"/>` },
     { id: "goldhorn", name: "金色龍角", price: 30, svg: hornSvg("#ff9800") },
     { id: "crystal", name: "水晶角", price: 35, svg: `<path class="dg-crys" d="M8.6 6.9L6.8 1.6l3.3 4.2zM15.4 6.9l1.8-5.3-3.3 4.2z"/><path d="M7.6 3.4l.8 2.2M16.4 3.4l-.8 2.2" stroke="#fff" stroke-width=".5"/>` },
   ] },
   // 第 24 次：老師說旁邊的龍鰭不錯，也可以讓學生變裝
   fin: { name: "龍鰭", items: [
+    { id: "wavy", name: "波浪鰭", price: 0, svg: mirror(`<path class="dg-fin" d="M5.4 8.6C3.6 8.4 2.4 9.2 2.2 10.2c.9-.1 1.4.2 1.6.7-1 .3-1.6 1.1-1.5 2 .9-.4 1.5-.3 1.9.2-.5.6-.6 1.4-.3 2 1.2-.6 2.3-1.4 3.1-2.4z"/>`) },   // 第 25 次參考圖：深一點的同色波浪鰭
     { id: "spiky", name: "尖尖鰭", price: 0, svg: mirror(`<path class="dg-spike" d="M5.4 9.2L1.2 7.6l1.9 2.9-1.9 2.4 3.8.4z"/>`) },
     { id: "nofin", name: "不要鰭", price: 0, svg: "" },
     { id: "roundfin", name: "圓圓耳", price: 10, svg: mirror(`<path class="dg-spike" d="M5.2 8.8C2.8 7.2.6 8 .6 10s2.2 3 4.8 2.2z"/>`) },
@@ -643,7 +642,7 @@ const DG_PARTS = {
     { id: "flamefin", name: "火焰鰭", price: 20, svg: mirror(`<path class="dg-flame" d="M5.4 9C3.6 8.4 2.6 7 2.8 5.6c-1.4 1-1.8 2.6-1.2 3.8-1 .2-1.4 1.2-1.2 2 1-.6 1.6-.2 2 .4-.8.8-.6 2 .2 2.6.4-1.2 1.6-1.4 2.8-1.2z"/>`) },
   ] },
   whisk: { name: "龍鬚", items: [
-    { id: "long", name: "長龍鬚", price: 0, svg: `<path class="dg-wh" d="M7.6 17c-1.4-.8-2.7-.3-3.5.7-.8 1-2 1.5-3.3 1M16.4 17c1.4-.8 2.7-.3 3.5.7.8 1 2 1.5 3.3 1"/>` },   // 一邊一條（老師要求）
+    { id: "long", name: "黃龍鬚", price: 0, svg: mirror(`<path class="dg-wh-y" d="M10.3 16.7c-1.5.7-3.2.9-4.6.4-1.1-.4-2 .4-1.6 1.3.4.8 1.6.7 1.6-.2"/>`) },   // 參考圖：從鼻子長出來、尾巴捲起來的黃鬍鬚   // 一邊一條（老師要求）
     { id: "curly", name: "捲捲鬚", price: 15, svg: `<path class="dg-wh" d="M8.4 15.6c-2.8-.2-4.4 1.4-4.2 3.2.1 1.2 1.6 1.4 1.9.4.2-.7-.6-1-.9-.5M15.6 15.6c2.8-.2 4.4 1.4 4.2 3.2-.1 1.2-1.6 1.4-1.9.4-.2-.7.6-1 .9-.5"/>` },
     { id: "beard", name: "大鬍子", price: 20, svg: `<path class="dg-beard" d="M9.4 19.4c.6 2.4 1.6 3.6 2.6 3.6s2-1.2 2.6-3.6c-1.7.6-3.5.6-5.2 0z"/><path class="dg-wh" d="M8.4 15.4c-2.6-.4-4.6.6-6.2 2.8M15.6 15.4c2.6-.4 4.6.6 6.2 2.8"/>` },
     { id: "nowhisk", name: "不要鬍鬚", price: 0, svg: "" },
@@ -701,36 +700,36 @@ function hornSvg(col) {
 }
 // 左邊畫一個，右邊鏡射
 function mirror(svg) { return svg + `<g transform="translate(24,0) scale(-1,1)">${svg}</g>`; }
-// 長身體（從頭後面彎到右下再往上翹）和肚子
-const DG_BODY = "M12.4 13.4c.7 4.4 3.3 6.7 6.1 5.9 2.4-.7 2-3.4 2.9-5.6";
-const DG_BELLY = "M13.2 13.89L13.34 14.45L13.5 15L13.69 15.54L13.92 16.05L14.18 16.54L14.47 17.01L14.8 17.43L15.17 17.82L15.57 18.15L16.01 18.41L16.47 18.61L16.95 18.72L17.44 18.76L17.94 18.71L18.42 18.59L18.84 18.4L19.18 18.13L19.46 17.77L19.68 17.32L19.86 16.81L20 16.26L20.13 15.67L20.26 15.06L20.42 14.44";   // 身體中心線往內側偏一點
-const DG_DEFAULT = { color: "green", horn: "antler", fin: "spiky", whisk: "long", eyes: "round", brow: "nobrow", pat: "nopat", acc: "none" };
+const DG_DEFAULT = { color: "green", horn: "antler", fin: "wavy", whisk: "long", eyes: "round", brow: "nobrow", pat: "nopat", acc: "none" };
 function dgPick(kind, id) { const list = DG_PARTS[kind].items; return list.find((x) => x.id === id) || list[0]; }
+// 顏色變深一點（鰭、耳朵裡面用）
+function dgShade(hex, k) {
+  const n = parseInt(hex.slice(1), 16), f = (v) => Math.round(v * (1 - k));
+  return "#" + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => f(v).toString(16).padStart(2, "0")).join("");
+}
+// 第 25 次（老師的第二張參考圖）：只要頭（長身體像毛毛蟲，拿掉）；線條變細；頭頂的三個三角形改成一撮黃色的毛；
+// 加葉子形的耳朵；頭的形狀下面寬一點；預設龍鬚是黃色捲捲的、鰭是深綠色波浪的。
+const DG_HEAD = "M12 5.2C7.5 5.2 4.7 8.5 4.7 12.9c0 4.6 3.1 7.5 7.3 7.5s7.3-2.9 7.3-7.5C19.3 8.5 16.5 5.2 12 5.2z";
 function dragonSvg(look, mood) {
   const L = { ...DG_DEFAULT, ...look };
   const col = dgPick("color", L.color);
-  return `<svg class="ico dragon${mood ? " mood-" + mood : ""}" viewBox="0 0 24 24" aria-hidden="true" style="--dg:${col.c};--dg2:${col.c2};--dgs:${col.sp || "#ff8f00"}">` +
-    // 第 24 次（老師給的參考圖）：長長的身體從頭後面彎到右下，黃色肚子一節一節、背上一排刺、小手
-    `<path class="dg-spike" d="M12.25 18.45L11.21 20.47L13.36 19.74zM14.38 20.55L14.33 22.81L15.94 21.22zM17.44 21.42L18.61 23.36L19.12 21.16zM20.76 20.32L22.92 20.99L21.83 19z"/>` +   // 背上的刺（彎的外側）
-    `<path class="dg-spike" d="M20.17 13.27L22.42 11.16L22.58 14.24z"/>` +   // 尾巴尖
-    `<path class="dg-trunk-o" d="${DG_BODY}"/><path class="dg-trunk" d="${DG_BODY}"/>` +
-    `<path class="dg-bellyline" d="${DG_BELLY}"/><path class="dg-bellyseg" d="${DG_BELLY}"/>` +   // 肚子（彎的內側）
-    `<g transform="translate(-.4,-.5) scale(.8)">` +   // 頭（縮小一點，放左上）
-    dgPick("fin", L.fin).svg +   // 兩邊的鰭（可以變裝）
+  return `<svg class="ico dragon${mood ? " mood-" + mood : ""}" viewBox="0 0 24 24" aria-hidden="true" style="--dg:${col.c};--dg2:${col.c2};--dgs:${col.sp || "#ff8f00"};--dgf:${dgShade(col.c, .28)}">` +
+    `<g transform="translate(0,1.6)">${dgPick("fin", L.fin).svg}</g>` +   // 兩邊的鰭（可以變裝），在臉頰旁邊
     dgPick("horn", L.horn).svg +
-    `<path class="dg-spike" d="M9.2 6.6l.9-3.4 1.1 2 .8-3 .8 3 1.1-2 .9 3.4z"/>` +   // 頭頂一排刺
-    `<ellipse class="dg-body" cx="12" cy="12.4" rx="7.4" ry="7"/>` +
-    `<clipPath id="dgBody"><ellipse cx="12" cy="12.4" rx="7" ry="6.6"/></clipPath><g clip-path="url(#dgBody)">${dgPick("pat", L.pat).svg}</g>` +   // 身上的紋路
-    `<ellipse class="dg-body" cx="12" cy="17.3" rx="4.7" ry="3.3"/><ellipse class="dg-belly" cx="12" cy="17.7" rx="3.8" ry="2.5"/>` +   // 凸出來的龍嘴巴
-    `<ellipse class="dg-nose" cx="10.7" cy="15.6" rx=".6" ry=".45"/><ellipse class="dg-nose" cx="13.3" cy="15.6" rx=".6" ry=".45"/>` +
+    mirror(`<path class="dg-ear" d="M7.2 8.4C5.2 8.6 3.1 7.4 2.4 5c2.3-.4 4.6.4 5.8 2.2z"/><path class="dg-ear-in" d="M6.6 7.7C5.4 7.6 4.2 6.9 3.6 5.8"/>`) +   // 葉子形的耳朵
+    `<path class="dg-body" d="${DG_HEAD}"/>` +
+    `<clipPath id="dgBody"><path d="${DG_HEAD}"/></clipPath><g clip-path="url(#dgBody)">${dgPick("pat", L.pat).svg}</g>` +   // 身上的紋路
+    `<path class="dg-tuft" d="M9.9 6.6c-.9-.2-1.2-1.3-.4-1.8-.2-1 .9-1.6 1.6-1 .4-.9 1.8-.9 2.1 0 .8-.5 1.8.2 1.5 1.1.8.5.5 1.6-.4 1.7-1.4.5-3 .5-4.4 0z"/>` +   // 頭頂一撮黃色的毛
+    `<ellipse class="dg-belly" cx="12" cy="17.4" rx="4.3" ry="2.7"/>` +   // 嘴巴附近淺一點
+    `<ellipse class="dg-nose" cx="10.8" cy="15.9" rx=".5" ry=".4"/><ellipse class="dg-nose" cx="13.2" cy="15.9" rx=".5" ry=".4"/>` +
     dgPick("whisk", L.whisk).svg +
     (col.dark ? `<circle class="dg-sclera" cx="9.1" cy="10.6" r="2.4"/><circle class="dg-sclera" cx="14.9" cy="10.6" r="2.4"/>` : "") +   // 深色的小龍：眼睛加白底才看得到
     `<g transform="translate(0,-.4)"><g class="dg-eyes">${dgPick("eyes", L.eyes).svg}</g>` + dgPick("brow", L.brow).svg +
     `<path class="dg-eyes-h" d="M7.5 11.6c.9-1.6 2.3-1.6 3.2 0M13.3 11.6c.9-1.6 2.3-1.6 3.2 0"/></g>` +
-    `<circle class="dg-cheek" cx="5.9" cy="13.4" r="1.1"/><circle class="dg-cheek" cx="18.1" cy="13.4" r="1.1"/>` +
-    `<g class="dg-m-n"><path class="dg-line" d="M10.6 18c.9.8 1.9.8 2.8 0"/><path class="dg-fang" d="M10.8 18.2l.35.9.45-.7zM13.2 18.2l-.35.9-.45-.7z"/></g><path class="dg-m-h" d="M10.3 17.6c.5 1.8 2.9 1.8 3.4 0z"/><circle class="dg-m-o" cx="12" cy="18.3" r=".7"/>` +
+    `<circle class="dg-cheek" cx="6.4" cy="13.6" r="1.1"/><circle class="dg-cheek" cx="17.6" cy="13.6" r="1.1"/>` +
+    `<g class="dg-m-n"><path class="dg-line" d="M10.8 17.9c.8.7 1.6.7 2.4 0"/></g><path class="dg-m-h" d="M10.4 17.5c.5 1.7 2.7 1.7 3.2 0z"/><circle class="dg-m-o" cx="12" cy="18.2" r=".65"/>` +
     `<path class="dg-sweat" d="M19.2 6.4c.7 1 1.1 1.7 1.1 2.2a1.1 1.1 0 0 1-2.2 0c0-.5.4-1.2 1.1-2.2z"/>` +
-    dgPick("acc", L.acc).svg + `</g></svg>`;
+    dgPick("acc", L.acc).svg + `</svg>`;
 }
 // 這台平板的小龍造型（學生自己打扮的）
 function dgState() { const b = loadBest(); return { look: { ...DG_DEFAULT, ...(b.dg || {}) }, own: b.own || [] }; }
