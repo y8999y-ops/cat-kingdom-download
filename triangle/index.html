@@ -453,7 +453,9 @@
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, 104px); justify-content: center; gap: 8px; }
   .shop-item { width: 104px; height: 124px; border: 3px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 4px; color: var(--ink); box-shadow: 0 3px 0 var(--line); overflow: hidden; }
   .shop-item b { white-space: nowrap; font-size: 16px !important; }
-  .panel.wide.shop { max-width: 920px; }   /* 一排可以放 8 格，配件也不用捲動 */
+  /* 變裝畫面寬度、格子區高度都固定（2 排的高度），換頁時整個畫面不會變大變小（老師反映） */
+  .panel.wide.shop { width: 920px; max-width: 100%; }
+  .shop-grid { min-height: 256px; align-content: start; }
   .shop-item > .ico.dragon { font-size: 64px; display: block; margin: 0 auto; }
   .shop-item span .ico { font-size: 1em; }
   .shop-item b { display: block; font-size: 18px; }
@@ -501,6 +503,7 @@
     .shop-item > .ico.dragon { font-size: 48px; }
     .shop-grid { grid-template-columns: repeat(auto-fill, 92px); }
     .shop-item { width: 92px; height: 104px; }
+    .shop-grid { min-height: 216px; }
     .shop-tabs { margin: 2px 0 6px; }
   }
 </style>
@@ -2089,7 +2092,7 @@ function toolAvail(name) {
   if (name === "turn") return mode === "tutorial" || mode === "pick" || (mode === "both" && !direct)
     || (mode === "corr" && !!corr && (challenge || corr.step === "stack" || (corr.step === "ask" && !!pieces[1] && !!pieces[1].noMove)));   // 找對應：疊疊看時，和作答點錯後才要轉
   if (name === "ruler") return mode === "angle" || mode === "both";
-  if (name === "mark") return mode === "corr";
+  if (name === "mark") return mode === "corr" || (mode === "both" && !direct);   // 找對應、第 5 關（綜合關，老師要求加回來）
   return false;
 }
 function updateToolButtons() {
@@ -2883,7 +2886,8 @@ function showShop(tab, back) {
   const { look, own } = dgState(), wallet = walletStars(), part = DG_PARTS[tab];
   const has = (it) => it.price === 0 || own.includes(it.id);
   const cur = look[tab] || (tab === "acc" ? "none" : DG_DEFAULT[tab]);
-  const cells = part.items.map((it) => {
+  // 價格由低到高排（老師要求）
+  const cells = [...part.items].sort((x, y) => x.price - y.price).map((it) => {
     const on = it.id === cur;
     const tag = on ? "使用中" : has(it) ? "換上" : `${ico("star", "star")} ${it.price}`;
     return `<button class="shop-item${on ? " on" : ""}${!has(it) && it.price > wallet ? " poor" : ""}" data-id="${it.id}">${dragonSvg({ ...look, [tab]: it.id })}<b>${it.name}</b><span>${tag}</span></button>`;
