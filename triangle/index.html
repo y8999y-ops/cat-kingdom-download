@@ -184,8 +184,15 @@
   #ruler .rl-body { fill: #546e7a; fill-opacity: .28; stroke: #263238; stroke-width: 3; stroke-linejoin: round; cursor: grab; }
   #ruler .rl-arm { stroke: #263238; stroke-width: 4; stroke-linecap: round; pointer-events: none; }
   #ruler .rl-sq { fill: none; stroke: #263238; stroke-width: 3; pointer-events: none; }
-  #ruler .rl-knob circle.k { fill: #455a64; stroke: #fff; stroke-width: 4; }
-  #ruler .rl-knob path { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  :is(#ruler, #lruler) .rl-knob circle.k { fill: #455a64; stroke: #fff; stroke-width: 4; }
+  :is(#ruler, #lruler) .rl-knob path { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  /* 量量看：量長度的尺（2026-11-12 老師要求） */
+  #lruler .lr-body { fill: #fff8e1; fill-opacity: .6; stroke: #6d4c41; stroke-width: 2; cursor: grab; }
+  #lruler .lr-tick { fill: none; stroke: #4e342e; stroke-width: 1.5; pointer-events: none; }
+  #lruler .lr-num { pointer-events: none; }
+  #lruler .lr-num text { font-size: 12px; font-weight: 700; fill: #4e342e; text-anchor: middle; }
+  #lruler .lr-edge { stroke: #d84315; stroke-width: 3; stroke-linecap: round; pointer-events: none; }
+  #lruler .lr-zero { fill: #d84315; pointer-events: none; }
   /* 教做記號：示範點一下的小手指 */
   #guide { pointer-events: none; }
   #guide .finger { transform-box: fill-box; transform-origin: 30% 0; }
@@ -536,7 +543,7 @@
     </div>
   </div>
   <div id="board">
-    <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="handle"></g><g id="guide"></g></svg>
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g><g id="ruler"></g><g id="lruler"></g><g id="handle"></g><g id="guide"></g></svg>
     <div id="progress" aria-hidden="true"></div>
     <div id="combo" aria-live="polite"></div>
 
@@ -544,6 +551,7 @@
       <button id="rotL" aria-label="向左轉" disabled></button>
       <button id="rotR" aria-label="向右轉" disabled></button>
       <button id="flip" aria-label="翻面" disabled></button>
+      <button id="lenBtn" aria-label="量量看" hidden></button>
       <button id="rulerBtn" aria-label="直角尺" hidden></button>
       <button id="markBtn" aria-label="做記號" hidden></button>
     </div>
@@ -600,6 +608,7 @@ const ICONS = {
   stack: `<path d="M3 19L9 7l6 12z"/><path d="M9 19l6-12 6 12z"/>`,
   corr: `<path d="M12 5L4 19h16z"/><circle class="f" cx="12" cy="5" r="2.2"/><circle class="f" cx="4" cy="19" r="2.2"/><circle class="f" cx="20" cy="19" r="2.2"/>`,
   ruler: `<path d="M4 3v17h17v-5H9V3z"/><path d="M4 15.5h4.5V20"/>`,
+  lenRuler: `<rect x="2" y="7.5" width="20" height="9" rx="1.5"/><path d="M6 7.5v3M10 7.5v4.5M14 7.5v3M18 7.5v4.5"/>`,
   mark: `<path d="M3 20L12 4l9 16z"/><path d="M5.6 10.6l3.2 1.8M15.2 12.4l3.2-1.8M10.3 18.5a2.6 2.6 0 0 1 3.4 0"/>`,
   zoomIn: `<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L20.5 20.5M7.5 10.5h6M10.5 7.5v6"/>`,
   zoomOut: `<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L20.5 20.5M7.5 10.5h6"/>`,
@@ -887,10 +896,12 @@ function startPage(i) {
   $("#pageLabel").textContent = PAGES[i].title;
   $("#progress").innerHTML = "";
   $("#roundBtn").hidden = true; nextAction = null;
+  dragDemoWait = false;
   $("#guide").innerHTML = "";
   hideSkip();
   $("#checkBtn").hidden = true;
   setTool("ruler", false);
+  setTool("len", false);
   setTool("mark", false);
   renderHearts();
   buildBins();
@@ -925,6 +936,7 @@ function startPage(i) {
   }
   playing = true;
   if (mode === "angle" && learn) startRulerDemo();   // 學習模式第 2 關：先教直角尺
+  if (mode === "side" && learn) startDragDemo();   // 學習模式第 1 關：小手示範怎麼拖（2026-11-12 老師要求）
 }
 
 // ================= 第 4 關：分三輪 =================
@@ -1958,9 +1970,15 @@ svg.addEventListener("pointerdown", (e) => {
     return;
   }
   if (pointers.size) return;   // 再多的手指就不理
+  if (dragDemoWait) { dragDemoWait = false; $("#guide").innerHTML = ""; }   // 第 1 關示範完，學生一按小手就離開
   pointers.set(e.pointerId, pt);
   lastAct = Date.now();
   try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  // 量量看的尺：拖本體是移動，拖灰色圓圈是轉動
+  if (lenOn && e.target.closest && e.target.closest("[data-lr],[data-lr-knob]")) {
+    rdrag = { pid: e.pointerId, len: true, knob: !!e.target.closest("[data-lr-knob]"), dx: lr.x - pt.x, dy: lr.y - pt.y };
+    return;
+  }
   // 直角尺在最上層：拖本體是移動，拖灰色圓圈是轉動
   if (rulerOn && e.target.closest && e.target.closest("[data-ruler],[data-ruler-knob]")) {
     const knob = !!e.target.closest("[data-ruler-knob]");
@@ -2016,6 +2034,13 @@ svg.addEventListener("pointermove", (e) => {
     rot.p.r = Math.round((rot.r0 + rot.total) / 5) * 5;
     updT(rot.p);
     drawHandle();
+    return;
+  }
+  if (rdrag && e.pointerId === rdrag.pid && rdrag.len) {
+    if (rdrag.knob) { turnLRTo(pt); return; }
+    lr.x = Math.max(0, Math.min(W, pt.x + rdrag.dx));
+    lr.y = Math.max(0, Math.min(H, pt.y + rdrag.dy));
+    drawLR();
     return;
   }
   if (rdrag && e.pointerId === rdrag.pid) {
@@ -2136,10 +2161,11 @@ function toolAvail(name) {
     || (mode === "corr" && !!corr && (challenge || corr.step === "stack" || (corr.step === "ask" && !!pieces[1] && !!pieces[1].noMove)));   // 找對應：疊疊看時，和作答點錯後才要轉
   if (name === "ruler") return mode === "angle" || mode === "both";
   if (name === "mark") return mode === "corr" || mode === "both";   // 找對應、第 3 關、第 5 關（老師要求加回來；第 3、5 關自由畫，不檢查）
+  if (name === "len") return mode === "side" || mode === "both";   // 量量看：和邊有關的關卡（第 1、3、5 關，含挑戰關）
   return false;
 }
 function updateToolButtons() {
-  for (const [name, id, on] of [["ruler", "#rulerBtn", rulerOn], ["mark", "#markBtn", markOn]]) {
+  for (const [name, id, on] of [["len", "#lenBtn", lenOn], ["ruler", "#rulerBtn", rulerOn], ["mark", "#markBtn", markOn]]) {
     $(id).hidden = !toolAvail(name);
     $(id).classList.toggle("on", on);
   }
@@ -2159,9 +2185,19 @@ function setTool(name, on) {
     rulerOn = on;
     if (on) placeRuler();
     drawRuler();
+  } else if (name === "len") {
+    lenOn = on;
+    if (on) placeLR();
+    drawLR();
   } else markOn = on;
   updateToolButtons();
 }
+$("#lenBtn").addEventListener("click", () => {
+  if (!playing) return;
+  lastAct = Date.now();
+  setTool("len", !lenOn);
+  if (lenOn) say("把尺上的 <b>0</b> 對準邊的一端，看另一端到<b>幾</b>。<br>拖<b>灰色圓圈</b>可以轉尺。");
+});
 $("#rulerBtn").addEventListener("click", () => {
   if (!playing) return;
   lastAct = Date.now();
@@ -2215,7 +2251,43 @@ function turnRulerTo(pt) {
   drawRuler();
 }
 // 直角尺拉回桌面內（轉方向、放大縮小時）
-function keepRulerIn() { ruler.x = Math.max(0, Math.min(W, ruler.x)); ruler.y = Math.max(0, Math.min(H, ruler.y)); }
+function keepRulerIn() {
+  ruler.x = Math.max(0, Math.min(W, ruler.x)); ruler.y = Math.max(0, Math.min(H, ruler.y));
+  lr.x = Math.max(0, Math.min(W, lr.x)); lr.y = Math.max(0, Math.min(H, lr.y));
+  drawLR();
+}
+
+// ---------- 量量看：量長度的尺（2026-11-12 老師要求） ----------
+// 和直角尺一樣，學生自己移動、自己轉（拖尺移動，拖灰色圓圈以 0 為中心轉，每 1° 一格）。
+// 尺下緣（紅線）是量的那一邊：0 對準邊的一端，看另一端到幾。1 格 = S / 10，放大縮小時尺也跟著變，量到的數字不變。
+let lr = { x: 0, y: 0, a: 0 }, lenOn = false;
+const lrEl = $("#lruler"), LR_N = 14, LR_H = 34, LR_PAD = 12, LR_KNOB = 30;
+const lrUnit = () => S / 10;
+function placeLR() { lr = { x: 30, y: rulerOn ? H * 0.5 : H - 14, a: 0 }; }
+function drawLR() {
+  if (!lenOn) { lrEl.innerHTML = ""; return; }
+  const u = lrUnit(), L = LR_N * u, every = u < 17 ? 2 : 1;   // 格子太密時，數字隔一個寫
+  let ticks = "", nums = "";
+  for (let k = 0; k <= LR_N * 2; k++) {
+    const x = (k * u / 2).toFixed(1), whole = k % 2 === 0;
+    ticks += `M${x} 0V${whole ? -12 : -7}`;
+    if (whole && (k / 2) % every === 0) nums += `<text x="${x}" y="-16">${k / 2}</text>`;
+  }
+  const kx = L + LR_PAD + LR_KNOB, ky = -LR_H / 2;
+  lrEl.innerHTML = `<g transform="translate(${lr.x.toFixed(1)},${lr.y.toFixed(1)}) rotate(${lr.a})">` +
+    `<rect class="lr-body" data-lr="1" x="${-LR_PAD}" y="${-LR_H}" width="${(L + 2 * LR_PAD).toFixed(1)}" height="${LR_H}" rx="4"/>` +
+    `<line class="lr-edge" x1="0" y1="0" x2="${L.toFixed(1)}" y2="0"/><path class="lr-tick" d="${ticks}"/><circle class="lr-zero" r="3.5"/>` +
+    `<g class="lr-num">${nums}</g>` +
+    `<line x1="${(L + LR_PAD).toFixed(1)}" y1="${ky}" x2="${kx.toFixed(1)}" y2="${ky}" stroke="#455a64" stroke-width="3" stroke-dasharray="5 4" pointer-events="none"/>` +
+    `<g class="rl-knob" data-lr-knob="1" transform="translate(${kx.toFixed(1)},${ky})"><circle r="34" fill="#000" fill-opacity="0"/><circle class="k" r="18"/>` +
+    `<g transform="translate(-11,-11) scale(.92)">${ICONS.rotR}</g></g></g>`;
+}
+// 拖灰色圓圈：尺以 0 為中心轉到手指的方向（扣掉圓圈本來偏的一點角度）
+function turnLRTo(pt) {
+  const off = Math.atan2(-LR_H / 2, LR_N * lrUnit() + LR_PAD + LR_KNOB) * 180 / Math.PI;
+  lr.a = Math.round(Math.atan2(pt.y - lr.y, pt.x - lr.x) * 180 / Math.PI - off);
+  drawLR();
+}
 
 // ---------- 學習模式第 2 關：先教直角尺怎麼用（老師要求） ----------
 // 直角尺依序移到直角、銳角、鈍角上，每一步學生（或老師）按「下一步」才繼續。
@@ -2276,6 +2348,84 @@ function startRulerDemo() {
   let over = false;
   showSkip(() => go(steps.length));
   showNext("下一步", () => go(0));
+}
+
+// ---------- 學習模式第 1 關：小手示範怎麼拖（2026-11-12 老師要求） ----------
+// 小手按住一個三角形 → 拖到下面的格子上（格子變色）→ 放開 → 三角形回到原位（只是示範，不算分類）；做兩次。
+// 最後小手停在三角形上輕輕動，學生一按就離開。
+let dragDemoWait = false;
+function binPoint(key) {   // 格子的中心（桌面座標）
+  const b = binsEl.querySelector(`.bin[data-key="${key}"]`);
+  if (!b) return null;
+  const r = b.getBoundingClientRect(), br = board.getBoundingClientRect();
+  return { el: b, pt: [r.left + r.width / 2 - br.left, r.top + r.height / 2 - br.top] };
+}
+function startDragDemo() {
+  const p = pieces.find((q) => q.cat.side === "equi") || pieces[0];
+  if (!p || !binPoint(p.cat.side)) return;
+  const tok = pageToken;
+  let over = false;
+  const live = () => tok === pageToken && !over;
+  const home = { nx: p.nx, ny: p.ny };
+  playing = false;
+  drawHandle();
+  const finish = () => {
+    if (over) return;
+    over = true;
+    hideSkip();
+    for (const b of binsEl.querySelectorAll(".bin")) b.classList.remove("over");
+    p.el && p.el.classList.remove("dragging");
+    p.nx = home.nx; p.ny = home.ny; updT(p);
+    drawFinger([p.nx * W, p.ny * H], false, true);
+    dragDemoWait = true;
+    playing = true;
+    lastAct = Date.now();
+    say("換你：<b>按住</b>三角形，拖到下面正確的格子裡。<br>要量邊的長度，可以按「<b>量量看</b>」。");
+  };
+  // 小手和三角形一起移動
+  const carry = (from, to, ms, done) => {
+    const t0 = performance.now();
+    const f = (t) => {
+      if (!live()) return;
+      const k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      const x = from[0] + (to[0] - from[0]) * e, y = from[1] + (to[1] - from[1]) * e;
+      p.nx = x / W; p.ny = y / H; updT(p);
+      drawFinger([x, y], false);
+      if (k < 1) requestAnimationFrame(f); else done();
+    };
+    requestAnimationFrame(f);
+  };
+  const once = (n, done) => {
+    const a = [home.nx * W, home.ny * H], bin = binPoint(p.cat.side);
+    say(n === 0 ? "看<b>小手</b>：先用手指<b>按住</b>三角形，<br>不要放開。" : "再看一次：<b>按住</b>三角形……");
+    moveFinger(n === 0 ? [a[0] + 120, a[1] + 80] : bin.pt, a, 900, () => {
+      if (!live()) return;
+      drawFinger(a, true);
+      layer.appendChild(p.el);
+      p.el.classList.add("dragging");
+      setTimeout(() => {
+        if (!live()) return;
+        say("按著不放，<b>拖到</b>下面的格子上，<br>格子會變顏色。");
+        carry(a, bin.pt, 1800, () => {
+          bin.el.classList.add("over");
+          setTimeout(() => {
+            if (!live()) return;
+            say("<b>放開手指</b>，三角形就放進格子裡了。<br>（這是示範，三角形會回去。）");
+            drawFinger(bin.pt, true);
+            p.el.classList.remove("dragging");
+            setTimeout(() => {
+              if (!live()) return;
+              bin.el.classList.remove("over");
+              tween(p, home, 600, () => setTimeout(() => live() && done(), 500));
+            }, 1800);
+          }, 700);
+        });
+      }, 1000);
+    });
+  };
+  say("先看<b>小手</b>怎麼把三角形<br>放進下面的格子。");
+  showSkip(finish);
+  showNext("開始", () => once(0, () => once(1, finish)));
 }
 
 // ---------- 做記號 ----------
@@ -2694,11 +2844,12 @@ function clearBoard() {
   $("#pageLabel").textContent = "";
   $("#progress").innerHTML = "";
   $("#roundBtn").hidden = true; nextAction = null;
+  dragDemoWait = false;
   $("#guide").innerHTML = "";
   hideSkip();
   $("#checkBtn").hidden = true;
   $("#hearts").innerHTML = "";
-  setTool("ruler", false); setTool("mark", false);
+  setTool("ruler", false); setTool("mark", false); setTool("len", false);
   updateToolButtons();
 }
 function setTheme() {
@@ -3048,6 +3199,7 @@ function nextChalTask() {
   mode = type;
   direct = type === "side" || type === "angle" || type === "both";
   if (!toolAvail("ruler")) setTool("ruler", false);   // 直角尺只在和角有關的題目
+  if (!toolAvail("len")) setTool("len", false);   // 量量看只在和邊有關的題目
   if (!toolAvail("mark")) setTool("mark", false);   // 做記號只在找對應
   updateToolButtons();
   buildBins();
@@ -3224,6 +3376,7 @@ function onResize() {
   else for (const p of act) clampIn(p);   // 其他大小變化（例如格子變高）：三角形大小不變，只拉回桌面內
   if (mode === "corr" && pieces[1]) pieces[1].home = { nx: pieces[1].nx, ny: pieces[1].ny };
   renderAll();
+  if (dragDemoWait) { dragDemoWait = false; $("#guide").innerHTML = ""; }   // 三角形重新排過，第 1 關示範的小手不要停在舊位置
   // 直角尺跟著對準的頂點走；沒對準就拉回桌面內
   keepRulerIn();
   drawRuler();
@@ -3262,6 +3415,7 @@ $("#hintBtn").innerHTML = ico("bulb");
 $("#rotL").innerHTML = ico("rotL") + "<span>左轉</span>";
 $("#rotR").innerHTML = ico("rotR") + "<span>右轉</span>";
 $("#flip").innerHTML = ico("flip") + "<span>翻面</span>";
+$("#lenBtn").innerHTML = ico("lenRuler") + "<span>量量看</span>";
 $("#rulerBtn").innerHTML = ico("ruler") + "<span>直角尺</span>";
 $("#markBtn").innerHTML = ico("mark") + "<span>做記號</span>";
 $("#zoomIn").innerHTML = ico("zoomIn");
